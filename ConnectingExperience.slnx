@@ -1,0 +1,26 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/APIGateway/APIGateway.csproj" />
+  </Folder>
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/BuildingBlocks.Application/BuildingBlocks.Application.csproj" />
+    <Project Path="src/BuildingBlocks/BuildingBlocks.Domain/BuildingBlocks.Domain.csproj" />
+    <Project Path="src/BuildingBlocks/BuildingBlocks.EntityFramework/BuildingBlocks.EntityFramework.csproj" />
+    <Project Path="src/BuildingBlocks/BuildingBlocks.Presentation/BuildingBlocks.Presentation.csproj" />
+    <Project Path="src/BuildingBlocks/BuildingBlocks.RabbitMQ/BuildingBlocks.RabbitMQ.csproj" />
+  </Folder>
+  <Folder Name="/src/services/">
+    <Project Path="src/services/Notification/Notification.csproj" />
+  </Folder>
+  <Folder Name="/src/services/IAM/">
+    <Project Path="src/services/IAM/IAM.Api/IAM.Api.csproj" />
+    <Project Path="src/services/IAM/IAM.Application/IAM.Application.csproj" />
+    <Project Path="src/services/IAM/IAM.Domain/IAM.Domain.csproj" />
+    <Project Path="src/services/IAM/IAM.Infrastructure/IAM.Infrastructure.csproj" />
+  </Folder>
+</Solution>

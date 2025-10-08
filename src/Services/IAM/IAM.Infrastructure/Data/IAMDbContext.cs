@@ -1,0 +1,120 @@
+﻿using BuildingBlocks.EntityFramework;
+using IAM.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+
+namespace IAM.Infrastructure.Data
+{
+    public class IAMDbContext : BaseDbContext
+    {
+        public IAMDbContext(DbContextOptions<IAMDbContext> options) : base(options)
+        {
+        }
+
+        public DbSet<AccountEntity> Accounts { get; set; }
+        public DbSet<RoleEntity> Roles { get; set; }
+        public DbSet<PermissionEntity> Permissions { get; set; }
+        public DbSet<RolePermissionEntity> RolePermissions { get; set; }
+        public DbSet<RefreshTokenEntity> RefreshTokens { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Configure Account
+            modelBuilder.Entity<AccountEntity>(entity =>
+            {
+                entity.ToTable("tbl_account");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("id_account");
+                entity.Property(e => e.FullName).HasColumnName("full_name").HasMaxLength(100).IsRequired();
+                entity.Property(e => e.Email).HasColumnName("email").HasMaxLength(255).IsRequired();
+                entity.Property(e => e.PasswordHash).HasColumnName("password_hash").IsRequired();
+                entity.Property(e => e.IsEmailConfirmed).HasColumnName("is_email_confirmed").HasDefaultValue(false);
+                entity.Property(e => e.EmailConfirmationToken).HasColumnName("email_confirmation_token");
+                entity.Property(e => e.PasswordResetToken).HasColumnName("password_reset_token");
+                entity.Property(e => e.PasswordResetTokenExpiry).HasColumnName("password_reset_token_expiry");
+                entity.Property(e => e.LastLoginAt).HasColumnName("last_login_at");
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+                entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+                entity.Property(e => e.IsActive).HasColumnName("is_active").HasDefaultValue(true);
+                entity.Property(e => e.RoleId).HasColumnName("role_id");
+
+                entity.HasIndex(e => e.Email).IsUnique();
+                
+                entity.HasOne(e => e.Role)
+                    .WithMany(e => e.Accounts)
+                    .HasForeignKey(e => e.RoleId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Configure Role
+            modelBuilder.Entity<RoleEntity>(entity =>
+            {
+                entity.ToTable("tbl_role");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("id_role");
+                entity.Property(e => e.Name).HasColumnName("name").IsRequired();
+                entity.Property(e => e.Description).HasColumnName("description");
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+                entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+            });
+
+            // Configure Permission
+            modelBuilder.Entity<PermissionEntity>(entity =>
+            {
+                entity.ToTable("tbl_permission");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("id_permission");
+                entity.Property(e => e.Name).HasColumnName("name").IsRequired();
+                entity.Property(e => e.Description).HasColumnName("description");
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+                entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+            });
+
+            // Configure RolePermission
+            modelBuilder.Entity<RolePermissionEntity>(entity =>
+            {
+                entity.ToTable("tbl_role_permission");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.RoleId).HasColumnName("id_role");
+                entity.Property(e => e.PermissionId).HasColumnName("id_permission");
+                entity.Property(e => e.Licensed).HasColumnName("licensed").HasDefaultValue(true);
+
+                entity.HasOne(e => e.Role)
+                    .WithMany(e => e.RolePermissions)
+                    .HasForeignKey(e => e.RoleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Permission)
+                    .WithMany(e => e.RolePermissions)
+                    .HasForeignKey(e => e.PermissionId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => new { e.RoleId, e.PermissionId }).IsUnique();
+            });
+
+            // Configure RefreshToken
+            modelBuilder.Entity<RefreshTokenEntity>(entity =>
+            {
+                entity.ToTable("tbl_refresh_token");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.AccountId).HasColumnName("id_account");
+                entity.Property(e => e.Token).HasColumnName("token").HasMaxLength(32).IsRequired();
+                entity.Property(e => e.ExpiryDate).HasColumnName("expiry_date");
+                entity.Property(e => e.IsRevoked).HasColumnName("is_revoked").HasDefaultValue(false);
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+                entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+                entity.Property(e => e.RevokedAt).HasColumnName("revoked_at");
+
+                entity.HasOne(e => e.Account)
+                    .WithMany(e => e.RefreshTokens)
+                    .HasForeignKey(e => e.AccountId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.Token).IsUnique();
+            });
+        }
+    }
+}
