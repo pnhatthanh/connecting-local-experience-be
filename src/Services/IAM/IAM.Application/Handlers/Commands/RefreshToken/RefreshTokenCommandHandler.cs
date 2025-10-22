@@ -34,9 +34,7 @@ namespace IAM.Application.Handlers.Commands.RefreshTokenCommand
             var refreshToken = await _refreshTokenRepository.GetAnyAsync(refreshTokenSpec)
                 ?? throw new UnAuthorizedException("Invalid refresh token");
             if (!refreshToken.IsActive)
-            {
                 throw new UnAuthorizedException("Refresh token is expired or revoked");
-            }
             var account = await _accountRepository.GetByIdAsync(refreshToken.AccountId)
                 ?? throw new NotFoundException("Account not found");
             if (!account.IsActive)
@@ -47,9 +45,8 @@ namespace IAM.Application.Handlers.Commands.RefreshTokenCommand
             var permissions = new List<string>();
             var newAccessToken = _jwtTokenService.GenerateAccessToken(account, permissions);
             var newRefreshTokenValue = _jwtTokenService.GenerateRefreshToken();
-            refreshToken.IsRevoked = true;
-            refreshToken.RevokedAt = DateTime.UtcNow;
-            _refreshTokenRepository.Update(refreshToken);
+            
+            _refreshTokenRepository.Delete(refreshToken);
             var newRefreshToken = new RefreshTokenEntity
             {
                 AccountId = account.Id,

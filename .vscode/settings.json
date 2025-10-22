@@ -2,10 +2,16 @@
     "cSpell.words": [
         "ASPNETCORE",
         "Dtos",
+        "healthcheck",
         "Hmac",
+        "Hsts",
+        "isready",
         "Linq",
         "Mediat",
         "Npgsql",
+        "rabbitmq",
+        "rabbitmqctl",
+        "requirepass",
         "Yarp"
     ]
 }
