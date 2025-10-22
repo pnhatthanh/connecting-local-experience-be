@@ -23,4 +23,10 @@
     <Project Path="src/services/IAM/IAM.Domain/IAM.Domain.csproj" />
     <Project Path="src/services/IAM/IAM.Infrastructure/IAM.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/src/services/Experience/">
+    <Project Path="src/services/Experience/Experience.Api/Experience.Api.csproj" />
+    <Project Path="src/services/Experience/Experience.Application/Experience.Application.csproj" />
+    <Project Path="src/services/Experience/Experience.Domain/Experience.Domain.csproj" />
+    <Project Path="src/services/Experience/Experience.Infrastructure/Experience.Infrastructure.csproj" />
+  </Folder>
 </Solution>

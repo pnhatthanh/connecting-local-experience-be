@@ -11,7 +11,7 @@ using IAM.Application.Handlers.Commands.ResetPasswordCommand;
 namespace IAM.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     public class AuthController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -43,12 +43,8 @@ namespace IAM.Api.Controllers
         }
 
         [HttpPost("refresh-token")]
-        public async Task<ActionResult<TokenResponse>> RefreshToken()
+        public async Task<ActionResult<TokenResponse>> RefreshToken([FromBody] RefreshTokenCommand command)
         {
-            var refreshToken = Request.Cookies["refreshToken"] ?? "";
-            if (string.IsNullOrEmpty(refreshToken))
-                return Unauthorized(new { message = "Refresh token is required" });
-            var command = new RefreshTokenCommand { RefreshToken = refreshToken };
             var result = await _mediator.Send(command);
             return Ok(result);
         }

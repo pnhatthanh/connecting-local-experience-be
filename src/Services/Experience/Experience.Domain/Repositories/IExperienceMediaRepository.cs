@@ -1,0 +1,10 @@
+using BuildingBlocks.Domain.Interfaces;
+using Experience.Domain.Entities;
+
+namespace Experience.Domain.Repositories
+{
+    public interface IExperienceMediaRepository : IBaseRepository<ExperienceMediaEntity>
+    {
+        Task<IEnumerable<ExperienceMediaEntity>> GetByExperienceIdAsync(Guid experienceId);
+    }
+}

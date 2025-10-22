@@ -23,18 +23,12 @@ namespace IAM.Application.Handlers.Commands.ConfirmEmailCommand
         {
             var emailSpec = new AccountEmailSpecification(request.Email.ToLowerInvariant());
             var account = await _accountRepository.GetAnyAsync(emailSpec)
-                ?? throw new BadRequestException("Invalid email or token");
-
+                ?? throw new BadRequestException("Email is not exist");
             if (account.IsEmailConfirmed)
-            {
                 throw new BadRequestException("Email is already confirmed");
-            }
 
-            if (string.IsNullOrEmpty(account.EmailConfirmationToken) || 
-                account.EmailConfirmationToken != request.Token)
-            {
+            if (account.EmailConfirmationToken != request.Token)
                 throw new BadRequestException("Invalid email or token");
-            }
 
             account.IsEmailConfirmed = true;
             account.EmailConfirmationToken = null; 
