@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: iam-postgres
+    environment:
+      POSTGRES_DB: IAM_DB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5678:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - iam-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: iam-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_VHOST: "/"
+    networks:
+      - iam-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: iam-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@iam.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8080:80"
+    networks:
+      - iam-network
+
+volumes:
+  postgres_data:
+
+networks:
+  iam-network:
+    driver: bridge
