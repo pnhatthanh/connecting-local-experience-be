@@ -6,7 +6,7 @@ namespace BuildingBlocks.EntityFramework
 {
     public static class AddDbContext
     {
-        public static IServiceCollection AddDbContextSqlServer<T>(this IServiceCollection services, string connectionString)
+        public static IServiceCollection AddDbContextPostgreSql<T>(this IServiceCollection services, string connectionString)
             where T : BaseDbContext
         {
             services.AddDbContext<T>(options =>

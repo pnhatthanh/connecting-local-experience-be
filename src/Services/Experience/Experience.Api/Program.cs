@@ -1,20 +1,21 @@
+using Experience.Api.Extensions;
 using Experience.Application.Extensions;
 using Experience.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add Experience services
+builder.Services.AddAuthenticationExtension(builder.Configuration);
+
 builder.Services.AddExperienceApplication()
                 .AddExperienceInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+await app.Services.ApplyMigrationAsync();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -22,6 +23,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

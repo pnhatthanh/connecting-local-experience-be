@@ -1,5 +1,4 @@
 using BuildingBlocks.Domain.Models;
-using NetTopologySuite.Geometries;
 
 namespace Experience.Domain.Entities
 {
@@ -10,7 +9,6 @@ namespace Experience.Domain.Entities
         public string PhotoUrl { get; set; } = string.Empty;
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public Point? Location { get; set; }
         public virtual ExperienceEntity Experience { get; set; } = null!;
     }
 }
