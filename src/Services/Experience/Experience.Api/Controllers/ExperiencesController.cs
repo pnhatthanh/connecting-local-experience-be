@@ -6,7 +6,6 @@ using Experience.Application.Handlers.Commands.UpdateExperience;
 using Experience.Application.Handlers.Queries.GetExperience;
 using Experience.Application.Handlers.Queries.GetExperiences;
 using Experience.Application.Handlers.Queries.GetExperiencesByHost;
-using Experience.Application.Handlers.Queries.GetExperienceSchedules;
 using Experience.Application.Handlers.Queries.GetNearbyExperiences;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Experience.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/experiences")]
     public class ExperiencesController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -96,23 +95,9 @@ namespace Experience.Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<bool>> DeleteExperience(Guid id, [FromQuery] Guid hostId)
+        public async Task<ActionResult<bool>> DeleteExperience([FromRoute] Guid id)
         {
-            var command = new DeleteExperienceCommand
-            {
-                Id = id,
-                HostId = hostId
-            };
-
-            var result = await _mediator.Send(command);
-            return Ok(result);
-        }
-
-        [HttpGet("{id}/schedules")]
-        public async Task<ActionResult<List<ExperienceScheduleDto>>> GetExperienceSchedules(Guid id)
-        {
-            var query = new GetExperienceSchedulesQuery { ExperienceId = id };
-            var result = await _mediator.Send(query);
+            var result = await _mediator.Send(new DeleteExperienceCommand { Id = id });
             return Ok(result);
         }
     }

@@ -1,3 +1,4 @@
+using BuildingBlocks.Domain.Exceptions;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Experience.Application.Interfaces;
@@ -15,98 +16,85 @@ namespace Experience.Infrastructure.Services
         public CloudinaryService(IOptions<CloudinarySettings> settings)
         {
             _settings = settings.Value;
-            
             var account = new Account(
                 _settings.CloudName,
                 _settings.ApiKey,
                 _settings.ApiSecret
             );
-            
             _cloudinary = new Cloudinary(account);
         }
-
-        public async Task<PhotoUploadResult> UploadPhotoAsync(IFormFile file, string? folder = null)
+        public async Task<string> UploadImageAsync(IFormFile imageFile, string? folder = null)
         {
-            if (file == null || file.Length == 0)
-                throw new ArgumentException("File is required");
-
-            // Validate file type
+            if (imageFile == null || imageFile.Length == 0)
+                throw new BadRequestException("Image file is required");
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
-            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            var fileExtension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
             
-            if (Array.IndexOf(allowedExtensions, extension) == -1)
-                throw new ArgumentException($"File type {extension} is not allowed. Allowed types: {string.Join(", ", allowedExtensions)}");
+            if (!allowedExtensions.Contains(fileExtension))
+                throw new BadRequestException($"File type {fileExtension} is not supported. Allowed types: {string.Join(", ", allowedExtensions)}");
+            const long maxFileSize = 10 * 1024 * 1024; // 10MB
+            if (imageFile.Length > maxFileSize)
+                throw new BadRequestException($"File size exceeds maximum allowed size of {maxFileSize / 1024 / 1024}MB");
 
-            // Validate file size (max 10MB)
-            const long maxFileSize = 10 * 1024 * 1024;
-            if (file.Length > maxFileSize)
-                throw new ArgumentException($"File size exceeds maximum allowed size of {maxFileSize / 1024 / 1024}MB");
-
-            var uploadResult = new ImageUploadResult();
-
-            using (var stream = file.OpenReadStream())
+            try
             {
+                using var stream = imageFile.OpenReadStream();
+                var fileName = $"{Guid.NewGuid()}{fileExtension}";
+                
                 var uploadParams = new ImageUploadParams
                 {
-                    File = new FileDescription(file.FileName, stream),
+                    File = new FileDescription(fileName, stream),
+                    UseFilename = false, 
+                    UniqueFilename = true,
+                    Overwrite = false,
                     Folder = folder ?? _settings.DefaultFolder,
                     Transformation = new Transformation()
                         .Quality("auto")
-                        .FetchFormat("auto"),
-                    UseFilename = true,
-                    UniqueFilename = true
+                        .FetchFormat("auto") 
+                };
+                var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+                if (uploadResult.Error != null)
+                    throw new Exception($"Upload failed: {uploadResult.Error.Message}");
+                return uploadResult.SecureUrl.ToString();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error uploading image to Cloudinary: {ex.Message}", ex);
+            }
+        }
+
+        public async Task DeleteImageAsync(string imageUrl)
+        {
+            if (string.IsNullOrWhiteSpace(imageUrl))
+                throw new BadRequestException("Image URL is required");
+
+            try
+            {
+                var uri = new Uri(imageUrl);
+                var path = uri.AbsolutePath;
+                var segments = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+                var uploadIndex = Array.IndexOf(segments, "upload");
+                if (uploadIndex == -1 || uploadIndex + 1 >= segments.Length)
+                    throw new BadRequestException("Invalid Cloudinary URL format");
+                var publicIdParts = segments
+                    .Skip(uploadIndex + 2)
+                    .ToArray();
+
+                var publicId = string.Join("/", publicIdParts);
+                publicId = Path.ChangeExtension(publicId, null);
+                var deleteParams = new DeletionParams(publicId)
+                {
+                    ResourceType = ResourceType.Image
                 };
 
-                uploadResult = await _cloudinary.UploadAsync(uploadParams);
+                var result = await _cloudinary.DestroyAsync(deleteParams);
+                if (result.Result != "ok")
+                    throw new Exception($"Failed to delete image. Cloudinary response: {result.Result}");
             }
-
-            if (uploadResult.Error != null)
-                throw new Exception($"Failed to upload photo: {uploadResult.Error.Message}");
-
-            return new PhotoUploadResult
+            catch (Exception ex)
             {
-                Url = uploadResult.SecureUrl.ToString(),
-                PublicId = uploadResult.PublicId,
-                Format = uploadResult.Format,
-                Size = uploadResult.Bytes,
-                Width = uploadResult.Width,
-                Height = uploadResult.Height
-            };
-        }
-
-        public async Task<List<PhotoUploadResult>> UploadMultiplePhotosAsync(IEnumerable<IFormFile> files, string? folder = null)
-        {
-            var results = new List<PhotoUploadResult>();
-
-            foreach (var file in files)
-            {
-                try
-                {
-                    var result = await UploadPhotoAsync(file, folder);
-                    results.Add(result);
-                }
-                catch (Exception ex)
-                {
-                    // Log error but continue with other files
-                    Console.WriteLine($"Failed to upload {file.FileName}: {ex.Message}");
-                }
+                throw new Exception($"Error deleting image from Cloudinary: {ex.Message}", ex);
             }
-
-            return results;
-        }
-
-        public async Task<bool> DeletePhotoAsync(string publicId)
-        {
-            if (string.IsNullOrEmpty(publicId))
-                return false;
-
-            var deleteParams = new DeletionParams(publicId)
-            {
-                ResourceType = ResourceType.Image
-            };
-
-            var result = await _cloudinary.DestroyAsync(deleteParams);
-            return result.Result == "ok";
         }
     }
 }

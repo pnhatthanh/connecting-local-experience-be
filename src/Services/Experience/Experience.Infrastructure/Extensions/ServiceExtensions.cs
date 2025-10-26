@@ -1,14 +1,17 @@
+using BuildingBlocks.Application.Interfaces;
+using BuildingBlocks.Domain.Interfaces;
 using BuildingBlocks.EntityFramework;
 using Experience.Application.Interfaces;
+using Experience.Domain.Entities;
 using Experience.Domain.Repositories;
 using Experience.Infrastructure.Configurations;
 using Experience.Infrastructure.Data;
 using Experience.Infrastructure.Repositories;
 using Experience.Infrastructure.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace Experience.Infrastructure.Extensions
 {
@@ -18,27 +21,26 @@ namespace Experience.Infrastructure.Extensions
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? throw new ArgumentNullException("Connection string 'DefaultConnection' not found.");
-
-            // Configure PostgreSQL with NetTopologySuite for geography support
+            
             services.AddDbContext<ExperienceDbContext>(options =>
             {
                 options.UseNpgsql(connectionString, x => x.UseNetTopologySuite());
             });
-
+            
             services.AddUnitOfWork<ExperienceDbContext>();
-
-            // Register repositories
             services.AddScoped<IExperienceRepository, ExperienceRepository>();
+            services.AddScoped<IExperienceCategoryRepository, ExperienceCategoryRepository>();
             services.AddScoped<IExperienceScheduleRepository, ExperienceScheduleRepository>();
             services.AddScoped<IExperienceScheduleSlotRepository, ExperienceScheduleSlotRepository>();
             services.AddScoped<IExperienceMediaRepository, ExperienceMediaRepository>();
             services.AddScoped<IExperienceItineraryRepository, ExperienceItineraryRepository>();
-
-            // Configure Cloudinary
-            services.Configure<CloudinarySettings>(opts =>
+            
+            services.AddHttpContextAccessor();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
+            
+            services.Configure<CloudinarySettings>(options =>
             {
-                var section = configuration.GetSection(CloudinarySettings.CloudinarySettingsKey);
-                section.Bind(opts);
+                configuration.GetSection(CloudinarySettings.CloudinarySettingsKey).Bind(options);
             });
             services.AddScoped<IPhotoService, CloudinaryService>();
 

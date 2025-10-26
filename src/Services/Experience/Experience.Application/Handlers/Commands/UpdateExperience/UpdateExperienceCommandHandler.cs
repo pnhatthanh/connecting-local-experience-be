@@ -1,8 +1,12 @@
 using BuildingBlocks.Domain.Exceptions;
 using BuildingBlocks.Domain.Interfaces;
 using Experience.Application.Dtos;
+using Experience.Domain.Entities;
 using Experience.Domain.Repositories;
+using Experience.Domain.Specifications;
+using MapsterMapper;
 using MediatR;
+using NetTopologySuite.Geometries;
 
 namespace Experience.Application.Handlers.Commands.UpdateExperience
 {
@@ -10,52 +14,69 @@ namespace Experience.Application.Handlers.Commands.UpdateExperience
     {
         private readonly IExperienceRepository _experienceRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
         public UpdateExperienceCommandHandler(
             IExperienceRepository experienceRepository,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            IMapper mapper)
         {
             _experienceRepository = experienceRepository;
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         public async Task<ExperienceDto> Handle(UpdateExperienceCommand request, CancellationToken cancellationToken)
         {
-            var experience = await _experienceRepository.GetByIdAsync(request.ExperienceId)
+            var spec = new ExperienceIdSpecification(request.ExperienceId);
+            var experience = await _experienceRepository.GetAnyAsync(spec, 
+                e => e.Category, 
+                e => e.Media, 
+                e => e.Schedule, 
+                e => e.Itineraries)
                 ?? throw new BadRequestException($"Experience with ID {request.ExperienceId} not found.");
 
-            experience.UpdatedAt = DateTime.UtcNow;
+            experience.Title = request.Title;
+            experience.Description = request.Description;
+            experience.Address = request.Address;
+            experience.District = request.District;
+            experience.City = request.City;
+            experience.Country = request.Country;
+            experience.AdultPrice = request.AdultPrice;
+            experience.ChildPrice = request.ChildPrice;
+            experience.Duration = request.Duration;
+            experience.MaxParticipants = request.MaxParticipants;
+            experience.CategoryId = request.CategoryId;
+            experience.MinAge = request.MinAge;
+            experience.CancellationPolicy = request.CancellationPolicy;
+            experience.MeetingLocation = request.MeetingLocation;
 
+            var geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+            experience.MeetingPoint = geometryFactory.CreatePoint(new Coordinate(request.MeetingPoint.Longitude, request.MeetingPoint.Latitude));
+            if (experience.Schedule != null)
+            {
+                experience.Schedule.RecurrenceType = request.RecurrenceType;
+                experience.Schedule.DaysOfWeek = request.DaysOfWeek;
+                experience.Schedule.TimeSlots = request.TimeSlots.Select(t => new ScheduleTimeSlot
+                {
+                    StartTime = t.StartTime,
+                    EndTime = t.EndTime
+                }).ToList();
+                experience.Schedule.StartDate = request.ScheduleStartDate;
+                experience.Schedule.EndDate = request.ScheduleEndDate;
+                experience.Schedule.UpdatedAt = DateTime.UtcNow;
+            }
+            experience.UpdatedAt = DateTime.UtcNow;
             _experienceRepository.Update(experience);
             await _unitOfWork.SaveChangeAsync();
+            var updatedExperience = await _experienceRepository.GetAnyAsync(spec, 
+                e => e.Category, 
+                e => e.Media, 
+                e => e.Schedule, 
+                e => e.Itineraries)
+                ?? throw new BadRequestException("Failed to reload updated experience.");
 
-            return new ExperienceDto
-            {
-                Id = experience.Id,
-                HostId = experience.HostId,
-                Title = experience.Title,
-                Description = experience.Description,
-                Location = new LocationDto
-                {
-                    Latitude = experience.Location.Y,
-                    Longitude = experience.Location.X
-                },
-                Price = experience.Price,
-                Duration = experience.Duration,
-                MaxParticipants = experience.MaxParticipants,
-                Category = experience.Category.ToString(),
-                Amenities = experience.Amenities,
-                ActivityLevel = experience.ActivityLevel.ToString(),
-                SkillLevel = experience.SkillLevel.ToString(),
-                MinAge = experience.MinAge,
-                Accessibility = experience.Accessibility,
-                Status = experience.Status.ToString(),
-                CancellationPolicy = experience.CancellationPolicy,
-                MeetingPoint = experience.MeetingPoint,
-                Language = experience.Language,
-                CreatedAt = experience.CreatedAt,
-                UpdatedAt = experience.UpdatedAt
-            };
+            return _mapper.Map<ExperienceDto>(updatedExperience);
         }
     }
 }

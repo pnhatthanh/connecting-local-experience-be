@@ -4,7 +4,5 @@ using Experience.Domain.Entities;
 namespace Experience.Domain.Repositories
 {
     public interface IExperienceScheduleRepository : IBaseRepository<ExperienceScheduleEntity>
-    {
-        Task<IEnumerable<ExperienceScheduleEntity>> GetByExperienceIdAsync(Guid experienceId);
-    }
+    {}
 }

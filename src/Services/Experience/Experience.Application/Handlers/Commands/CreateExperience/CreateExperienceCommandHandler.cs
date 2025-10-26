@@ -1,10 +1,13 @@
+using BuildingBlocks.Application.Interfaces;
+using BuildingBlocks.Domain.Exceptions;
 using BuildingBlocks.Domain.Interfaces;
 using Experience.Application.Dtos;
 using Experience.Application.Interfaces;
 using Experience.Domain.Entities;
-using Experience.Domain.Enums;
 using Experience.Domain.Repositories;
+using MapsterMapper;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using NetTopologySuite.Geometries;
 
 namespace Experience.Application.Handlers.Commands.CreateExperience
@@ -12,136 +15,119 @@ namespace Experience.Application.Handlers.Commands.CreateExperience
     public class CreateExperienceCommandHandler : IRequestHandler<CreateExperienceCommand, ExperienceDto>
     {
         private readonly IExperienceRepository _experienceRepository;
+        private readonly IExperienceCategoryRepository _categoryRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPhotoService _photoService;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly IMapper _mapper;
+        private readonly GeometryFactory _geometryFactory; 
 
         public CreateExperienceCommandHandler(
             IExperienceRepository experienceRepository,
-            IUnitOfWork unitOfWork,
-            IPhotoService photoService)
+            IExperienceCategoryRepository categoryRepository,
+            IUnitOfWork unitOfWork, 
+            IPhotoService photoService, 
+            ICurrentUserService currentUserService,
+            IMapper mapper)
         {
             _experienceRepository = experienceRepository;
+            _categoryRepository = categoryRepository;
             _unitOfWork = unitOfWork;
             _photoService = photoService;
+            _currentUserService = currentUserService;
+            _mapper = mapper;
+            _geometryFactory = new GeometryFactory(new PrecisionModel(), 4326); 
         }
 
         public async Task<ExperienceDto> Handle(CreateExperienceCommand request, CancellationToken cancellationToken)
         {
-            var geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
-            var location = geometryFactory.CreatePoint(new Coordinate(request.Location.Longitude, request.Location.Latitude));
+            var hostId = _currentUserService.UserId;
 
-            var experience = new ExperienceEntity
+            if (await _categoryRepository.GetByIdAsync(request.CategoryId) == null)
+                throw new BadRequestException("Invalid category ID");
+            
+            var experience = _mapper.From(request).AddParameters("geometryFactory", _geometryFactory)
+                .AddParameters("hostId", hostId)
+                .AdaptToType<ExperienceEntity>();
+            if (request.MediaFiles?.Any() == true)
+                experience.Media = await UploadMediaFilesAsync(experience.Id, request.MediaFiles);
+            if (request.Itineraries?.Any() == true)
+                experience.Itineraries = await UploadItinerariesAsync(experience.Id, request.Itineraries);
+            experience.Schedule = new ExperienceScheduleEntity
             {
                 Id = Guid.NewGuid(),
-                HostId = request.HostId,
-                Title = request.Title,
-                Description = request.Description,
-                Location = location,
-                Price = request.Price,
-                Duration = request.Duration,
-                MaxParticipants = request.MaxParticipants,
-                Category = Enum.Parse<ExperienceCategory>(request.Category),
-                Amenities = request.Amenities,
-                ActivityLevel = Enum.Parse<ActivityLevel>(request.ActivityLevel),
-                SkillLevel = Enum.Parse<SkillLevel>(request.SkillLevel),
-                MinAge = request.MinAge,
-                Accessibility = request.Accessibility,
-                Status = ExperienceStatus.Draft,
-                CancellationPolicy = request.CancellationPolicy,
-                MeetingPoint = request.MeetingPoint,
-                Language = request.Language,
+                ExperienceId = experience.Id,
+                RecurrenceType = request.RecurrenceType,
+                DaysOfWeek = request.DaysOfWeek,
+                TimeSlots = _mapper.Map<List<ScheduleTimeSlot>>(request.TimeSlots),
+                StartDate = request.ScheduleStartDate,
+                EndDate = request.ScheduleEndDate,
                 CreatedAt = DateTime.UtcNow
             };
-
-            if (request.MediaFiles != null && request.MediaFiles.Any())
+            
+            await _experienceRepository.AddAsync(experience);
+            await _unitOfWork.SaveChangeAsync();
+            return _mapper.Map<ExperienceDto>(experience);
+        }
+        private async Task<List<ExperienceMediaEntity>> UploadMediaFilesAsync(Guid experienceId, List<IFormFile> mediaFiles)
+        {
+            var uploadedMedia = new List<ExperienceMediaEntity>();
+            for (int i = 0; i < mediaFiles.Count; i++)
             {
-                var uploadedMedia = new List<ExperienceMediaEntity>();
-                for (int i = 0; i < request.MediaFiles.Count; i++)
+                var file = mediaFiles[i];
+                try
                 {
-                    var file = request.MediaFiles[i];
-                    try
-                    {
-                        var uploadResult = await _photoService.UploadPhotoAsync(file, $"experiences/{experience.Id}");
-                        uploadedMedia.Add(new ExperienceMediaEntity
-                        {
-                            Id = Guid.NewGuid(),
-                            ExperienceId = experience.Id,
-                            Url = uploadResult.Url,
-                            Order = i + 1,
-                            CreatedAt = DateTime.UtcNow
-                        });
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Failed to upload media file: {ex.Message}");
-                    }
-                }
-                experience.Media = uploadedMedia;
-            }
-
-            if (request.Itineraries != null && request.Itineraries.Any())
-            {
-                var itineraries = new List<ExperienceItineraryEntity>();
-                foreach (var itinerary in request.Itineraries)
-                {
-                    string? photoUrl = null;
-                    
-                    if (itinerary.PhotoFile != null)
-                    {
-                        try
-                        {
-                            var uploadResult = await _photoService.UploadPhotoAsync(itinerary.PhotoFile, $"experiences/{experience.Id}/itinerary");
-                            photoUrl = uploadResult.Url;
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Failed to upload itinerary photo: {ex.Message}");
-                        }
-                    }
-
-                    itineraries.Add(new ExperienceItineraryEntity
+                    var uploadPath = $"experiences/{experienceId}"; 
+                    var uploadedUrl = await _photoService.UploadImageAsync(file, uploadPath);
+                    uploadedMedia.Add(new ExperienceMediaEntity
                     {
                         Id = Guid.NewGuid(),
-                        ExperienceId = experience.Id,
-                        StepNumber = itinerary.StepNumber,
-                        PhotoUrl = photoUrl ?? string.Empty,
-                        Title = itinerary.Title,
-                        Description = itinerary.Description,
-                        Location = itinerary.Location != null ? geometryFactory.CreatePoint(new Coordinate(itinerary.Location.Longitude, itinerary.Location.Latitude)) : null,
+                        ExperienceId = experienceId,
+                        Url = uploadedUrl,
+                        Order = i + 1, 
                         CreatedAt = DateTime.UtcNow
                     });
                 }
-                experience.Itineraries = itineraries;
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Failed to upload media file for experience {experienceId}: {ex.Message}");
+                }
             }
+            return uploadedMedia;
+        }
 
-            await _experienceRepository.AddAsync(experience);
-            await _unitOfWork.SaveChangeAsync();
-
-            return new ExperienceDto
+        private async Task<List<ExperienceItineraryEntity>> UploadItinerariesAsync(
+            Guid experienceId,
+            List<CreateExperienceItineraryDto> itineraries)
+        {
+            var itineraryEntities = new List<ExperienceItineraryEntity>();
+            foreach (var itinerary in itineraries)
             {
-                Id = experience.Id,
-                HostId = experience.HostId,
-                Title = experience.Title,
-                Description = experience.Description,
-                Location = new LocationDto { Latitude = experience.Location.Y, Longitude = experience.Location.X },
-                Price = experience.Price,
-                Duration = experience.Duration,
-                MaxParticipants = experience.MaxParticipants,
-                Category = experience.Category.ToString(),
-                Amenities = experience.Amenities,
-                ActivityLevel = experience.ActivityLevel.ToString(),
-                SkillLevel = experience.SkillLevel.ToString(),
-                MinAge = experience.MinAge,
-                Accessibility = experience.Accessibility,
-                Status = experience.Status.ToString(),
-                CancellationPolicy = experience.CancellationPolicy,
-                MeetingPoint = experience.MeetingPoint,
-                Language = experience.Language,
-                CreatedAt = experience.CreatedAt,
-                UpdatedAt = experience.UpdatedAt,
-                Media = experience.Media?.Select(m => new ExperienceMediaDto { Id = m.Id, Url = m.Url, Order = m.Order }).ToList(),
-                Itineraries = experience.Itineraries?.Select(i => new ExperienceItineraryDto { Id = i.Id, StepNumber = i.StepNumber, PhotoUrl = i.PhotoUrl, Title = i.Title, Description = i.Description, Location = i.Location != null ? new LocationDto { Latitude = i.Location.Y, Longitude = i.Location.X } : null }).ToList()
-            };
+                string? photoUrl = null;
+                if (itinerary.PhotoFile != null)
+                {
+                    try
+                    {
+                        var uploadPath = $"experiences/{experienceId}/itinerary";
+                        photoUrl = await _photoService.UploadImageAsync(itinerary.PhotoFile, uploadPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Failed to upload itinerary photo for step {itinerary.StepNumber}: {ex.Message}");
+                    }
+                }
+                itineraryEntities.Add(new ExperienceItineraryEntity
+                {
+                    Id = Guid.NewGuid(),
+                    ExperienceId = experienceId,
+                    StepNumber = itinerary.StepNumber,
+                    PhotoUrl = photoUrl ?? string.Empty,
+                    Title = itinerary.Title,
+                    Description = itinerary.Description,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+            return itineraryEntities;
         }
     }
 }

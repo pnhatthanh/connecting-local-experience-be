@@ -20,7 +20,7 @@ namespace IAM.Infrastructure.Extensions
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? throw new ArgumentNullException("Connection string 'DefaultConnection' not found.");
-            services.AddDbContextSqlServer<IAMDbContext>(connectionString);
+            services.AddDbContextPostgreSql<IAMDbContext>(connectionString);
             services.AddUnitOfWork<IAMDbContext>();
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
