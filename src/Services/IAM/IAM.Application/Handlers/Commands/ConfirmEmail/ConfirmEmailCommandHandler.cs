@@ -22,7 +22,7 @@ namespace IAM.Application.Handlers.Commands.ConfirmEmailCommand
         public async Task<bool> Handle(ConfirmEmailCommand request, CancellationToken cancellationToken)
         {
             var emailSpec = new AccountEmailSpecification(request.Email.ToLowerInvariant());
-            var account = await _accountRepository.GetAnyAsync(emailSpec)
+            var account = await _accountRepository.GetBySpecAsync(emailSpec)
                 ?? throw new BadRequestException("Email is not exist");
             if (account.IsEmailConfirmed)
                 throw new BadRequestException("Email is already confirmed");

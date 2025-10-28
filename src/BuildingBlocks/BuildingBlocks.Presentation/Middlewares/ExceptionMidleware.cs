@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using BuildingBlocks.Domain.Exceptions;
 using BuildingBlocks.Presentation.Results;
 using FluentValidation;
+using BuildingBlocks.Application.Exceptions;
 
 namespace BuildingBlocks.Presentation.Middlewares
 {
@@ -35,12 +36,13 @@ namespace BuildingBlocks.Presentation.Middlewares
 
             switch (exception)
             {
-                case ValidationException validationException:
+                case FluentValidationException fluentValidationException:
                     context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                     errorResponse.StatusCode = (int)HttpStatusCode.BadRequest;
                     errorResponse.Message = "Validation failed";
-                    errorResponse.Errors = validationException.Errors.GroupBy(error => error.PropertyName)
-                                        .ToDictionary(error => error.Key, error => error.Select(e => e.ErrorMessage).ToList());
+                    errorResponse.Errors = fluentValidationException.Errors.ToDictionary(
+                        error => error.Key, 
+                        error => error.Value.ToList<string>());
                     break;
                 case BaseException customException:
                     context.Response.StatusCode = (int)customException.StatusCode;

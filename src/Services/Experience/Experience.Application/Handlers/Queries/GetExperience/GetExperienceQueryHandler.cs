@@ -1,15 +1,15 @@
 using System.Linq.Expressions;
+using BuildingBlocks.Application.CQRS.Query;
 using BuildingBlocks.Domain.Exceptions;
 using Experience.Application.Dtos;
 using Experience.Domain.Entities;
 using Experience.Domain.Repositories;
 using Experience.Domain.Specifications;
 using MapsterMapper;
-using MediatR;
 
 namespace Experience.Application.Handlers.Queries.GetExperience
 {
-    public class GetExperienceQueryHandler : IRequestHandler<GetExperienceQuery, ExperienceDto?>
+    public class GetExperienceQueryHandler : IQueryHandler<GetExperienceQuery, ExperienceDto?>
     {
         private readonly IExperienceRepository _experienceRepository;
         private readonly IMapper _mapper;
@@ -32,7 +32,7 @@ namespace Experience.Application.Handlers.Queries.GetExperience
                 e => e.Schedule,
                 e => e.Itineraries
             };
-            var experience = await _experienceRepository.GetAnyAsync(spec, includes)
+            var experience = await _experienceRepository.GetBySpecAsync(spec, includes)
                 ?? throw new BadRequestException($"Experience with ID {request.ExperienceId} not found.");
             return _mapper.Map<ExperienceDto>(experience);
         }

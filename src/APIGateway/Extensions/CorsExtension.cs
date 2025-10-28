@@ -10,10 +10,20 @@ public static class CorsExtension
         {
             options.AddDefaultPolicy(builder =>
             {
-                builder.WithOrigins(corsSettings.AllowedOrigins)
-                       .AllowAnyHeader()
-                       .AllowAnyMethod()
-                       .AllowCredentials();
+                // Check if wildcard is used
+                if (corsSettings.AllowedOrigins.Contains("*"))
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyHeader()
+                           .AllowAnyMethod();
+                }
+                else
+                {
+                    builder.WithOrigins(corsSettings.AllowedOrigins)
+                           .AllowAnyHeader()
+                           .AllowAnyMethod()
+                           .AllowCredentials();
+                }
             });
         });
         return services;

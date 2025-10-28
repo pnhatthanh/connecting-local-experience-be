@@ -1,16 +1,17 @@
+using BuildingBlocks.Application.CQRS.Command;
 using BuildingBlocks.Domain.Exceptions;
 using BuildingBlocks.Domain.Interfaces;
 using Experience.Application.Dtos;
 using Experience.Domain.Entities;
+using Experience.Domain.Enums;
 using Experience.Domain.Repositories;
 using Experience.Domain.Specifications;
 using MapsterMapper;
-using MediatR;
 using NetTopologySuite.Geometries;
 
 namespace Experience.Application.Handlers.Commands.UpdateExperience
 {
-    public class UpdateExperienceCommandHandler : IRequestHandler<UpdateExperienceCommand, ExperienceDto>
+    public class UpdateExperienceCommandHandler : ICommandHandler<UpdateExperienceCommand, ExperienceDto>
     {
         private readonly IExperienceRepository _experienceRepository;
         private readonly IUnitOfWork _unitOfWork;
@@ -29,7 +30,7 @@ namespace Experience.Application.Handlers.Commands.UpdateExperience
         public async Task<ExperienceDto> Handle(UpdateExperienceCommand request, CancellationToken cancellationToken)
         {
             var spec = new ExperienceIdSpecification(request.ExperienceId);
-            var experience = await _experienceRepository.GetAnyAsync(spec, 
+            var experience = await _experienceRepository.GetBySpecAsync(spec, 
                 e => e.Category, 
                 e => e.Media, 
                 e => e.Schedule, 
@@ -47,36 +48,35 @@ namespace Experience.Application.Handlers.Commands.UpdateExperience
             experience.Duration = request.Duration;
             experience.MaxParticipants = request.MaxParticipants;
             experience.CategoryId = request.CategoryId;
+            experience.ActivityLevel = Enum.Parse<ActivityLevel>(request.ActivityLevel);
+            experience.SkillLevel = Enum.Parse<SkillLevel>(request.SkillLevel);
             experience.MinAge = request.MinAge;
-            experience.CancellationPolicy = request.CancellationPolicy;
+            experience.CancellationPolicy = Enum.Parse<CancellationPolicyType>(request.CancellationPolicy);
             experience.MeetingLocation = request.MeetingLocation;
+            experience.Language = request.Language;
 
             var geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
             experience.MeetingPoint = geometryFactory.CreatePoint(new Coordinate(request.MeetingPoint.Longitude, request.MeetingPoint.Latitude));
+            
             if (experience.Schedule != null)
             {
-                experience.Schedule.RecurrenceType = request.RecurrenceType;
+                experience.Schedule.RecurrenceType = Enum.Parse<RecurrenceType>(request.RecurrenceType);
                 experience.Schedule.DaysOfWeek = request.DaysOfWeek;
                 experience.Schedule.TimeSlots = request.TimeSlots.Select(t => new ScheduleTimeSlot
                 {
                     StartTime = t.StartTime,
                     EndTime = t.EndTime
                 }).ToList();
-                experience.Schedule.StartDate = request.ScheduleStartDate;
-                experience.Schedule.EndDate = request.ScheduleEndDate;
+                experience.Schedule.StartDate = request.StartDate;
+                experience.Schedule.EndDate = request.EndDate;
                 experience.Schedule.UpdatedAt = DateTime.UtcNow;
             }
+            
             experience.UpdatedAt = DateTime.UtcNow;
             _experienceRepository.Update(experience);
             await _unitOfWork.SaveChangeAsync();
-            var updatedExperience = await _experienceRepository.GetAnyAsync(spec, 
-                e => e.Category, 
-                e => e.Media, 
-                e => e.Schedule, 
-                e => e.Itineraries)
-                ?? throw new BadRequestException("Failed to reload updated experience.");
 
-            return _mapper.Map<ExperienceDto>(updatedExperience);
+            return _mapper.Map<ExperienceDto>(experience);
         }
     }
 }

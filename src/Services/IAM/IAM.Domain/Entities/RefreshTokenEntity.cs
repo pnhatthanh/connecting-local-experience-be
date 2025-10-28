@@ -10,7 +10,6 @@ namespace IAM.Domain.Entities
         public bool IsRevoked { get; set; } = false;
         public DateTime? RevokedAt { get; set; }
         public virtual AccountEntity Account { get; set; } = null!;
-
         public bool IsActive => !IsRevoked && DateTime.UtcNow <= ExpiryDate;
     }
 }

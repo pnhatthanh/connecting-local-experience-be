@@ -31,7 +31,7 @@ namespace IAM.Application.Handlers.Commands.LoginCommand
         public async Task<TokenResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
             var emailSpec = new AccountEmailSpecification(request.Email.ToLowerInvariant());
-            var account = await _accountRepository.GetAnyAsync(emailSpec)
+            var account = await _accountRepository.GetBySpecAsync(emailSpec, account => account.Role)
                 ?? throw new BadRequestException("Invalid email or password");
             if (!_passwordHasher.VerifyPassword(request.Password, account.PasswordHash))
                 throw new BadRequestException("Invalid email or password");
@@ -39,8 +39,9 @@ namespace IAM.Application.Handlers.Commands.LoginCommand
            if (!account.IsActive)
                 throw new ForbiddenException("Account is deactivated");
 
-           if (!account.IsEmailConfirmed)
-               throw new ForbiddenException("Email is not confirmed");
+            if (!account.IsEmailConfirmed)
+                throw new ForbiddenException("Email is not confirmed");
+               
             var permissions = new List<string>();
             var accessToken = _jwtTokenService.GenerateAccessToken(account, permissions);
             var refreshTokenValue = _jwtTokenService.GenerateRefreshToken();

@@ -1,18 +1,19 @@
+using BuildingBlocks.Application.CQRS.Command;
 using BuildingBlocks.Application.Interfaces;
 using BuildingBlocks.Domain.Exceptions;
 using BuildingBlocks.Domain.Interfaces;
 using Experience.Application.Dtos;
 using Experience.Application.Interfaces;
 using Experience.Domain.Entities;
+using Experience.Domain.Enums;
 using Experience.Domain.Repositories;
 using MapsterMapper;
-using MediatR;
 using Microsoft.AspNetCore.Http;
 using NetTopologySuite.Geometries;
 
 namespace Experience.Application.Handlers.Commands.CreateExperience
 {
-    public class CreateExperienceCommandHandler : IRequestHandler<CreateExperienceCommand, ExperienceDto>
+    public class CreateExperienceCommandHandler : ICommandHandler<CreateExperienceCommand, ExperienceDto>
     {
         private readonly IExperienceRepository _experienceRepository;
         private readonly IExperienceCategoryRepository _categoryRepository;
@@ -45,23 +46,50 @@ namespace Experience.Application.Handlers.Commands.CreateExperience
 
             if (await _categoryRepository.GetByIdAsync(request.CategoryId) == null)
                 throw new BadRequestException("Invalid category ID");
+            var experience = new ExperienceEntity
+            {
+                Id = Guid.NewGuid(),
+                HostId = hostId,
+                Title = request.Title,
+                Description = request.Description,
+                Location = _geometryFactory.CreatePoint(new Coordinate(request.Location.Longitude, request.Location.Latitude)),
+                Address = request.Address,
+                District = request.District,
+                City = request.City,
+                Country = request.Country,
+                AdultPrice = request.AdultPrice,
+                ChildPrice = request.ChildPrice,
+                Duration = request.Duration,
+                MaxParticipants = request.MaxParticipants,
+                CategoryId = request.CategoryId,
+                ActivityLevel = Enum.Parse<ActivityLevel>(request.ActivityLevel),
+                SkillLevel = Enum.Parse<SkillLevel>(request.SkillLevel),
+                MinAge = request.MinAge,
+                Status = ExperienceStatus.Draft,
+                CancellationPolicy = Enum.Parse<CancellationPolicyType>(request.CancellationPolicy),
+                MeetingPoint = _geometryFactory.CreatePoint(new Coordinate(request.MeetingPoint.Longitude, request.MeetingPoint.Latitude)),
+                MeetingLocation = request.MeetingLocation,
+                Language = request.Language,
+            };
             
-            var experience = _mapper.From(request).AddParameters("geometryFactory", _geometryFactory)
-                .AddParameters("hostId", hostId)
-                .AdaptToType<ExperienceEntity>();
             if (request.MediaFiles?.Any() == true)
                 experience.Media = await UploadMediaFilesAsync(experience.Id, request.MediaFiles);
             if (request.Itineraries?.Any() == true)
                 experience.Itineraries = await UploadItinerariesAsync(experience.Id, request.Itineraries);
+            
             experience.Schedule = new ExperienceScheduleEntity
             {
                 Id = Guid.NewGuid(),
                 ExperienceId = experience.Id,
-                RecurrenceType = request.RecurrenceType,
+                RecurrenceType = Enum.Parse<RecurrenceType>(request.RecurrenceType),
                 DaysOfWeek = request.DaysOfWeek,
-                TimeSlots = _mapper.Map<List<ScheduleTimeSlot>>(request.TimeSlots),
-                StartDate = request.ScheduleStartDate,
-                EndDate = request.ScheduleEndDate,
+                TimeSlots = request.TimeSlots.Select(t => new ScheduleTimeSlot
+                {
+                    StartTime = t.StartTime,
+                    EndTime = t.EndTime
+                }).ToList(),
+                StartDate = request.StartDate,
+                EndDate = request.EndDate,
                 CreatedAt = DateTime.UtcNow
             };
             
@@ -96,9 +124,7 @@ namespace Experience.Application.Handlers.Commands.CreateExperience
             return uploadedMedia;
         }
 
-        private async Task<List<ExperienceItineraryEntity>> UploadItinerariesAsync(
-            Guid experienceId,
-            List<CreateExperienceItineraryDto> itineraries)
+        private async Task<List<ExperienceItineraryEntity>> UploadItinerariesAsync( Guid experienceId, List<CreateExperienceItineraryDto> itineraries)
         {
             var itineraryEntities = new List<ExperienceItineraryEntity>();
             foreach (var itinerary in itineraries)

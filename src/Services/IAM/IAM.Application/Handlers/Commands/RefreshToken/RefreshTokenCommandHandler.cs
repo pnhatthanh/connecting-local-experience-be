@@ -31,11 +31,13 @@ namespace IAM.Application.Handlers.Commands.RefreshTokenCommand
         public async Task<TokenResponse> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
         {
             var refreshTokenSpec = new RefreshTokenSpecification(request.RefreshToken);
-            var refreshToken = await _refreshTokenRepository.GetAnyAsync(refreshTokenSpec)
+            var refreshToken = await _refreshTokenRepository.GetBySpecAsync(refreshTokenSpec)
                 ?? throw new UnAuthorizedException("Invalid refresh token");
             if (!refreshToken.IsActive)
                 throw new UnAuthorizedException("Refresh token is expired or revoked");
-            var account = await _accountRepository.GetByIdAsync(refreshToken.AccountId)
+            
+            var accountSpec = new AccountByIdSpecification(refreshToken.AccountId);
+            var account = await _accountRepository.GetBySpecAsync(accountSpec, account => account.Role)
                 ?? throw new NotFoundException("Account not found");
             if (!account.IsActive)
                 throw new ForbiddenException("Account is deactivated");

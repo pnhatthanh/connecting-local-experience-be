@@ -33,20 +33,16 @@ namespace Experience.Api.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<ExperienceDto>> UpdateExperience(Guid id, [FromBody] UpdateExperienceCommand command)
         {
-            command.ExperienceId = id;
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command with { ExperienceId = id });
             return Ok(result);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ExperienceDto>> GetExperience(Guid id)
+        public async Task<ActionResult<ExperienceDto>> GetExperience([FromRoute] GetExperienceQuery query)
         {
-            var query = new GetExperienceQuery { ExperienceId = id };
             var result = await _mediator.Send(query);
-
             if (result == null)
                 return NotFound();
-
             return Ok(result);
         }
 
@@ -97,7 +93,7 @@ namespace Experience.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<bool>> DeleteExperience([FromRoute] Guid id)
         {
-            var result = await _mediator.Send(new DeleteExperienceCommand { Id = id });
+            var result = await _mediator.Send(new DeleteExperienceCommand(id));
             return Ok(result);
         }
     }

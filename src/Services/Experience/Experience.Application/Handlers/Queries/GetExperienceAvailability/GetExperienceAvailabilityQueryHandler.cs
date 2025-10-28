@@ -25,7 +25,7 @@ namespace Experience.Application.Handlers.Queries.GetExperienceAvailability
         public async Task<List<ExperienceScheduleSlotDto>> Handle(GetExperienceAvailabilityQuery request, CancellationToken cancellationToken)
         {
             var spec = new ExperienceIdSpecification(request.ExperienceId);
-            var experience = await _experienceRepository.GetAnyAsync(spec, e => e.Schedule)
+            var experience = await _experienceRepository.GetBySpecAsync(spec, e => e.Schedule)
                 ?? throw new BadRequestException($"Experience with ID {request.ExperienceId} not found "); 
             var slotSpec = new SlotsByScheduleIdsAndDateRangeSpecification(
                 new List<Guid> { experience.Schedule.Id }, 

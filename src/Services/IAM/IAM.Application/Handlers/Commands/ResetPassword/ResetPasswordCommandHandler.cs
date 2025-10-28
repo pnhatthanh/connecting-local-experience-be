@@ -26,7 +26,7 @@ namespace IAM.Application.Handlers.Commands.ResetPasswordCommand
         public async Task<bool> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
         {
             var emailSpec = new AccountEmailSpecification(request.Email.ToLowerInvariant());
-            var account = await _accountRepository.GetAnyAsync(emailSpec)
+            var account = await _accountRepository.GetBySpecAsync(emailSpec)
                 ?? throw new BadRequestException("Invalid email or token");
             if (string.IsNullOrEmpty(account.PasswordResetToken) || account.PasswordResetToken != request.Token)
                 throw new BadRequestException("Invalid email or token");

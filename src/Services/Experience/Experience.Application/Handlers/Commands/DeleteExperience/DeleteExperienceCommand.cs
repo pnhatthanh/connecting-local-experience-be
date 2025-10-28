@@ -1,9 +1,6 @@
-using MediatR;
+using BuildingBlocks.Application.CQRS.Command;
 
 namespace Experience.Application.Handlers.Commands.DeleteExperience
 {
-    public class DeleteExperienceCommand : IRequest<bool>
-    {
-        public Guid Id { get; set; }
-    }
+    public record DeleteExperienceCommand(Guid Id) : ICommand<bool>;
 }
