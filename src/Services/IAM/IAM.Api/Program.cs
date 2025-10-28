@@ -1,5 +1,7 @@
 using IAM.Infrastructure.Extensions;
 using IAM.Application.Extensions;
+using IAM.Api.Extensions;
+using BuildingBlocks.Presentation.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,10 @@ builder.Services.AddIAMApplication()
 
 var app = builder.Build();
 
+await app.Services.ApplyMigrationAsync();
+await app.Services.SeedDataAsync();
+
+app.UseException();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

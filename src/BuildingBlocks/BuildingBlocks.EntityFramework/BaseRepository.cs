@@ -33,7 +33,7 @@ namespace BuildingBlocks.EntityFramework
         {
             return await _dbSet.FindAsync(id);
         }
-        public Task<T?> GetAnyAsync(Specification<T>? specification = null, params Expression<Func<T, object>>[] includes)
+        public Task<T?> GetBySpecAsync(Specification<T>? specification = null, params Expression<Func<T, object>>[] includes)
         {
             return _dbSet.ApplySpecification(specification)
                           .ApplyInclude(includes)

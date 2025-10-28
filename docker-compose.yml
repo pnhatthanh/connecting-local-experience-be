@@ -8,7 +8,6 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ConnectionStrings__DefaultConnection=Host=iam-db;Database=${IAM_POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
-      - Redis__ConnectionString=redis:6379,password=${REDIS_PASSWORD}
       - RabbitMQ__HostName=rabbitmq
       - RabbitMQ__Port=5672
       - RabbitMQ__UserName=${RABBITMQ_USER}
@@ -20,8 +19,6 @@ services:
       - "5001:8080"
     depends_on:
       iam-db:
-        condition: service_healthy
-      redis:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -67,7 +64,7 @@ services:
     restart: unless-stopped
 
   experience-db:
-    image: postgis/postgis:15-3.3-alpine
+    image: postgres:15-alpine
     container_name: connecting-experience-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -141,7 +138,6 @@ services:
     container_name: connecting-gateway
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
-      - Redis__ConnectionString=redis:6379,password=${REDIS_PASSWORD}
       - ReverseProxy__Clusters__iam-cluster__Destinations__destination1__Address=http://iam-api:8080
       - ReverseProxy__Clusters__experience-cluster__Destinations__destination1__Address=http://experience-api:8080
     ports:
@@ -150,7 +146,6 @@ services:
       - iam-api
       - experience-api
       - notification-service
-      - redis
     networks:
       - connecting-network
     restart: unless-stopped

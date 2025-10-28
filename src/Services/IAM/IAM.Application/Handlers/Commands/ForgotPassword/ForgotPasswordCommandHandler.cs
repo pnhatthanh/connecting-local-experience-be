@@ -27,7 +27,7 @@ namespace IAM.Application.Handlers.Commands.ForgotPasswordCommand
         public async Task<bool> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
         {
             var emailSpec = new AccountEmailSpecification(request.Email.ToLowerInvariant());
-            var account = await _accountRepository.GetAnyAsync(emailSpec)
+            var account = await _accountRepository.GetBySpecAsync(emailSpec)
                 ?? throw new BadRequestException("Email not found");
             var resetToken = Guid.NewGuid().ToString("N");
             account.PasswordResetToken = resetToken;

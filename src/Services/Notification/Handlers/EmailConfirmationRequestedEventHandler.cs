@@ -32,6 +32,7 @@ public class EmailConfirmationRequestedEventHandler : IIntegrationEventHandler<E
                 @event.ConfirmationToken);
 
             var confirmationUrl = _emailSettings.VerificationUrlTemplate
+                .Replace("{email}", Uri.EscapeDataString(@event.Email))
                 .Replace("{token}", @event.ConfirmationToken);
 
             await _emailService.SendEmailConfirmationAsync(
@@ -48,7 +49,6 @@ public class EmailConfirmationRequestedEventHandler : IIntegrationEventHandler<E
             _logger.LogError(ex, 
                 "Failed to send email confirmation to {Email}", 
                 @event.Email);
-            // Don't throw - we don't want to crash the service if email fails
         }
     }
 }

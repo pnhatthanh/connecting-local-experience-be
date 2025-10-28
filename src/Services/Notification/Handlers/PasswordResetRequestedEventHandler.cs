@@ -48,7 +48,6 @@ public class PasswordResetRequestedEventHandler : IIntegrationEventHandler<Passw
             _logger.LogError(ex, 
                 "Failed to send password reset email to {Email}", 
                 @event.Email);
-            // Don't throw - we don't want to crash the service if email fails
         }
     }
 }

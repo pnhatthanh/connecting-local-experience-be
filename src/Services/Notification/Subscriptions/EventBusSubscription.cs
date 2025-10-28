@@ -10,11 +10,8 @@ public static class EventBusSubscription
     {
         try
         {
-            // Subscribe to Email Confirmation Event
             await eventBus.SubscribeAsync<EmailConfirmationRequestedEvent, EmailConfirmationRequestedEventHandler>();
             logger.LogInformation("Subscribed to {EventName}", nameof(EmailConfirmationRequestedEvent));
-
-            // Subscribe to Password Reset Event
             await eventBus.SubscribeAsync<PasswordResetRequestedEvent, PasswordResetRequestedEventHandler>();
             logger.LogInformation("Subscribed to {EventName}", nameof(PasswordResetRequestedEvent));
 

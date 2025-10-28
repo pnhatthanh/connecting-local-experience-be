@@ -1,7 +1,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /app
 
-# Copy csproj files and restore dependencies
 COPY ["src/Services/Notification/Notification.csproj", "src/Services/Notification/"]
 COPY ["src/BuildingBlocks/BuildingBlocks.Application/BuildingBlocks.Application.csproj", "src/BuildingBlocks/BuildingBlocks.Application/"]
 COPY ["src/BuildingBlocks/BuildingBlocks.Domain/BuildingBlocks.Domain.csproj", "src/BuildingBlocks/BuildingBlocks.Domain/"]
@@ -9,7 +8,6 @@ COPY ["src/BuildingBlocks/BuildingBlocks.RabbitMQ/BuildingBlocks.RabbitMQ.csproj
 
 RUN dotnet restore src/Services/Notification/Notification.csproj
 
-# Copy source code
 COPY ["src/Services/Notification/", "src/Services/Notification/"]
 COPY ["src/BuildingBlocks/BuildingBlocks.Application/", "src/BuildingBlocks/BuildingBlocks.Application/"]
 COPY ["src/BuildingBlocks/BuildingBlocks.Domain/", "src/BuildingBlocks/BuildingBlocks.Domain/"]
@@ -24,6 +22,5 @@ COPY --from=build /app/publish .
 
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080
-ENV ASPNETCORE_ENVIRONMENT=Production
 
 ENTRYPOINT ["dotnet", "Notification.dll"]

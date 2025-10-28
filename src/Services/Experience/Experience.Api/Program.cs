@@ -1,6 +1,7 @@
 using Experience.Api.Extensions;
 using Experience.Application.Extensions;
 using Experience.Infrastructure.Extensions;
+using BuildingBlocks.Presentation.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseException();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

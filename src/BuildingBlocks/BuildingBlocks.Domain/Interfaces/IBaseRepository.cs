@@ -10,7 +10,7 @@ namespace BuildingBlocks.Domain.Interfaces
         void Update(T entity);
         void Delete(T entity);
         Task<T?> GetByIdAsync(Guid id);
-        Task<T?> GetAnyAsync(Specification<T>? specification = null, params Expression<Func<T, object>>[] includes);
+        Task<T?> GetBySpecAsync(Specification<T>? specification = null, params Expression<Func<T, object>>[] includes);
         Task<List<T>> GetAllAsync(Specification<T>? specification = null, params Expression<Func<T, object>>[] includes);
         Task<bool> CheckExistsAsync(Specification<T>? specification = null);
         Task<int> CountAsync(Specification<T>? specification = null);
