@@ -29,4 +29,10 @@
     <Project Path="src/services/Experience/Experience.Domain/Experience.Domain.csproj" />
     <Project Path="src/services/Experience/Experience.Infrastructure/Experience.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/src/services/User/">
+    <Project Path="src/services/User/User.Api/User.Api.csproj" />
+    <Project Path="src/services/User/User.Application/User.Application.csproj" />
+    <Project Path="src/services/User/User.Domain/User.Domain.csproj" />
+    <Project Path="src/services/User/User.Infrastructure/User.Infrastructure.csproj" />
+  </Folder>
 </Solution>
