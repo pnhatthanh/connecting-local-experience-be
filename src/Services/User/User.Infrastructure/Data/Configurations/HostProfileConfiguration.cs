@@ -19,6 +19,7 @@ namespace User.Infrastructure.Data.Configurations
                 .HasColumnName("spoken_languages")
                 .HasColumnType("jsonb");
             builder.Property(e => e.Location).HasColumnName("location").HasMaxLength(255);
+            builder.Property(e => e.HostingSince).HasColumnName("hosting_since");
             builder.Property(e => e.IsVerified).HasColumnName("is_verified").HasDefaultValue(false);
             builder.Property(e => e.VerifyStatus)
                 .HasColumnName("verify_status")
@@ -30,16 +31,31 @@ namespace User.Infrastructure.Data.Configurations
             builder.Property(e => e.DocumentUrl).HasColumnName("document_url").HasMaxLength(500);
             builder.Property(e => e.VerifyReason).HasColumnName("verify_reason").HasColumnType("TEXT");
             builder.Property(e => e.VerifiedAt).HasColumnName("verified_at");
-            builder.Property(e => e.VerifiedBy).HasColumnName("verified_by");
-            builder.Property(e => e.ResponseRate).HasColumnName("response_rate").HasColumnType("DECIMAL(5,2)").HasDefaultValue(100.00m);
             builder.Property(e => e.ResponseTime).HasColumnName("response_time").HasMaxLength(50);
             builder.Property(e => e.TotalExperiences).HasColumnName("total_experiences").HasDefaultValue(0);
+            builder.Property(e => e.TotalBookings).HasColumnName("total_bookings").HasDefaultValue(0);
+            builder.Property(e => e.TotalReviews).HasColumnName("total_reviews").HasDefaultValue(0);
             builder.Property(e => e.RatingAvg).HasColumnName("rating_avg").HasColumnType("DECIMAL(3,2)");
+            builder.Property(e => e.Work).HasColumnName("work").HasMaxLength(200);
+            builder.Property(e => e.Education).HasColumnName("education").HasMaxLength(200);
+            builder.Property(e => e.FunFact).HasColumnName("fun_fact").HasMaxLength(500);
+            builder.Property(e => e.TopicsOfInterest)
+                .HasColumnName("topics_of_interest")
+                .HasColumnType("jsonb");
+            builder.Property(e => e.FacebookUrl).HasColumnName("facebook_url").HasMaxLength(500);
+            builder.Property(e => e.InstagramUrl).HasColumnName("instagram_url").HasMaxLength(500);
+            builder.Property(e => e.LinkedInUrl).HasColumnName("linkedin_url").HasMaxLength(500);
             builder.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("NOW()");
             builder.Property(e => e.UpdatedAt).HasColumnName("updated_at");
 
             builder.HasIndex(e => e.UserId).IsUnique();
             builder.HasIndex(e => e.VerifyStatus);
+            
+            // Relationship
+            builder.HasOne(e => e.User)
+                .WithOne(u => u.HostProfile)
+                .HasForeignKey<HostProfileEntity>(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

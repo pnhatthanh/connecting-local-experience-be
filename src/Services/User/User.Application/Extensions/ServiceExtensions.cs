@@ -1,10 +1,14 @@
 using FluentValidation;
+using Mapster;
+using MapsterMapper;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 using BuildingBlocks.Application.Behaviors;
 using User.Application.Handlers.Commands.UpdateUserProfile;
 using BuildingBlocks.Application.EventBus.Abstractions;
 using User.Application.Events;
+using User.Application.EventHandlers;
 
 namespace User.Application.Extensions
 {
@@ -16,6 +20,12 @@ namespace User.Application.Extensions
             services.AddValidatorsFromAssembly(typeof(UpdateUserProfileCommand).Assembly);
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
+            var config = TypeAdapterConfig.GlobalSettings;
+            config.Scan(Assembly.GetExecutingAssembly());
+            services.AddSingleton(config);
+            services.AddScoped<IMapper, ServiceMapper>();
+
+            services.AddScoped<IIntegrationEventHandler<AccountCreatedEvent>, AccountCreatedEventHandler>();
             return services;
         }
         

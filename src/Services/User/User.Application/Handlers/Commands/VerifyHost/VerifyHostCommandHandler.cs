@@ -1,8 +1,8 @@
-using System.Data;
 using BuildingBlocks.Application.CQRS.Command;
 using BuildingBlocks.Application.EventBus.Abstractions;
 using BuildingBlocks.Domain.Exceptions;
 using BuildingBlocks.Domain.Interfaces;
+using MapsterMapper;
 using Microsoft.Extensions.Logging;
 using User.Application.DTOs;
 using User.Application.Events;
@@ -18,23 +18,29 @@ namespace User.Application.Handlers.Commands.VerifyHost
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEventBus _eventBus;
         private readonly ILogger<VerifyHostCommandHandler> _logger;
+        private readonly IMapper _mapper;
 
-        public VerifyHostCommandHandler(IUserRepository userRepository,
-            IUnitOfWork unitOfWork, IEventBus eventBus, ILogger<VerifyHostCommandHandler> logger)
+        public VerifyHostCommandHandler(
+            IUserRepository userRepository,
+            IUnitOfWork unitOfWork, 
+            IEventBus eventBus, 
+            ILogger<VerifyHostCommandHandler> logger,
+            IMapper mapper)
         {
             _userRepository = userRepository;
             _unitOfWork = unitOfWork;
             _eventBus = eventBus;
             _logger = logger;
+            _mapper = mapper;
         }
 
         public async Task<HostProfileDto> Handle(VerifyHostCommand request, CancellationToken cancellationToken)
         {
             var userSpec = new UserByIdSpecification(request.AccountId);
-            var userProfile = await _userRepository.GetBySpecAsync(userSpec, user => user.HostProfile)
-                ?? throw new NotFoundException($"User profile with Id {request.AccountId} not found");
+            var userProfile = await _userRepository.GetBySpecAsync(userSpec, user => user.HostProfile!)
+                ?? throw new BadRequestException($"User profile with Id {request.AccountId} not found");
             if(userProfile.HostProfile == null)
-                throw new NotFoundException($"Host profile for user Id {request.AccountId} not found");
+                throw new BadRequestException($"Host profile for user Id {request.AccountId} not found");
             if (userProfile.HostProfile.VerifyStatus != VerifyStatus.Pending)
                 throw new BadRequestException("Only pending host profiles can be verified");
             userProfile.HostProfile.VerifyStatus = Enum.Parse<VerifyStatus>(request.Status);
@@ -60,7 +66,7 @@ namespace User.Application.Handlers.Commands.VerifyHost
 
             await _eventBus.PublishAsync(hostProfileVerifiedEvent, cancellationToken);
 
-            return null!;
+            return _mapper.Map<HostProfileDto>(userProfile.HostProfile);
         }
     }
 }

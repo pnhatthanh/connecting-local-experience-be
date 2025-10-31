@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Experience.Domain.Entities;
 using Microsoft.EntityFrameworkCore.Migrations;
 using NetTopologySuite.Geometries;
 
@@ -8,13 +9,27 @@ using NetTopologySuite.Geometries;
 namespace Experience.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitDb : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:PostgresExtension:postgis", ",,");
+
+            migrationBuilder.CreateTable(
+                name: "tbl_experience_category",
+                columns: table => new
+                {
+                    id_category = table.Column<Guid>(type: "uuid", nullable: false),
+                    name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_tbl_experience_category", x => x.id_category);
+                });
 
             migrationBuilder.CreateTable(
                 name: "tbl_experience",
@@ -25,18 +40,23 @@ namespace Experience.Infrastructure.Migrations
                     title = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     description = table.Column<string>(type: "text", nullable: false),
                     location = table.Column<Point>(type: "geography(Point)", nullable: false),
-                    price = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
+                    address = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    district = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    city = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    country = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    adult_price = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
+                    child_price = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
                     duration = table.Column<int>(type: "integer", nullable: false),
                     max_participants = table.Column<int>(type: "integer", nullable: false),
-                    category = table.Column<string>(type: "text", nullable: false),
+                    category_id = table.Column<Guid>(type: "uuid", nullable: false),
                     activity_level = table.Column<string>(type: "text", nullable: false),
                     skill_level = table.Column<string>(type: "text", nullable: false),
                     min_age = table.Column<int>(type: "integer", nullable: false),
                     accessibility = table.Column<string>(type: "text", nullable: true),
-                    amenities = table.Column<List<string>>(type: "jsonb", nullable: false),
                     status = table.Column<string>(type: "text", nullable: false, defaultValue: "Draft"),
-                    cancellation_policy = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    meeting_point = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    cancellation_policy = table.Column<string>(type: "text", nullable: false, defaultValue: "AlwaysFreeCancellation"),
+                    meeting_point = table.Column<Point>(type: "geography(Point)", nullable: false),
+                    meeting_location = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     language = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
@@ -44,6 +64,12 @@ namespace Experience.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_tbl_experience", x => x.id_experience);
+                    table.ForeignKey(
+                        name: "FK_tbl_experience_tbl_experience_category_category_id",
+                        column: x => x.category_id,
+                        principalTable: "tbl_experience_category",
+                        principalColumn: "id_category",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -53,10 +79,9 @@ namespace Experience.Infrastructure.Migrations
                     id_itinerary = table.Column<Guid>(type: "uuid", nullable: false),
                     experience_id = table.Column<Guid>(type: "uuid", nullable: false),
                     step_number = table.Column<int>(type: "integer", nullable: false),
-                    photo_url = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    photo_url = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     title = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     description = table.Column<string>(type: "text", nullable: false),
-                    location = table.Column<Point>(type: "geography(Point)", nullable: true),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -77,7 +102,7 @@ namespace Experience.Infrastructure.Migrations
                 {
                     id_media = table.Column<Guid>(type: "uuid", nullable: false),
                     experience_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    url = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    url = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     order = table.Column<int>(type: "integer", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
@@ -99,11 +124,11 @@ namespace Experience.Infrastructure.Migrations
                 {
                     id_schedule = table.Column<Guid>(type: "uuid", nullable: false),
                     experience_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    is_recurring = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
-                    recurring_pattern = table.Column<string>(type: "jsonb", nullable: true),
-                    start_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    recurrence_type = table.Column<int>(type: "integer", nullable: false),
+                    days_of_week = table.Column<List<DayOfWeek>>(type: "jsonb", nullable: false),
+                    time_slots = table.Column<List<ScheduleTimeSlot>>(type: "jsonb", nullable: false),
+                    start_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     end_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    timezone = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, defaultValue: "Asia/Ho_Chi_Minh"),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -147,9 +172,9 @@ namespace Experience.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_tbl_experience_category",
+                name: "IX_tbl_experience_category_id",
                 table: "tbl_experience",
-                column: "category");
+                column: "category_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_tbl_experience_host_id",
@@ -160,6 +185,12 @@ namespace Experience.Infrastructure.Migrations
                 name: "IX_tbl_experience_status",
                 table: "tbl_experience",
                 column: "status");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_tbl_experience_category_name",
+                table: "tbl_experience_category",
+                column: "name",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_tbl_experience_itinerary_experience_id",
@@ -174,7 +205,8 @@ namespace Experience.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_tbl_experience_schedule_experience_id",
                 table: "tbl_experience_schedule",
-                column: "experience_id");
+                column: "experience_id",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_tbl_experience_schedule_slot_date",
@@ -209,6 +241,9 @@ namespace Experience.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "tbl_experience");
+
+            migrationBuilder.DropTable(
+                name: "tbl_experience_category");
         }
     }
 }

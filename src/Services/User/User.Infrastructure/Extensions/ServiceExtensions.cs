@@ -1,3 +1,4 @@
+using BuildingBlocks.Application.Interfaces;
 using BuildingBlocks.EntityFramework;
 using BuildingBlocks.RabbitMQ;
 using BuildingBlocks.RabbitMQ.Configurations;
@@ -31,6 +32,8 @@ namespace User.Infrastructure.Extensions
 
             services.Configure<CloudinarySettings>(configuration.GetSection(CloudinarySettings.CloudinarySettingsKey));
             services.AddScoped<IPhotoService, CloudinaryService>();
+            services.AddHttpContextAccessor();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             return services;
         }

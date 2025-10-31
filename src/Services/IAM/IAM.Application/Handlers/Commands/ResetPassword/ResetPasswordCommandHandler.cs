@@ -5,7 +5,7 @@ using IAM.Application.Interfaces;
 using IAM.Domain.Repositories;
 using IAM.Domain.Specifications;
 
-namespace IAM.Application.Handlers.Commands.ResetPasswordCommand
+namespace IAM.Application.Handlers.Commands.ResetPassword
 {
     public class ResetPasswordCommandHandler : ICommandHandler<ResetPasswordCommand, bool>
     {

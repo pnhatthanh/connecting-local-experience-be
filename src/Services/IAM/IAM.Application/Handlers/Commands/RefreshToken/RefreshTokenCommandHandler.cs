@@ -7,7 +7,7 @@ using IAM.Domain.Entities;
 using IAM.Domain.Repositories;
 using IAM.Domain.Specifications;
 
-namespace IAM.Application.Handlers.Commands.RefreshTokenCommand
+namespace IAM.Application.Handlers.Commands.RefreshToken
 {
     public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand, TokenResponse>
     {

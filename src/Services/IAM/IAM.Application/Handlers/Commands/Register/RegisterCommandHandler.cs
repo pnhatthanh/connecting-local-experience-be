@@ -10,7 +10,7 @@ using IAM.Domain.Enums;
 using IAM.Domain.Repositories;
 using IAM.Domain.Specifications;
 
-namespace IAM.Application.Handlers.Commands.RegisterCommand
+namespace IAM.Application.Handlers.Commands.Register
 {
     public class RegisterCommandHandler : ICommandHandler<RegisterCommand, RegisterResponse>
     {

@@ -15,6 +15,10 @@ services:
       - RabbitMQ__VirtualHost=/
       - RabbitMQ__ExchangeName=connecting_events
       - RabbitMQ__QueueName=iam_service_queue
+      - Jwt__SecretKey=${JWT_SECRET_KEY}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
+      - Jwt__ExpirationMinutes=${JWT_EXPIRATION_MINUTES}
     ports:
       - "5001:8080"
     depends_on:
@@ -64,7 +68,7 @@ services:
     restart: unless-stopped
 
   experience-db:
-    image: postgres:15-alpine
+    image: postgis/postgis:16-3.4-alpine
     container_name: connecting-experience-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -74,6 +78,59 @@ services:
       - "5433:5432"
     volumes:
       - experience_postgres_data:/var/lib/postgresql/data
+    networks:
+      - connecting-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  user-api:
+    build:
+      context: .
+      dockerfile: src/Services/User/User.Api/Dockerfile
+    image: connecting-user-api:latest
+    container_name: connecting-user-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ConnectionStrings__DefaultConnection=Host=user-db;Database=${USER_POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=${RABBITMQ_USER}
+      - RabbitMQ__Password=${RABBITMQ_PASSWORD}
+      - RabbitMQ__VirtualHost=/
+      - RabbitMQ__ExchangeName=connecting_events
+      - RabbitMQ__QueueName=user_service_queue
+      - Jwt__SecretKey=${JWT_SECRET_KEY}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
+      - Jwt__ExpirationMinutes=${JWT_EXPIRATION_MINUTES}
+      - Cloudinary__CloudName=${CLOUDINARY_CLOUD_NAME}
+      - Cloudinary__ApiKey=${CLOUDINARY_API_KEY}
+      - Cloudinary__ApiSecret=${CLOUDINARY_API_SECRET}
+    ports:
+      - "5003:8080"
+    depends_on:
+      user-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - connecting-network
+    restart: unless-stopped
+
+  user-db:
+    image: postgres:15-alpine
+    container_name: connecting-user-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${USER_POSTGRES_DB}
+    ports:
+      - "5434:5432"
+    volumes:
+      - user_postgres_data:/var/lib/postgresql/data
     networks:
       - connecting-network
     healthcheck:
@@ -140,11 +197,13 @@ services:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ReverseProxy__Clusters__iam-cluster__Destinations__destination1__Address=http://iam-api:8080
       - ReverseProxy__Clusters__experience-cluster__Destinations__destination1__Address=http://experience-api:8080
+      - ReverseProxy__Clusters__user-cluster__Destinations__destination1__Address=http://user-api:8080
     ports:
       - "5000:8080"
     depends_on:
       - iam-api
       - experience-api
+      - user-api
       - notification-service
     networks:
       - connecting-network
@@ -154,6 +213,8 @@ volumes:
   iam_postgres_data:
     driver: local
   experience_postgres_data:
+    driver: local
+  user_postgres_data:
     driver: local
   rabbitmq_data:
     driver: local

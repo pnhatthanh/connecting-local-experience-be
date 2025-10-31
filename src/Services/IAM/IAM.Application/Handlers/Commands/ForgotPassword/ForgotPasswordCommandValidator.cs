@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace IAM.Application.Handlers.Commands.ForgotPasswordCommand
+namespace IAM.Application.Handlers.Commands.ForgotPassword
 {
     public class ForgotPasswordCommandValidator : AbstractValidator<ForgotPasswordCommand>
     {

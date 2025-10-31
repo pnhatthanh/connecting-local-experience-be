@@ -1,7 +1,7 @@
 using BuildingBlocks.Application.CQRS.Command;
 using IAM.Application.DTOs;
 
-namespace IAM.Application.Handlers.Commands.LoginCommand
+namespace IAM.Application.Handlers.Commands.Login
 {
     public class LoginCommand : ICommand<TokenResponse>
     {
