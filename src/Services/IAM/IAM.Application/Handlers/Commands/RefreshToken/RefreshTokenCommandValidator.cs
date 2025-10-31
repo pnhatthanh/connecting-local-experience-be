@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace IAM.Application.Handlers.Commands.RefreshTokenCommand
+namespace IAM.Application.Handlers.Commands.RefreshToken
 {
     public class RefreshTokenCommandValidator : AbstractValidator<RefreshTokenCommand>
     {

@@ -3,6 +3,7 @@ using BuildingBlocks.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
 using User.Application.Events;
 using User.Domain.Entities;
+using User.Domain.Enums;
 using User.Domain.Repositories;
 using User.Domain.Specifications;
 
@@ -39,7 +40,7 @@ namespace User.Application.EventHandlers
                     Id = @event.AccountId, 
                     Email = @event.Email,
                     FullName = @event.FullName,
-                    Role = Domain.Enums.UserRole.User,
+                    Role = UserRole.User,
                     CreatedAt = DateTime.UtcNow
                 };
 

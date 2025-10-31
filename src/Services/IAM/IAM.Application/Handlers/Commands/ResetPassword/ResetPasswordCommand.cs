@@ -1,6 +1,6 @@
 using BuildingBlocks.Application.CQRS.Command;
 
-namespace IAM.Application.Handlers.Commands.ResetPasswordCommand
+namespace IAM.Application.Handlers.Commands.ResetPassword
 {
     public class ResetPasswordCommand : ICommand<bool>
     {

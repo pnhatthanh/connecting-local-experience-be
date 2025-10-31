@@ -1,13 +1,12 @@
-using IAM.Application.Handlers.Commands.RegisterCommand;
-using IAM.Application.Handlers.Commands.LoginCommand;
 using IAM.Application.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using IAM.Application.Handlers.Commands.RefreshTokenCommand;
-using IAM.Application.Handlers.Commands.ConfirmEmailCommand;
-using IAM.Application.Handlers.Commands.ForgotPasswordCommand;
-using IAM.Application.Handlers.Commands.ResetPasswordCommand;
-
+using IAM.Application.Handlers.Commands.ConfirmEmail;
+using IAM.Application.Handlers.Commands.Register;
+using IAM.Application.Handlers.Commands.Login;
+using IAM.Application.Handlers.Commands.RefreshToken;
+using IAM.Application.Handlers.Commands.ForgotPassword;
+using IAM.Application.Handlers.Commands.ResetPassword;
 namespace IAM.Api.Controllers
 {
     [ApiController]
@@ -28,9 +27,14 @@ namespace IAM.Api.Controllers
             return Ok(result);
         }
 
-        [HttpPost("confirm-email")]
-        public async Task<ActionResult<bool>> ConfirmEmail([FromBody] ConfirmEmailCommand command)
+        [HttpGet("confirm-email")]
+        public async Task<ActionResult<bool>> ConfirmEmail([FromQuery] string email, [FromQuery] string token)
         {
+            var command = new ConfirmEmailCommand 
+            { 
+                Email = email, 
+                Token = token 
+            };
             var result = await _mediator.Send(command);
             return Ok(new { success = result, message = "Email confirmed successfully" });
         }
@@ -42,21 +46,21 @@ namespace IAM.Api.Controllers
             return Ok(result);
         }
 
-        [HttpPost("refresh-token")]
+        [HttpPost("refresh")]
         public async Task<ActionResult<TokenResponse>> RefreshToken([FromBody] RefreshTokenCommand command)
         {
             var result = await _mediator.Send(command);
             return Ok(result);
         }
 
-        [HttpPost("forgot-password")]
+        [HttpPost("password/forgot")]
         public async Task<ActionResult<bool>> ForgotPassword([FromBody] ForgotPasswordCommand command)
         {
             var result = await _mediator.Send(command);
             return Ok(new { success = result, message = "Password reset email has been sent" });
         }
 
-        [HttpPost("reset-password")]
+        [HttpPost("password/reset")]
         public async Task<ActionResult<bool>> ResetPassword([FromBody] ResetPasswordCommand command)
         {
             var result = await _mediator.Send(command);

@@ -6,7 +6,7 @@ using IAM.Application.Events;
 using IAM.Domain.Repositories;
 using IAM.Domain.Specifications;
 
-namespace IAM.Application.Handlers.Commands.ForgotPasswordCommand
+namespace IAM.Application.Handlers.Commands.ForgotPassword
 {
     public class ForgotPasswordCommandHandler : ICommandHandler<ForgotPasswordCommand, bool>
     {

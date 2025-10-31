@@ -11,5 +11,12 @@ namespace User.Application.Handlers.Commands.BecomeHost
         public string[]? SpokenLanguages { get; set; }
         public string? Location { get; set; }
         public IFormFile? Document { get; set; }
+        public string? Work { get; set; }
+        public string? Education { get; set; }
+        public string? FunFact { get; set; }
+        public string[]? TopicsOfInterest { get; set; }
+        public string? FacebookUrl { get; set; }
+        public string? InstagramUrl { get; set; }
+        public string? LinkedInUrl { get; set; }
     }
 }

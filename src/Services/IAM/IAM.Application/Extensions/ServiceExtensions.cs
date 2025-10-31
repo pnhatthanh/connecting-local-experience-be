@@ -1,8 +1,8 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using IAM.Application.Handlers.Commands.RegisterCommand;
 using BuildingBlocks.Application.Behaviors;
+using IAM.Application.Handlers.Commands.Register;
 
 namespace IAM.Application.Extensions
 {

@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace IAM.Application.Handlers.Commands.ResetPasswordCommand
+namespace IAM.Application.Handlers.Commands.ResetPassword
 {
     public class ResetPasswordCommandValidator : AbstractValidator<ResetPasswordCommand>
     {

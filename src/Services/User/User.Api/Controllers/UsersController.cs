@@ -9,6 +9,7 @@ using User.Application.Handlers.Commands.RemoveFavorite;
 using User.Application.Handlers.Commands.UpdateUserProfile;
 using User.Application.Handlers.Queries.GetUserById;
 using User.Application.Handlers.Queries.GetUserFavorites;
+using User.Application.Handlers.Queries.GetUsers;
 
 namespace User.Api.Controllers
 {
@@ -22,6 +23,27 @@ namespace User.Api.Controllers
         {
             _mediator = mediator;
         }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<PaginationResult<UserDto>>> GetUsers(
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? searchTerm = null,
+            [FromQuery] string? role = null,
+            CancellationToken cancellationToken = default)
+        {
+            var query = new GetUsersQuery
+            {
+                PageIndex = pageIndex,
+                PageSize = pageSize,
+                SearchTerm = searchTerm,
+                Role = role
+            };
+            var result = await _mediator.Send(query, cancellationToken);
+            return Ok(result);
+        }
+
         [HttpGet("{userId}")]
         public async Task<ActionResult<UserDto>> GetUserById([FromRoute] Guid userId, CancellationToken cancellationToken)
         {
@@ -44,22 +66,25 @@ namespace User.Api.Controllers
             CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(command, cancellationToken);
-            return CreatedAtAction(nameof(GetUserById), new { userId = result.UserId }, result);
+            return Ok(result);
         }
 
-        [HttpGet("{userId:guid}/favorites")]
+        [HttpGet("favorites")]
         [Authorize]
-        public async Task<IActionResult> GetUserFavorites([FromQuery] int pageIndex = 1,
-            [FromQuery] int pageSize = 10, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<PaginationResult<UserFavoriteExperienceDto>>> GetUserFavorites(
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10,
+            CancellationToken cancellationToken = default)
         {
-            var query = new GetUserFavoritesQuery 
-            { 
+            var query = new GetUserFavoritesQuery
+            {
                 PageIndex = pageIndex,
                 PageSize = pageSize
             };
             var result = await _mediator.Send(query, cancellationToken);
             return Ok(result);
         }
+
         [HttpPost("favorites/{experienceId}")]
         [Authorize]
         public async Task<ActionResult<bool>> AddFavorite([FromRoute]Guid experienceId, CancellationToken cancellationToken)
@@ -71,6 +96,7 @@ namespace User.Api.Controllers
             var result = await _mediator.Send(command, cancellationToken);
             return Ok(result);
         }
+
         [HttpDelete("favorites/{experienceId}")]
         [Authorize]
         public async Task<ActionResult<bool>> RemoveFavorite([FromRoute]Guid experienceId, CancellationToken cancellationToken)

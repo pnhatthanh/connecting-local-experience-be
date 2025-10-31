@@ -17,22 +17,6 @@ namespace Experience.Infrastructure.Data.Configurations
 
             entity.HasIndex(e => e.Name).IsUnique();
 
-            var now = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            entity.HasData(
-                new ExperienceCategoryEntity { Id = Guid.NewGuid(), Name = "Arts", CreatedAt = now, UpdatedAt = now },
-                new ExperienceCategoryEntity { Id = Guid.NewGuid(), Name = "Cooking", CreatedAt = now, UpdatedAt = now },
-                new ExperienceCategoryEntity { Id = Guid.NewGuid(), Name = "Food Drink", CreatedAt = now, UpdatedAt = now },
-                new ExperienceCategoryEntity { Id = Guid.NewGuid(), Name = "Nature", CreatedAt = now, UpdatedAt = now },
-                new ExperienceCategoryEntity { Id = Guid.NewGuid(), Name = "Sports", CreatedAt = now, UpdatedAt = now },
-                new ExperienceCategoryEntity { Id = Guid.NewGuid(), Name = "History", CreatedAt = now, UpdatedAt = now },
-                new ExperienceCategoryEntity { Id = Guid.NewGuid(), Name = "Music", CreatedAt = now, UpdatedAt = now },
-                new ExperienceCategoryEntity { Id = Guid.NewGuid(), Name = "Nightlife", CreatedAt = now, UpdatedAt = now },
-                new ExperienceCategoryEntity { Id = Guid.NewGuid(), Name = "Wellness", CreatedAt = now, UpdatedAt = now },
-                new ExperienceCategoryEntity { Id = Guid.NewGuid(), Name = "Social Impact", CreatedAt = now, UpdatedAt = now },
-                new ExperienceCategoryEntity { Id = Guid.NewGuid(), Name = "Photography", CreatedAt = now, UpdatedAt = now },
-                new ExperienceCategoryEntity { Id = Guid.NewGuid(), Name = "Animal", CreatedAt = now, UpdatedAt = now },
-                new ExperienceCategoryEntity { Id = Guid.NewGuid(), Name = "Entertainment", CreatedAt = now, UpdatedAt = now }
-            );
         }
     }
 }

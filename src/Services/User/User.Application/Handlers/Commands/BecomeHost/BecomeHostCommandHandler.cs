@@ -2,6 +2,7 @@ using BuildingBlocks.Application.CQRS.Command;
 using BuildingBlocks.Application.EventBus.Abstractions;
 using BuildingBlocks.Domain.Exceptions;
 using BuildingBlocks.Domain.Interfaces;
+using MapsterMapper;
 using Microsoft.Extensions.Logging;
 using User.Application.DTOs;
 using User.Application.Events;
@@ -21,14 +22,16 @@ namespace User.Application.Handlers.Commands.BecomeHost
         private readonly IEventBus _eventBus;
         private readonly IPhotoService _photoService;
         private readonly ILogger<BecomeHostCommandHandler> _logger;
+        private readonly IMapper _mapper;
 
         public BecomeHostCommandHandler(
-            IUserRepository userRepository,
+            IUserRepository userRepository, 
             IHostProfileRepository hostProfileRepository,
-            IUnitOfWork unitOfWork,
-            IEventBus eventBus,
-            IPhotoService photoService,
-            ILogger<BecomeHostCommandHandler> logger)
+            IUnitOfWork unitOfWork, 
+            IPhotoService photoService, 
+            IEventBus eventBus, 
+            ILogger<BecomeHostCommandHandler> logger,
+            IMapper mapper)
         {
             _userRepository = userRepository;
             _hostProfileRepository = hostProfileRepository;
@@ -36,6 +39,7 @@ namespace User.Application.Handlers.Commands.BecomeHost
             _eventBus = eventBus;
             _photoService = photoService;
             _logger = logger;
+            _mapper = mapper;
         }
 
         public async Task<HostProfileDto> Handle(BecomeHostCommand request, CancellationToken cancellationToken)
@@ -63,8 +67,13 @@ namespace User.Application.Handlers.Commands.BecomeHost
                 DocumentUrl = documentUrl,
                 VerifyStatus = VerifyStatus.Pending,
                 IsVerified = false,
-                ResponseRate = 0,
-                TotalExperiences = 0,
+                Work = request.Work,
+                Education = request.Education,
+                FunFact = request.FunFact,
+                TopicsOfInterest = request.TopicsOfInterest ?? [],
+                FacebookUrl = request.FacebookUrl,
+                InstagramUrl = request.InstagramUrl,
+                LinkedInUrl = request.LinkedInUrl,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -83,23 +92,7 @@ namespace User.Application.Handlers.Commands.BecomeHost
 
             await _eventBus.PublishAsync(hostProfileSubmittedEvent, cancellationToken);
 
-            return new HostProfileDto
-            {
-                Id = hostProfile.Id,
-                UserId = hostProfile.UserId,
-                Bio = hostProfile.Bio,
-                SpokenLanguages = hostProfile.SpokenLanguages,
-                Location = hostProfile.Location,
-                IsVerified = hostProfile.IsVerified,
-                VerifyStatus = hostProfile.VerifyStatus,
-                DocumentUrl = hostProfile.DocumentUrl,
-                ResponseRate = hostProfile.ResponseRate,
-                ResponseTime = hostProfile.ResponseTime,
-                TotalExperiences = hostProfile.TotalExperiences,
-                RatingAvg = hostProfile.RatingAvg,
-                CreatedAt = hostProfile.CreatedAt,
-                UpdatedAt = hostProfile.UpdatedAt
-            };
+            return _mapper.Map<HostProfileDto>(hostProfile);
         }
     }
 }

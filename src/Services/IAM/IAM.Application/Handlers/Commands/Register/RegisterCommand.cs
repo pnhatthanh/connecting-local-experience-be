@@ -1,7 +1,7 @@
 using BuildingBlocks.Application.CQRS.Command;
 using IAM.Application.DTOs;
 
-namespace IAM.Application.Handlers.Commands.RegisterCommand
+namespace IAM.Application.Handlers.Commands.Register
 {
     public class RegisterCommand : ICommand<RegisterResponse>
     {

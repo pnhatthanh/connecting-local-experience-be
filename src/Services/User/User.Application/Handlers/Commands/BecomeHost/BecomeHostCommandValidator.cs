@@ -39,6 +39,37 @@ namespace User.Application.Handlers.Commands.BecomeHost
                 .Must(languages => languages == null || languages.Length > 0)
                 .WithMessage("At least one spoken language is required")
                 .When(x => x.SpokenLanguages != null);
+
+            RuleFor(x => x.Work)
+                .MaximumLength(200).WithMessage("Work cannot exceed 200 characters")
+                .When(x => !string.IsNullOrWhiteSpace(x.Work));
+
+            RuleFor(x => x.Education)
+                .MaximumLength(200).WithMessage("Education cannot exceed 200 characters")
+                .When(x => !string.IsNullOrWhiteSpace(x.Education));
+
+            RuleFor(x => x.FunFact)
+                .MaximumLength(500).WithMessage("Fun fact cannot exceed 500 characters")
+                .When(x => !string.IsNullOrWhiteSpace(x.FunFact));
+
+            RuleFor(x => x.FacebookUrl)
+                .Must(BeAValidUrl).WithMessage("Facebook URL is not valid")
+                .When(x => !string.IsNullOrWhiteSpace(x.FacebookUrl));
+
+            RuleFor(x => x.InstagramUrl)
+                .Must(BeAValidUrl).WithMessage("Instagram URL is not valid")
+                .When(x => !string.IsNullOrWhiteSpace(x.InstagramUrl));
+
+            RuleFor(x => x.LinkedInUrl)
+                .Must(BeAValidUrl).WithMessage("LinkedIn URL is not valid")
+                .When(x => !string.IsNullOrWhiteSpace(x.LinkedInUrl));
+        }
+
+        private bool BeAValidUrl(string? url)
+        {
+            if (string.IsNullOrWhiteSpace(url)) return true;
+            return Uri.TryCreate(url, UriKind.Absolute, out var uriResult)
+                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
         }
     }
 }

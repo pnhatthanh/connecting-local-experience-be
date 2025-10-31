@@ -2,11 +2,13 @@ using BuildingBlocks.Application.CQRS.Query;
 using BuildingBlocks.Application.Dtos;
 using User.Application.DTOs;
 
-namespace User.Application.Handlers.Queries.GetUserFavorites
+namespace User.Application.Handlers.Queries.GetUsers
 {
-    public class GetUserFavoritesQuery : IQuery<PaginationResult<UserFavoriteExperienceDto>>
+    public class GetUsersQuery : IQuery<PaginationResult<UserDto>>
     {
         public int PageIndex { get; set; } = 1;
         public int PageSize { get; set; } = 10;
+        public string? SearchTerm { get; set; }
+        public string? Role { get; set; }
     }
 }

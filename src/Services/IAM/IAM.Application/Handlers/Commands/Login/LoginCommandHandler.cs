@@ -8,7 +8,7 @@ using IAM.Domain.Repositories;
 using IAM.Domain.Specifications;
 using MediatR;
 
-namespace IAM.Application.Handlers.Commands.LoginCommand
+namespace IAM.Application.Handlers.Commands.Login
 {
     public class LoginCommandHandler : ICommandHandler<LoginCommand, TokenResponse>
     {

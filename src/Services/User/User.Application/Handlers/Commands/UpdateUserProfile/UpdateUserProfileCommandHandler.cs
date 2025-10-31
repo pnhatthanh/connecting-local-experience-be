@@ -2,6 +2,7 @@ using BuildingBlocks.Application.CQRS.Command;
 using BuildingBlocks.Application.Interfaces;
 using BuildingBlocks.Domain.Exceptions;
 using BuildingBlocks.Domain.Interfaces;
+using MapsterMapper;
 using User.Application.DTOs;
 using User.Application.Interfaces;
 using User.Domain.Enums;
@@ -16,14 +17,16 @@ namespace User.Application.Handlers.Commands.UpdateUserProfile
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPhotoService _photoService;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IMapper _mapper;
 
-        public UpdateUserProfileCommandHandler(IUserRepository userRepository,
-            IUnitOfWork unitOfWork, IPhotoService photoService, ICurrentUserService currentUserService)
+        public UpdateUserProfileCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork, 
+            IPhotoService photoService, ICurrentUserService currentUserService, IMapper mapper)
         {
             _userRepository = userRepository;
             _unitOfWork = unitOfWork;
             _photoService = photoService;
             _currentUserService = currentUserService;
+            _mapper = mapper;
         }
 
         public async Task<UserDto> Handle(UpdateUserProfileCommand request, CancellationToken cancellationToken)
@@ -31,6 +34,7 @@ namespace User.Application.Handlers.Commands.UpdateUserProfile
             var userSpec = new UserByIdSpecification(_currentUserService.UserId);
             var user = await _userRepository.GetBySpecAsync(userSpec)
                 ?? throw new BadRequestException($"User with Id {_currentUserService.UserId} not found");
+            
             user.PhoneNumber = request.PhoneNumber;
             user.FullName = request.FullName ?? user.FullName;
             user.DateOfBirth = request.DateOfBirth;
@@ -39,28 +43,14 @@ namespace User.Application.Handlers.Commands.UpdateUserProfile
             if (request.Avatar != null)
             {
                 if (!string.IsNullOrWhiteSpace(user.AvatarUrl))
-                {
                     await _photoService.DeleteImageAsync(user.AvatarUrl);
-                }
                 user.AvatarUrl = await _photoService.UploadImageAsync(request.Avatar, "users/avatars");
             }  
             user.UpdatedAt = DateTime.UtcNow;
             _userRepository.Update(user);
             await _unitOfWork.SaveChangeAsync();
-            return new UserDto
-            {
-                Id = user.Id,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                FullName = user.FullName,
-                DateOfBirth = user.DateOfBirth,
-                Gender = user.Gender,
-                AvatarUrl = user.AvatarUrl,
-                Country = user.Country,
-                Role = user.Role,
-                CreatedAt = user.CreatedAt,
-                UpdatedAt = user.UpdatedAt
-            };
+            
+            return _mapper.Map<UserDto>(user);
         }
     }
 }
