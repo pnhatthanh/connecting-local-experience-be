@@ -47,7 +47,7 @@ namespace BuildingBlocks.Presentation.Middlewares
                     errorResponse.Message = "Validation failed";
                     errorResponse.Errors = fluentValidationException.Errors.ToDictionary(
                         error => error.Key, 
-                        error => error.Value.ToList<string>());
+                        error => error.Value.ToList());
                     break;
                 case BaseException customException:
                     context.Response.StatusCode = (int)customException.StatusCode;

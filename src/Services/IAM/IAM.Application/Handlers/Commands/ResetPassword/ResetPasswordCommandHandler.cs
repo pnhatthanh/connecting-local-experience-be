@@ -32,7 +32,7 @@ namespace IAM.Application.Handlers.Commands.ResetPassword
                 throw new BadRequestException("Invalid email or token");
             if (account.PasswordResetTokenExpiry == null || account.PasswordResetTokenExpiry < DateTime.UtcNow)
                 throw new BadRequestException("Token has expired");
-            account.PasswordHash = _passwordHasher.HashPassword(request.NewPassword);
+            account.PasswordHash = _passwordHasher.HashPassword(request.Password);
             account.PasswordResetToken = null;
             account.PasswordResetTokenExpiry = null;
 

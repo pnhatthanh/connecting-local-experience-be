@@ -29,7 +29,9 @@ namespace IAM.Application.Handlers.Commands.ForgotPassword
             var emailSpec = new AccountEmailSpecification(request.Email.ToLowerInvariant());
             var account = await _accountRepository.GetBySpecAsync(emailSpec)
                 ?? throw new BadRequestException("Email not found");
-            var resetToken = Guid.NewGuid().ToString("N");
+            
+            var random = new Random();
+            var resetToken = random.Next(100000, 999999).ToString(); 
             account.PasswordResetToken = resetToken;
             account.PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1); 
             _accountRepository.Update(account);

@@ -66,7 +66,7 @@ namespace User.Application.Handlers.Commands.VerifyHost
 
             await _eventBus.PublishAsync(hostProfileVerifiedEvent, cancellationToken);
 
-            return _mapper.Map<HostProfileDto>(userProfile.HostProfile);
+            return _mapper.Map<HostProfileDto>(userProfile);
         }
     }
 }

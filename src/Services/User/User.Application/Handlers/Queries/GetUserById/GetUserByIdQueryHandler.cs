@@ -20,9 +20,8 @@ namespace User.Application.Handlers.Queries.GetUserById
         public async Task<UserDto?> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
         {
             var userSpec = new UserByIdSpecification(request.UserId);
-            var user = await _userRepository.GetBySpecAsync(userSpec)
+            var user = await _userRepository.GetBySpecAsync(userSpec, user => user.HostProfile!)
                 ?? throw new BadRequestException($"User with Id {request.UserId} not found");
-
             return _mapper.Map<UserDto>(user);
         }
     }

@@ -39,6 +39,11 @@ namespace User.Infrastructure.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("NOW()");
 
+                    b.Property<string>("DesiredHostingStyle")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("desired_hosting_style");
+
                     b.Property<string>("DocumentUrl")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
@@ -60,8 +65,7 @@ namespace User.Infrastructure.Migrations
                         .HasColumnName("fun_fact");
 
                     b.Property<DateTime?>("HostingSince")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("hosting_since");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("InstagramUrl")
                         .HasMaxLength(500)
@@ -69,10 +73,7 @@ namespace User.Infrastructure.Migrations
                         .HasColumnName("instagram_url");
 
                     b.Property<bool>("IsVerified")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_verified");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("LinkedInUrl")
                         .HasMaxLength(500)
@@ -80,24 +81,22 @@ namespace User.Infrastructure.Migrations
                         .HasColumnName("linkedin_url");
 
                     b.Property<string>("Location")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("location");
+                        .HasColumnType("text");
 
                     b.Property<decimal?>("RatingAvg")
                         .HasColumnType("DECIMAL(3,2)")
                         .HasColumnName("rating_avg");
 
-                    b.Property<string>("ResponseTime")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                    b.Property<int?>("ResponseTime")
+                        .HasColumnType("integer")
                         .HasColumnName("response_time");
 
-                    b.PrimitiveCollection<string[]>("SpokenLanguages")
+                    b.Property<string>("SpokenLanguages")
+                        .IsRequired()
                         .HasColumnType("jsonb")
                         .HasColumnName("spoken_languages");
 
-                    b.PrimitiveCollection<string[]>("TopicsOfInterest")
+                    b.Property<string>("TopicsOfInterest")
                         .IsRequired()
                         .HasColumnType("jsonb")
                         .HasColumnName("topics_of_interest");

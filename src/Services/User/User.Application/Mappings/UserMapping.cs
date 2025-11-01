@@ -15,7 +15,12 @@ namespace User.Application.Mappings
                 .Map(dest => dest.AvatarUrl, src => src.AvatarUrl)
                 .Map(dest => dest.DateOfBirth, src => src.DateOfBirth)
                 .Map(dest => dest.Country, src => src.Country)
-                .Map(dest => dest.Gender, src => src.Gender.ToString());
+                .Map(dest => dest.Gender, src => src.Gender.ToString())
+                .Map(dest => dest.PhoneNumber, src => src.PhoneNumber)
+                .Map(dest => dest.Role, src => src.Role.ToString())
+                .Map(dest => dest.CreatedAt, src => src.CreatedAt)
+                .Map(dest => dest.UpdatedAt, src => src.UpdatedAt)
+                .Map(dest => dest.HostProfile, src => src.HostProfile ?? null);
         }
     }
 }
