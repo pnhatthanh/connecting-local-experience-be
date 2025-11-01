@@ -13,7 +13,7 @@ namespace IAM.Application.Handlers.Commands.ResetPassword
             RuleFor(x => x.Token)
                 .NotEmpty().WithMessage("Token is required");
 
-            RuleFor(x => x.NewPassword)
+            RuleFor(x => x.Password)
                 .NotEmpty().WithMessage("Password is required")
                 .MinimumLength(8).WithMessage("Password must be at least 8 characters")
                 .MaximumLength(100).WithMessage("Password cannot exceed 100 characters")
@@ -22,7 +22,7 @@ namespace IAM.Application.Handlers.Commands.ResetPassword
 
             RuleFor(x => x.ConfirmPassword)
                 .NotEmpty().WithMessage("Confirm password is required")
-                .Equal(x => x.NewPassword).WithMessage("Passwords do not match");
+                .Equal(x => x.Password).WithMessage("Passwords do not match");
         }
     }
 }

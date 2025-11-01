@@ -9,10 +9,6 @@ namespace User.Application.Mappings
         public void Register(TypeAdapterConfig config)
         {
             config.NewConfig<UserEntity, HostProfileDto>()
-                .Map(dest => dest.Id, src => src.Id)
-                .Map(dest => dest.FullName, src => src.FullName)
-                .Map(dest => dest.Email, src => src.Email)
-                .Map(dest => dest.AvatarUrl, src => src.AvatarUrl)
                 .Map(dest => dest.Bio, src => src.HostProfile != null ? src.HostProfile.Bio : null)
                 .Map(dest => dest.SpokenLanguages, src => src.HostProfile != null ? src.HostProfile.SpokenLanguages : null)
                 .Map(dest => dest.Location, src => src.HostProfile != null ? src.HostProfile.Location : null)
@@ -28,7 +24,7 @@ namespace User.Application.Mappings
                 .Map(dest => dest.TotalReviews, src => src.HostProfile != null ? src.HostProfile.TotalReviews : 0)
                 .Map(dest => dest.HostingSince, src => src.HostProfile != null ? src.HostProfile.HostingSince : null)
                 .Map(dest => dest.IsVerified, src => src.HostProfile != null ? src.HostProfile.IsVerified : false)
-                .Map(dest => dest.ResponseTime, src => src.HostProfile != null ? src.HostProfile.ResponseTime : null);
+                .Map(dest => dest.ResponseTime, src => src.HostProfile != null ? src.HostProfile.ResponseTime.ToString() : null);
         }
     }
 }

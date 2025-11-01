@@ -28,8 +28,8 @@ public static class SeedDataExtension
                     new RoleEntity
                     {
                         Id = Guid.NewGuid(),
-                        Name = AccountRole.Provider,
-                        Description = "Experience provider role",
+                        Name = AccountRole.Host,
+                        Description = "Experience host role",
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow
                     },

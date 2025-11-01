@@ -7,7 +7,7 @@ namespace User.Domain.Entities
     {
         public Guid UserId { get; set; }
         public string? Bio { get; set; }
-        public string[]? SpokenLanguages { get; set; }
+        public string[] SpokenLanguages { get; set; } = [];
         public string? Location { get; set; }
         public DateTime? HostingSince { get; set; }
         public bool IsVerified { get; set; } = false;
@@ -15,7 +15,7 @@ namespace User.Domain.Entities
         public string? DocumentUrl { get; set; } //Passport images
         public string? VerifyReason { get; set; }
         public DateTime? VerifiedAt { get; set; }
-        public string? ResponseTime { get; set; } // e.g., "within an hour", "within a few hours"
+        public ResponseTime? ResponseTime { get; set; } // e.g., "within an hour", "within a few hours"
         public int TotalExperiences { get; set; } = 0;
         public int TotalBookings { get; set; } = 0;
         public int TotalReviews { get; set; } = 0;
@@ -24,6 +24,7 @@ namespace User.Domain.Entities
         public string? Education { get; set; }
         public string? FunFact { get; set; }
         public string[] TopicsOfInterest { get; set; } = [];
+        public string? DesiredHostingStyle { get; set; }
         public string? FacebookUrl { get; set; }
         public string? InstagramUrl { get; set; }
         public string? LinkedInUrl { get; set; }
