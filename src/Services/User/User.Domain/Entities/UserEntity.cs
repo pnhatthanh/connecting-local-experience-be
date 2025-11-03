@@ -13,6 +13,7 @@ namespace User.Domain.Entities
         public string? AvatarUrl { get; set; }
         public string? Country { get; set; }
         public UserRole Role { get; set; } = UserRole.User;
+        public UserStatus Status { get; set; } = UserStatus.Active;
         public virtual HostProfileEntity? HostProfile { get; set; }
         public virtual ICollection<UserFavoriteExperienceEntity> FavoriteExperiences { get; set; } = new List<UserFavoriteExperienceEntity>();
     }

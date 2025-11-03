@@ -1,6 +1,5 @@
 using BuildingBlocks.Application.CQRS.Command;
 using User.Application.DTOs;
-using User.Domain.Enums;
 
 namespace User.Application.Handlers.Commands.VerifyHost
 {

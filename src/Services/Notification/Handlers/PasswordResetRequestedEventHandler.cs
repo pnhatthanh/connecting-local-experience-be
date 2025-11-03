@@ -31,13 +31,10 @@ public class PasswordResetRequestedEventHandler : IIntegrationEventHandler<Passw
                 @event.Email, 
                 @event.ResetToken);
 
-            var resetUrl = _emailSettings.ResetUrlTemplate
-                .Replace("{token}", @event.ResetToken);
-
             await _emailService.SendPasswordResetAsync(
                 @event.Email,
                 @event.FullName,
-                resetUrl);
+                @event.ResetToken);
 
             _logger.LogInformation(
                 "Password reset email sent successfully to {Email}", 

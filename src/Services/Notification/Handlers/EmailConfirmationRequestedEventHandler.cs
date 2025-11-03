@@ -31,9 +31,17 @@ public class EmailConfirmationRequestedEventHandler : IIntegrationEventHandler<E
                 @event.Email, 
                 @event.ConfirmationToken);
 
+            _logger.LogInformation(
+                "VerificationUrlTemplate: {Template}", 
+                _emailSettings.VerificationUrlTemplate);
+
             var confirmationUrl = _emailSettings.VerificationUrlTemplate
                 .Replace("{email}", Uri.EscapeDataString(@event.Email))
                 .Replace("{token}", @event.ConfirmationToken);
+
+            _logger.LogInformation(
+                "Generated confirmation URL: {ConfirmationUrl}", 
+                confirmationUrl);
 
             await _emailService.SendEmailConfirmationAsync(
                 @event.Email,

@@ -146,6 +146,30 @@ namespace Experience.Application.Handlers.Commands.UpdateExperience
                 .Must(timeSlots => !HasOverlappingTimeSlots(timeSlots))
                 .When(x => x.TimeSlots != null && x.TimeSlots.Any())
                 .WithMessage("Time slots cannot overlap with each other.");
+            
+            RuleFor(x => x.MediaFiles)
+                .Must(files => files == null || files.Count <= 10)
+                .WithMessage("Maximum 10 media files are allowed.");
+            
+            When(x => x.Itineraries != null && x.Itineraries.Any(), () =>
+            {
+                RuleForEach(x => x.Itineraries).ChildRules(itinerary =>
+                {
+                    itinerary.RuleFor(x => x.StepNumber)
+                        .GreaterThan(0)
+                        .WithMessage("Step number must be greater than 0.");
+                    
+                    itinerary.RuleFor(x => x.Title)
+                        .NotEmpty()
+                        .WithMessage("Itinerary title is required.")
+                        .MaximumLength(255)
+                        .WithMessage("Itinerary title must not exceed 255 characters.");
+                    
+                    itinerary.RuleFor(x => x.Description)
+                        .NotEmpty()
+                        .WithMessage("Itinerary description is required.");
+                });
+            });
         }
         
         private bool HasOverlappingTimeSlots(List<TimeSlotDto> timeSlots)

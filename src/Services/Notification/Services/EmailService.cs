@@ -58,14 +58,14 @@ public class EmailService : IEmailService
     public async Task SendEmailConfirmationAsync(string to, string fullName, string confirmationUrl)
     {
         var subject = "Confirm Your Email - Connecting Experience";
-        var htmlBody = _templateService.GetEmailConfirmationTemplate(fullName, confirmationUrl);
+        var htmlBody = _templateService.GetEmailConfirmationTemplate(fullName, to, confirmationUrl);
         await SendEmailAsync(to, subject, htmlBody);
     }
 
-    public async Task SendPasswordResetAsync(string to, string fullName, string resetUrl)
+    public async Task SendPasswordResetAsync(string to, string fullName, string resetCode)
     {
         var subject = "Reset Your Password - Connecting Experience";
-        var htmlBody = _templateService.GetPasswordResetTemplate(fullName, resetUrl);
+        var htmlBody = _templateService.GetPasswordResetTemplate(fullName, to, resetCode);
         await SendEmailAsync(to, subject, htmlBody);
     }
 }

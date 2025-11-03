@@ -7,6 +7,8 @@ using IAM.Application.Handlers.Commands.Login;
 using IAM.Application.Handlers.Commands.RefreshToken;
 using IAM.Application.Handlers.Commands.ForgotPassword;
 using IAM.Application.Handlers.Commands.ResetPassword;
+using IAM.Application.Handlers.Commands.UpdateAccountStatus;
+using Microsoft.AspNetCore.Authorization;
 namespace IAM.Api.Controllers
 {
     [ApiController]
@@ -66,5 +68,28 @@ namespace IAM.Api.Controllers
             var result = await _mediator.Send(command);
             return Ok(new { success = result, message = "Password has been reset successfully" });
         }
+
+        [HttpPatch("accounts/{accountId}/status")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<bool>> UpdateAccountStatus(
+            [FromRoute] Guid accountId,
+            [FromBody] UpdateAccountStatusRequest request)
+        {
+            var command = new UpdateAccountStatusCommand 
+            { 
+                AccountId = accountId,
+                IsActive = request.IsActive
+            };
+            var result = await _mediator.Send(command);
+            var message = request.IsActive 
+                ? "Account has been activated successfully" 
+                : "Account has been deactivated successfully";
+            return Ok(new { success = result, message });
+        }
+    }
+
+    public class UpdateAccountStatusRequest
+    {
+        public bool IsActive { get; set; }
     }
 }

@@ -58,6 +58,20 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ConnectionStrings__DefaultConnection=Host=experience-db;Database=${EXPERIENCE_POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=${RABBITMQ_USER}
+      - RabbitMQ__Password=${RABBITMQ_PASSWORD}
+      - RabbitMQ__VirtualHost=/
+      - RabbitMQ__ExchangeName=connecting_events
+      - RabbitMQ__QueueName=user_service_queue
+      - Jwt__SecretKey=${JWT_SECRET_KEY}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
+      - Jwt__ExpirationMinutes=${JWT_EXPIRATION_MINUTES}
+      - Cloudinary__CloudName=${CLOUDINARY_CLOUD_NAME}
+      - Cloudinary__ApiKey=${CLOUDINARY_API_KEY}
+      - Cloudinary__ApiSecret=${CLOUDINARY_API_SECRET}
     ports:
       - "5002:8080"
     depends_on:
@@ -159,7 +173,7 @@ services:
       - Smtp__Username=${SMTP_USERNAME}
       - Smtp__Password=${SMTP_PASSWORD}
       - Smtp__FromAddress=${SMTP_FROM_ADDRESS}
-      - Email__VerificationUrlTemplate=${FRONTEND_URL}/auth/verify-email?token={token}
+      - Email__VerificationUrlTemplate=${FRONTEND_URL}/auth/verify-email?email={email}&token={token}
       - Email__ResetUrlTemplate=${FRONTEND_URL}/auth/reset-password?token={token}
     depends_on:
       rabbitmq:
