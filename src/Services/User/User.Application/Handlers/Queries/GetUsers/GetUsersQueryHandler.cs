@@ -7,7 +7,7 @@ using User.Domain.Specifications;
 
 namespace User.Application.Handlers.Queries.GetUsers
 {
-    public class GetUsersQueryHandler : IQueryHandler<GetUsersQuery, PaginationResult<UserDto>>
+    public class GetUsersQueryHandler : IQueryHandler<GetUsersQuery, PaginationResult<UserSummaryDto>>
     {
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
@@ -18,9 +18,9 @@ namespace User.Application.Handlers.Queries.GetUsers
             _mapper = mapper;
         }
 
-        public async Task<PaginationResult<UserDto>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
+        public async Task<PaginationResult<UserSummaryDto>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
         {
-            var spec = new UserFilterSpecification(request.SearchTerm, request.Role);
+            var spec = new UserFilterSpecification(request.SearchTerm, request.Role, request.Status);
             
             var users = await _userRepository.GetPagedListAsync(
                 spec,
@@ -29,9 +29,9 @@ namespace User.Application.Handlers.Queries.GetUsers
 
             var totalCount = await _userRepository.CountAsync(spec);
 
-            var dtos = _mapper.Map<List<UserDto>>(users);
+            var dtos = _mapper.Map<List<UserSummaryDto>>(users);
 
-            return new PaginationResult<UserDto>
+            return new PaginationResult<UserSummaryDto>
             {
                 Data = dtos,
                 TotalCount = totalCount,

@@ -8,6 +8,7 @@ using Experience.Application.Handlers.Queries.GetExperiences;
 using Experience.Application.Handlers.Queries.GetExperiencesByHost;
 using Experience.Application.Handlers.Queries.GetNearbyExperiences;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Experience.Api.Controllers
@@ -24,22 +25,25 @@ namespace Experience.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ExperienceDto>> CreateExperience([FromBody] CreateExperienceCommand command)
+        [Authorize(Roles = "Host")]
+        public async Task<ActionResult<ExperienceDto>> CreateExperience([FromForm] CreateExperienceCommand command)
         {
             var result = await _mediator.Send(command);
             return CreatedAtAction(nameof(GetExperience), new { id = result.Id }, result);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<ExperienceDto>> UpdateExperience(Guid id, [FromBody] UpdateExperienceCommand command)
+        [Authorize(Roles = "Host")]
+        public async Task<ActionResult<ExperienceDto>> UpdateExperience(Guid id, [FromForm] UpdateExperienceCommand command)
         {
             var result = await _mediator.Send(command with { ExperienceId = id });
             return Ok(result);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ExperienceDto>> GetExperience([FromRoute] GetExperienceQuery query)
+        public async Task<ActionResult<ExperienceDto>> GetExperience([FromRoute] Guid id)
         {
+            var query = new GetExperienceQuery(id);
             var result = await _mediator.Send(query);
             if (result == null)
                 return NotFound();
@@ -91,6 +95,7 @@ namespace Experience.Api.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Host")]
         public async Task<ActionResult<bool>> DeleteExperience([FromRoute] Guid id)
         {
             var result = await _mediator.Send(new DeleteExperienceCommand(id));

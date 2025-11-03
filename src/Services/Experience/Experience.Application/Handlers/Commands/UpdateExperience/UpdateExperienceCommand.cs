@@ -1,5 +1,6 @@
 using BuildingBlocks.Application.CQRS.Command;
 using Experience.Application.Dtos;
+using Microsoft.AspNetCore.Http;
 
 namespace Experience.Application.Handlers.Commands.UpdateExperience
 {
@@ -27,6 +28,15 @@ namespace Experience.Application.Handlers.Commands.UpdateExperience
         List<DayOfWeek> DaysOfWeek,
         List<TimeSlotDto> TimeSlots,
         DateTime StartDate,
-        DateTime? EndDate
+        DateTime? EndDate,
+        List<IFormFile>? MediaFiles,
+        List<UpdateExperienceItineraryDto>? Itineraries
     ) : ICommand<ExperienceDto>;
+    
+    public record UpdateExperienceItineraryDto(
+        int StepNumber,
+        IFormFile? PhotoFile,
+        string Title,
+        string Description
+    );
 }

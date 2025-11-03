@@ -26,6 +26,7 @@ namespace User.Application.Extensions
             services.AddScoped<IMapper, ServiceMapper>();
 
             services.AddScoped<IIntegrationEventHandler<AccountCreatedEvent>, AccountCreatedEventHandler>();
+            services.AddScoped<IIntegrationEventHandler<AccountStatusChangedEvent>, AccountStatusChangedEventHandler>();
             return services;
         }
         
@@ -33,6 +34,7 @@ namespace User.Application.Extensions
         {
             var eventBus = serviceProvider.GetRequiredService<IEventBus>();
             await eventBus.SubscribeAsync<AccountCreatedEvent, IIntegrationEventHandler<AccountCreatedEvent>>();
+            await eventBus.SubscribeAsync<AccountStatusChangedEvent, IIntegrationEventHandler<AccountStatusChangedEvent>>();
             return serviceProvider;
         }
     }

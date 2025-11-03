@@ -4,6 +4,5 @@ namespace User.Domain.Enums
     {
         Male,
         Female,
-        Other
     }
 }

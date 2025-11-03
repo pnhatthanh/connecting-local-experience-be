@@ -11,20 +11,22 @@ public class TemplateService : ITemplateService
         _logger = logger;
     }
 
-    public string GetEmailConfirmationTemplate(string fullName, string confirmationUrl)
+    public string GetEmailConfirmationTemplate(string fullName, string email, string confirmationUrl)
     {
         var template = LoadTemplate("EmailConfirmation.html");
         return template
             .Replace("{{FullName}}", fullName)
+            .Replace("{{Email}}", email)
             .Replace("{{ConfirmationUrl}}", confirmationUrl);
     }
 
-    public string GetPasswordResetTemplate(string fullName, string resetUrl)
+    public string GetPasswordResetTemplate(string fullName, string email, string resetCode)
     {
         var template = LoadTemplate("PasswordReset.html");
         return template
             .Replace("{{FullName}}", fullName)
-            .Replace("{{ResetUrl}}", resetUrl);
+            .Replace("{{Email}}", email)
+            .Replace("{{ResetCode}}", resetCode);
     }
 
     private string LoadTemplate(string templateName)

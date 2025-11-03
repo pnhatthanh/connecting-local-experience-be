@@ -32,6 +32,13 @@ namespace User.Infrastructure.Data.Configurations
                     v => Enum.Parse<UserRole>(v, true)
                 )
                 .HasDefaultValue(UserRole.User);
+            builder.Property(e => e.Status)
+                .HasColumnName("status")
+                .HasConversion(
+                    v => v.ToString().ToLower(),
+                    v => Enum.Parse<UserStatus>(v, true)
+                )
+                .HasDefaultValue(UserStatus.Active);
             builder.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("NOW()");
             builder.Property(e => e.UpdatedAt).HasColumnName("updated_at");
 

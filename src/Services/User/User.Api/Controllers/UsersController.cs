@@ -7,6 +7,7 @@ using User.Application.Handlers.Commands.AddFavorite;
 using User.Application.Handlers.Commands.BecomeHost;
 using User.Application.Handlers.Commands.RemoveFavorite;
 using User.Application.Handlers.Commands.UpdateUserProfile;
+using User.Application.Handlers.Queries.GetMyProfile;
 using User.Application.Handlers.Queries.GetUserById;
 using User.Application.Handlers.Queries.GetUserFavorites;
 using User.Application.Handlers.Queries.GetUsers;
@@ -51,6 +52,16 @@ namespace User.Api.Controllers
             var result = await _mediator.Send(query, cancellationToken);
             return Ok(result);
         }
+
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<ActionResult<UserDto>> GetMyProfile(CancellationToken cancellationToken)
+        {
+            var query = new GetMyProfileQuery();
+            var result = await _mediator.Send(query, cancellationToken);
+            return Ok(result);
+        }
+
         [HttpPut]
         [Authorize]
         public async Task<ActionResult<UserDto>> UpdateProfile([FromForm] UpdateUserProfileCommand command,

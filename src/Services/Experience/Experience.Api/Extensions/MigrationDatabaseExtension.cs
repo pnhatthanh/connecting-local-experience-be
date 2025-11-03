@@ -7,11 +7,20 @@ public static class MigrationDatabaseExtension
 {
     public static async Task<IServiceProvider> ApplyMigrationAsync(this IServiceProvider serviceProvider)
     {
-        using (var scope = serviceProvider.CreateScope())
+        using var scope = serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ExperienceDbContext>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<ExperienceDbContext>>();
+        
+        try
         {
-            var dbContext = scope.ServiceProvider.GetRequiredService<ExperienceDbContext>();
-            await dbContext.Database.MigrateAsync();
+            await DbInitializer.InitializeAsync(dbContext, logger);
         }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "An error occurred while migrating the Experience database");
+            throw;
+        }
+        
         return serviceProvider;
     }
 }
