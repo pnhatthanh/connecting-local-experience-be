@@ -17,11 +17,6 @@ namespace Experience.Infrastructure.Data.Configurations
             entity.Property(e => e.CreatedAt).HasColumnName("created_at");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
 
-            entity.HasOne(e => e.Experience)
-                .WithMany(e => e.Media)
-                .HasForeignKey(e => e.ExperienceId)
-                .OnDelete(DeleteBehavior.Cascade);
-
             entity.HasIndex(e => e.ExperienceId);
         }
     }

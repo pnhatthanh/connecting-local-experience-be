@@ -11,6 +11,7 @@ using Experience.Domain.Specifications;
 using MapsterMapper;
 using Microsoft.AspNetCore.Http;
 using NetTopologySuite.Geometries;
+using System.Collections.Concurrent;
 
 namespace Experience.Application.Handlers.Commands.UpdateExperience
 {
@@ -21,13 +22,10 @@ namespace Experience.Application.Handlers.Commands.UpdateExperience
         private readonly IMapper _mapper;
         private readonly IPhotoService _photoService;
         private readonly ICurrentUserService _currentUserService;
+        private readonly GeometryFactory _geometryFactory = new(new PrecisionModel(), 4326);
 
-        public UpdateExperienceCommandHandler(
-            IExperienceRepository experienceRepository,
-            IUnitOfWork unitOfWork,
-            IMapper mapper,
-            IPhotoService photoService,
-            ICurrentUserService currentUserService)
+        public UpdateExperienceCommandHandler(IExperienceRepository experienceRepository, IUnitOfWork unitOfWork,
+            IMapper mapper, IPhotoService photoService, ICurrentUserService currentUserService)
         {
             _experienceRepository = experienceRepository;
             _unitOfWork = unitOfWork;
@@ -38,18 +36,41 @@ namespace Experience.Application.Handlers.Commands.UpdateExperience
 
         public async Task<ExperienceDto> Handle(UpdateExperienceCommand request, CancellationToken cancellationToken)
         {
-            var spec = new ExperienceIdSpecification(request.ExperienceId);
+            var experience = await LoadExperienceAsync(request.ExperienceId, cancellationToken);
+            ValidateOwnership(experience);
+            UpdateBasicInfo(experience, request);
+            await UpdateScheduleAsync(experience, request, cancellationToken);
+            await UpdateMediaAsync(experience, request, cancellationToken);
+            await UpdateItinerariesAsync(experience, request, cancellationToken);
+
+            _experienceRepository.Update(experience);
+            await _unitOfWork.SaveChangeAsync();
+
+            return _mapper.Map<ExperienceDto>(experience);
+        }
+
+        private async Task<ExperienceEntity> LoadExperienceAsync(Guid experienceId, CancellationToken ct)
+        {
+            var spec = new ExperienceIdSpecification(experienceId);
             var experience = await _experienceRepository.GetBySpecAsync(spec,
                 e => e.Category,
                 e => e.Media,
                 e => e.Schedule,
-                e => e.Itineraries)
-                ?? throw new BadRequestException($"Experience with ID {request.ExperienceId} not found.");
+                e => e.Itineraries) 
+            ?? throw new BadRequestException($"Experience with ID {experienceId} not found.");
+            return experience;
+        }
+        private void ValidateOwnership(ExperienceEntity experience)
+        {
             if (experience.HostId != _currentUserService.UserId)
                 throw new ForbiddenException("You are not authorized to update this experience.");
+        }
+        private void UpdateBasicInfo(ExperienceEntity experience, UpdateExperienceCommand request)
+        {
             experience.Title = request.Title;
             experience.Description = request.Description;
             experience.Address = request.Address;
+            experience.Location = _geometryFactory.CreatePoint(new Coordinate(request.Location.Longitude, request.Location.Latitude));
             experience.District = request.District;
             experience.City = request.City;
             experience.Country = request.Country;
@@ -58,113 +79,203 @@ namespace Experience.Application.Handlers.Commands.UpdateExperience
             experience.Duration = request.Duration;
             experience.MaxParticipants = request.MaxParticipants;
             experience.CategoryId = request.CategoryId;
-            experience.ActivityLevel = Enum.Parse<ActivityLevel>(request.ActivityLevel);
-            experience.SkillLevel = Enum.Parse<SkillLevel>(request.SkillLevel);
+            experience.ActivityLevel = Enum.Parse<ActivityLevel>(request.ActivityLevel, true);
+            experience.SkillLevel = Enum.Parse<SkillLevel>(request.SkillLevel, true);
             experience.MinAge = request.MinAge;
-            experience.CancellationPolicy = Enum.Parse<CancellationPolicyType>(request.CancellationPolicy);
-            experience.MeetingLocation = request.MeetingLocation;
+            experience.CancellationPolicy = Enum.Parse<CancellationPolicyType>(request.CancellationPolicy, true);
             experience.Language = request.Language;
-
-            var geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
-            experience.MeetingPoint = geometryFactory.CreatePoint(new Coordinate(request.MeetingPoint.Longitude, request.MeetingPoint.Latitude));
-            
-            if (experience.Schedule != null)
+            experience.MeetingPoint = _geometryFactory.CreatePoint(new Coordinate(request.MeetingPoint.Longitude, request.MeetingPoint.Latitude));
+        }
+        private async Task UpdateScheduleAsync(ExperienceEntity experience, UpdateExperienceCommand request, CancellationToken ct)
+        {
+            if (experience.Schedule == null)
             {
-                experience.Schedule.RecurrenceType = Enum.Parse<RecurrenceType>(request.RecurrenceType);
-                experience.Schedule.DaysOfWeek = request.DaysOfWeek;
-                experience.Schedule.TimeSlots = request.TimeSlots.Select(t => new ScheduleTimeSlot
+                if (request.RecurrenceType == null) return;
+                experience.Schedule = new ExperienceScheduleEntity();
+            }
+            experience.Schedule.RecurrenceType = Enum.Parse<RecurrenceType>(request.RecurrenceType!, true);
+            experience.Schedule.DaysOfWeek = request.DaysOfWeek;
+            experience.Schedule.StartDate = request.StartDate;
+            experience.Schedule.EndDate = request.EndDate;
+
+            experience.Schedule.TimeSlots = request.TimeSlots?
+                .Select(t => new ScheduleTimeSlot
                 {
                     StartTime = t.StartTime,
                     EndTime = t.EndTime
-                }).ToList();
-                experience.Schedule.StartDate = request.StartDate;
-                experience.Schedule.EndDate = request.EndDate;
-                experience.Schedule.UpdatedAt = DateTime.UtcNow;
-            }
-            
-            if (request.MediaFiles?.Any() == true)
-            {
-                if (experience.Media?.Any() == true)
-                {
-                    experience.Media.Clear();
-                }
-                
-                experience.Media = await UploadMediaFilesAsync(experience.Id, request.MediaFiles);
-            }
-            
-            if (request.Itineraries?.Any() == true)
-            {
-                if (experience.Itineraries?.Any() == true)
-                {
-                    experience.Itineraries.Clear();
-                }
-                experience.Itineraries = await UploadItinerariesAsync(experience.Id, request.Itineraries);
-            }
-            
-            experience.UpdatedAt = DateTime.UtcNow;
-            _experienceRepository.Update(experience);
-            await _unitOfWork.SaveChangeAsync();
-
-            return _mapper.Map<ExperienceDto>(experience);
+                })
+                .ToList() ?? new List<ScheduleTimeSlot>();
         }
-        
-        private async Task<List<ExperienceMediaEntity>> UploadMediaFilesAsync(Guid experienceId, List<IFormFile> mediaFiles)
+        private async Task UpdateMediaAsync(ExperienceEntity experience, UpdateExperienceCommand request, CancellationToken ct)
         {
-            var uploadedMedia = new List<ExperienceMediaEntity>();
-            for (int i = 0; i < mediaFiles.Count; i++)
+            experience.Media ??= new List<ExperienceMediaEntity>();
+
+            var keepMediaIds = request.KeepMediaIds?.ToHashSet() ?? new HashSet<Guid>();
+
+            var mediaToDelete = experience.Media
+                .Where(m => !keepMediaIds.Contains(m.Id))
+                .ToList();
+
+            if (mediaToDelete.Any())
             {
-                var file = mediaFiles[i];
+                await DeleteMediaImagesAsync(mediaToDelete, ct);
+                foreach (var media in mediaToDelete)
+                    experience.Media.Remove(media);
+            }
+            else if (keepMediaIds.Count == 0)
+            {
+                await DeleteMediaImagesAsync(experience.Media, ct);
+                experience.Media.Clear();
+            }
+
+            if (request.NewMediaFiles?.Any() == true)
+            {
+                var startOrder = experience.Media.Any() ? experience.Media.Max(m => m.Order) : 0;
+                var newMedia = await UploadMediaFilesAsync(experience.Id, request.NewMediaFiles, startOrder, ct);
+                foreach (var media in newMedia)
+                    experience.Media.Add(media);
+            }
+        }
+
+        private async Task UpdateItinerariesAsync(ExperienceEntity experience, UpdateExperienceCommand request, CancellationToken ct)
+        {
+            experience.Itineraries ??= new List<ExperienceItineraryEntity>();
+
+            if (request.Itineraries?.Any() != true)
+            {
+                await DeleteAllItinerariesAsync(experience.Itineraries, ct);
+                experience.Itineraries.Clear();
+                return;
+            }
+            var requestIds = request.Itineraries
+                .Where(i => i.Id.HasValue)
+                .Select(i => i.Id!.Value)
+                .ToHashSet();
+            var itinerariesToDelete = experience.Itineraries
+                .Where(i => !requestIds.Contains(i.Id))
+                .ToList();
+
+            if (itinerariesToDelete.Any())
+            {
+                await DeleteItineraryImagesAsync(itinerariesToDelete, ct);
+                foreach (var it in itinerariesToDelete)
+                    experience.Itineraries.Remove(it);
+            }
+            foreach (var reqIt in request.Itineraries)
+            {
+                if (reqIt.Id.HasValue)
+                {
+                    var existing = experience.Itineraries.FirstOrDefault(i => i.Id == reqIt.Id.Value);
+                    if (existing != null)
+                    {
+                        await UpdateExistingItineraryAsync(existing, reqIt, experience.Id, ct);
+                    }
+                }
+                else
+                {
+                    var newItinerary = await CreateNewItineraryAsync(reqIt, experience.Id, ct);
+                    experience.Itineraries.Add(newItinerary);
+                }
+            }
+        }
+
+        private async Task UpdateExistingItineraryAsync(ExperienceItineraryEntity existing, 
+            UpdateExperienceItineraryDto request, Guid experienceId, CancellationToken ct)
+        {
+            existing.StepNumber = request.StepNumber;
+            existing.Title = request.Title;
+            existing.Description = request.Description;
+            if (request.PhotoFile != null)
+            {
+                if (!string.IsNullOrEmpty(existing.PhotoUrl))
+                {
+                    await _photoService.DeleteImageAsync(existing.PhotoUrl);
+                }
+
+                var uploadPath = $"experiences/{experienceId}/itinerary";
+                existing.PhotoUrl = await _photoService.UploadImageAsync(request.PhotoFile, uploadPath);
+            }
+        }
+
+        private async Task<ExperienceItineraryEntity> CreateNewItineraryAsync(UpdateExperienceItineraryDto request, 
+            Guid experienceId, CancellationToken ct)
+        {
+            string? photoUrl = null;
+            if (request.PhotoFile != null)
+            {
+                var uploadPath = $"experiences/{experienceId}/itinerary";
+                photoUrl = await _photoService.UploadImageAsync(request.PhotoFile, uploadPath);
+            }
+            return new ExperienceItineraryEntity
+            {
+                ExperienceId = experienceId,
+                StepNumber = request.StepNumber,
+                Title = request.Title,
+                Description = request.Description,
+                PhotoUrl = photoUrl ?? string.Empty
+            };
+        }
+
+        private async Task DeleteMediaImagesAsync(IEnumerable<ExperienceMediaEntity> media, CancellationToken ct)
+        {
+            var tasks = media
+                .Where(m => !string.IsNullOrEmpty(m.Url))
+                .Select(m => SafeDeleteImageAsync(m.Url, ct));
+
+            await Task.WhenAll(tasks);
+        }
+
+        private async Task DeleteItineraryImagesAsync(IEnumerable<ExperienceItineraryEntity> itineraries, CancellationToken ct)
+        {
+            var tasks = itineraries
+                .Where(i => !string.IsNullOrEmpty(i.PhotoUrl))
+                .Select(i => SafeDeleteImageAsync(i.PhotoUrl, ct));
+            await Task.WhenAll(tasks);
+        }
+
+        private async Task DeleteAllItinerariesAsync(ICollection<ExperienceItineraryEntity> itineraries, CancellationToken ct)
+        {
+            if (!itineraries.Any()) 
+                return;
+            await DeleteItineraryImagesAsync(itineraries, ct);
+        }
+
+        private async Task SafeDeleteImageAsync(string url, CancellationToken ct)
+        {
+            try
+            {
+                await _photoService.DeleteImageAsync(url);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[WARN] Failed to delete image {url}: {ex.Message}");
+            }
+        }
+
+        private async Task<List<ExperienceMediaEntity>> UploadMediaFilesAsync(
+            Guid experienceId, List<IFormFile> files, int startOrder, CancellationToken ct)
+        {
+            var uploadedMedia = new ConcurrentBag<ExperienceMediaEntity>();
+            var uploadPath = $"experiences/{experienceId}";
+            var uploadTasks = files.Select(async (file, index) =>
+            {
                 try
                 {
-                    var uploadPath = $"experiences/{experienceId}"; 
-                    var uploadedUrl = await _photoService.UploadImageAsync(file, uploadPath);
+                    var url = await _photoService.UploadImageAsync(file, uploadPath);
                     uploadedMedia.Add(new ExperienceMediaEntity
                     {
-                        Id = Guid.NewGuid(),
                         ExperienceId = experienceId,
-                        Url = uploadedUrl,
-                        Order = i + 1, 
-                        CreatedAt = DateTime.UtcNow
+                        Url = url,
+                        Order = startOrder + index + 1
                     });
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Failed to upload media file for experience {experienceId}: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine($"[ERROR] Upload failed for file {file.FileName}: {ex.Message}");
                 }
-            }
-            return uploadedMedia;
-        }
-
-        private async Task<List<ExperienceItineraryEntity>> UploadItinerariesAsync(Guid experienceId, List<UpdateExperienceItineraryDto> itineraries)
-        {
-            var itineraryEntities = new List<ExperienceItineraryEntity>();
-            foreach (var itinerary in itineraries)
-            {
-                string? photoUrl = null;
-                if (itinerary.PhotoFile != null)
-                {
-                    try
-                    {
-                        var uploadPath = $"experiences/{experienceId}/itinerary";
-                        photoUrl = await _photoService.UploadImageAsync(itinerary.PhotoFile, uploadPath);
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Failed to upload itinerary photo for step {itinerary.StepNumber}: {ex.Message}");
-                    }
-                }
-                itineraryEntities.Add(new ExperienceItineraryEntity
-                {
-                    Id = Guid.NewGuid(),
-                    ExperienceId = experienceId,
-                    StepNumber = itinerary.StepNumber,
-                    PhotoUrl = photoUrl ?? string.Empty,
-                    Title = itinerary.Title,
-                    Description = itinerary.Description,
-                    CreatedAt = DateTime.UtcNow
-                });
-            }
-            return itineraryEntities;
+            });
+            await Task.WhenAll(uploadTasks);
+            return uploadedMedia.ToList();
         }
     }
 }

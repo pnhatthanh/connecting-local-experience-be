@@ -1,6 +1,7 @@
 using BuildingBlocks.Application.CQRS.Command;
 using Experience.Application.Dtos;
 using Microsoft.AspNetCore.Http;
+using NetTopologySuite.Geometries;
 
 namespace Experience.Application.Handlers.Commands.UpdateExperience
 {
@@ -9,6 +10,7 @@ namespace Experience.Application.Handlers.Commands.UpdateExperience
         string Title,
         string Description,
         string Address,
+        LocationDto Location,
         string District,
         string City,
         string Country,
@@ -29,13 +31,15 @@ namespace Experience.Application.Handlers.Commands.UpdateExperience
         List<TimeSlotDto> TimeSlots,
         DateTime StartDate,
         DateTime? EndDate,
-        List<IFormFile>? MediaFiles,
+        List<Guid>? KeepMediaIds,
+        List<IFormFile>? NewMediaFiles,
         List<UpdateExperienceItineraryDto>? Itineraries
     ) : ICommand<ExperienceDto>;
     
     public record UpdateExperienceItineraryDto(
+        Guid? Id,  
         int StepNumber,
-        IFormFile? PhotoFile,
+        IFormFile? PhotoFile,  
         string Title,
         string Description
     );

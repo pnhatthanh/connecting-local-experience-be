@@ -147,9 +147,9 @@ namespace Experience.Application.Handlers.Commands.UpdateExperience
                 .When(x => x.TimeSlots != null && x.TimeSlots.Any())
                 .WithMessage("Time slots cannot overlap with each other.");
             
-            RuleFor(x => x.MediaFiles)
+            RuleFor(x => x.NewMediaFiles)
                 .Must(files => files == null || files.Count <= 10)
-                .WithMessage("Maximum 10 media files are allowed.");
+                .WithMessage("Maximum 10 new media files are allowed per update.");
             
             When(x => x.Itineraries != null && x.Itineraries.Any(), () =>
             {
