@@ -14,6 +14,7 @@ var app = builder.Build();
 
 await app.Services.ApplyMigrationAsync();
 await app.Services.SeedDataAsync();
+await app.Services.SubscribeToEventsAsync();
 
 app.UseException();
 app.UseHttpsRedirection();

@@ -99,7 +99,11 @@ namespace Experience.Api.Controllers
         public async Task<ActionResult<bool>> DeleteExperience([FromRoute] Guid id)
         {
             var result = await _mediator.Send(new DeleteExperienceCommand(id));
-            return Ok(result);
+            return Ok(new
+            {
+                Success = result,
+                Message = result ? "Experience deleted successfully." : "Failed to delete experience."
+            });
         }
     }
 }

@@ -1,0 +1,233 @@
+{
+  "info": {
+    "name": "Experience Service API",
+    "_postman_id": "experience-service-api-collection",
+    "description": "Experience Service API - Postman Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5094"
+    },
+    {
+      "key": "token",
+      "value": "your-jwt-token-here"
+    }
+  ],
+  "item": [
+    {
+      "name": "Create Experience",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "Title", "value": "Amazing Cooking Class", "type": "text" },
+            { "key": "Description", "value": "Learn to cook traditional Vietnamese dishes", "type": "text" },
+            { "key": "Address", "value": "123 Food Street", "type": "text" },
+            { "key": "District", "value": "Hoan Kiem", "type": "text" },
+            { "key": "City", "value": "Hanoi", "type": "text" },
+            { "key": "Country", "value": "Vietnam", "type": "text" },
+            { "key": "AdultPrice", "value": "50.00", "type": "text" },
+            { "key": "ChildPrice", "value": "30.00", "type": "text" },
+            { "key": "Duration", "value": "180", "type": "text" },
+            { "key": "MaxParticipants", "value": "10", "type": "text" },
+            { "key": "CategoryId", "value": "11111111-1111-1111-1111-111111111111", "type": "text" },
+            { "key": "ActivityLevel", "value": "Light", "type": "text" },
+            { "key": "SkillLevel", "value": "Beginner", "type": "text" },
+            { "key": "MinAge", "value": "8", "type": "text" },
+            { "key": "CancellationPolicy", "value": "Flexible", "type": "text" },
+            { "key": "MeetingPoint.Latitude", "value": "21.0285", "type": "text" },
+            { "key": "MeetingPoint.Longitude", "value": "105.8542", "type": "text" },
+            { "key": "MeetingLocation", "value": "Main Kitchen Entrance", "type": "text" },
+            { "key": "Language", "value": "English, Vietnamese", "type": "text" },
+            { "key": "RecurrenceType", "value": "Weekly", "type": "text" },
+            { "key": "DaysOfWeek[0]", "value": "Monday", "type": "text" },
+            { "key": "DaysOfWeek[1]", "value": "Wednesday", "type": "text" },
+            { "key": "DaysOfWeek[2]", "value": "Friday", "type": "text" },
+            { "key": "TimeSlots[0].StartTime", "value": "09:00:00", "type": "text" },
+            { "key": "TimeSlots[0].EndTime", "value": "12:00:00", "type": "text" },
+            { "key": "TimeSlots[1].StartTime", "value": "14:00:00", "type": "text" },
+            { "key": "TimeSlots[1].EndTime", "value": "17:00:00", "type": "text" },
+            { "key": "StartDate", "value": "2025-11-10T00:00:00Z", "type": "text" },
+            { "key": "EndDate", "value": "2026-01-31T00:00:00Z", "type": "text" },
+            { "key": "MediaFiles", "type": "file", "src": "/path/to/photo1.jpg" },
+            { "key": "MediaFiles", "type": "file", "src": "/path/to/photo2.jpg" },
+            { "key": "Itineraries[0].StepNumber", "value": "1", "type": "text" },
+            { "key": "Itineraries[0].Title", "value": "Introduction & Welcome", "type": "text" },
+            { "key": "Itineraries[0].Description", "value": "Meet the chef and learn about Vietnamese cuisine", "type": "text" },
+            { "key": "Itineraries[0].PhotoFile", "type": "file", "src": "/path/to/step1.jpg" },
+            { "key": "Itineraries[1].StepNumber", "value": "2", "type": "text" },
+            { "key": "Itineraries[1].Title", "value": "Cooking Session", "type": "text" },
+            { "key": "Itineraries[1].Description", "value": "Hands-on cooking experience", "type": "text" },
+            { "key": "Itineraries[1].PhotoFile", "type": "file", "src": "/path/to/step2.jpg" }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/experiences",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "experiences"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Experience",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "Title", "value": "Updated Cooking Class", "type": "text" },
+            { "key": "Description", "value": "Updated description for Vietnamese cooking class", "type": "text" },
+            { "key": "Address", "value": "456 New Food Street", "type": "text" },
+            { "key": "District", "value": "Ba Dinh", "type": "text" },
+            { "key": "City", "value": "Hanoi", "type": "text" },
+            { "key": "Country", "value": "Vietnam", "type": "text" },
+            { "key": "AdultPrice", "value": "60.00", "type": "text" },
+            { "key": "ChildPrice", "value": "35.00", "type": "text" },
+            { "key": "Duration", "value": "240", "type": "text" },
+            { "key": "MaxParticipants", "value": "12", "type": "text" },
+            { "key": "CategoryId", "value": "11111111-1111-1111-1111-111111111111", "type": "text" },
+            { "key": "ActivityLevel", "value": "Moderate", "type": "text" },
+            { "key": "SkillLevel", "value": "Intermediate", "type": "text" },
+            { "key": "MinAge", "value": "10", "type": "text" },
+            { "key": "CancellationPolicy", "value": "Moderate", "type": "text" },
+            { "key": "MeetingPoint.Latitude", "value": "21.0345", "type": "text" },
+            { "key": "MeetingPoint.Longitude", "value": "105.8525", "type": "text" },
+            { "key": "MeetingLocation", "value": "Updated Kitchen Location", "type": "text" },
+            { "key": "Language", "value": "English, Vietnamese, French", "type": "text" },
+            { "key": "RecurrenceType", "value": "Weekly", "type": "text" },
+            { "key": "DaysOfWeek[0]", "value": "Tuesday", "type": "text" },
+            { "key": "DaysOfWeek[1]", "value": "Thursday", "type": "text" },
+            { "key": "DaysOfWeek[2]", "value": "Saturday", "type": "text" },
+            { "key": "TimeSlots[0].StartTime", "value": "10:00:00", "type": "text" },
+            { "key": "TimeSlots[0].EndTime", "value": "14:00:00", "type": "text" },
+            { "key": "StartDate", "value": "2025-11-15T00:00:00Z", "type": "text" },
+            { "key": "EndDate", "value": "2026-02-28T00:00:00Z", "type": "text" },
+            { "key": "KeepMediaIds[0]", "value": "22222222-2222-2222-2222-222222222222", "type": "text", "description": "ID của media muốn giữ lại" },
+            { "key": "KeepMediaIds[1]", "value": "33333333-3333-3333-3333-333333333333", "type": "text", "description": "ID của media muốn giữ lại" },
+            { "key": "NewMediaFiles", "type": "file", "src": "/path/to/new-photo1.jpg", "description": "Media mới muốn thêm" },
+            { "key": "NewMediaFiles", "type": "file", "src": "/path/to/new-photo2.jpg", "description": "Media mới muốn thêm" },
+            { "key": "Itineraries[0].Id", "value": "44444444-4444-4444-4444-444444444444", "type": "text", "description": "ID có sẵn = update itinerary cũ" },
+            { "key": "Itineraries[0].StepNumber", "value": "1", "type": "text" },
+            { "key": "Itineraries[0].Title", "value": "Updated Introduction", "type": "text" },
+            { "key": "Itineraries[0].Description", "value": "Updated welcome session", "type": "text" },
+            { "key": "Itineraries[1].StepNumber", "value": "2", "type": "text", "description": "Không có Id = tạo mới" },
+            { "key": "Itineraries[1].Title", "value": "New Cooking Step", "type": "text" },
+            { "key": "Itineraries[1].Description", "value": "New step in the cooking process", "type": "text" },
+            { "key": "Itineraries[1].PhotoFile", "type": "file", "src": "/path/to/new-step-photo.jpg", "description": "Photo cho itinerary mới" },
+            { "key": "Itineraries[2].Id", "value": "55555555-5555-5555-5555-555555555555", "type": "text", "description": "Update itinerary cũ + đổi ảnh" },
+            { "key": "Itineraries[2].StepNumber", "value": "3", "type": "text" },
+            { "key": "Itineraries[2].Title", "value": "Final Tasting", "type": "text" },
+            { "key": "Itineraries[2].Description", "value": "Updated description for tasting", "type": "text" },
+            { "key": "Itineraries[2].PhotoFile", "type": "file", "src": "/path/to/updated-tasting-photo.jpg", "description": "Ảnh mới thay thế ảnh cũ" }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/experiences/your-experience-id-here",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "experiences", "your-experience-id-here"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Experience By ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/experiences/your-experience-id-here",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "experiences", "your-experience-id-here"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Experiences",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/experiences?pageNumber=1&pageSize=10&category=Food&status=Active",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "experiences"],
+          "query": [
+            { "key": "pageNumber", "value": "1" },
+            { "key": "pageSize", "value": "10" },
+            { "key": "category", "value": "Food" },
+            { "key": "status", "value": "Active" }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Experiences By Host",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/experiences/host/your-host-id-here",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "experiences", "host", "your-host-id-here"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Nearby Experiences",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/experiences/nearby?latitude=21.0285&longitude=105.8542&radiusInKm=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "experiences", "nearby"],
+          "query": [
+            { "key": "latitude", "value": "21.0285" },
+            { "key": "longitude", "value": "105.8542" },
+            { "key": "radiusInKm", "value": "10" }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Experience",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/experiences/your-experience-id-here",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "experiences", "your-experience-id-here"]
+        }
+      },
+      "response": []
+    }
+  ]
+}

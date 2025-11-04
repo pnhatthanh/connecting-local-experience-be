@@ -61,6 +61,20 @@ namespace Experience.Infrastructure.Data.Configurations
                 .HasForeignKey<ExperienceScheduleEntity>(s => s.ExperienceId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Configure Media relationship with cascade delete for orphans
+            entity.HasMany(e => e.Media)
+                .WithOne(m => m.Experience)
+                .HasForeignKey(m => m.ExperienceId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
+
+            // Configure Itineraries relationship with cascade delete for orphans
+            entity.HasMany(e => e.Itineraries)
+                .WithOne(i => i.Experience)
+                .HasForeignKey(i => i.ExperienceId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
+
             entity.HasIndex(e => e.HostId);
             entity.HasIndex(e => e.Status);
             entity.HasIndex(e => e.CategoryId);
