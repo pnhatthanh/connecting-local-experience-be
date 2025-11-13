@@ -8,21 +8,21 @@ namespace Experience.Application.Utils
     {
         public static List<ExperienceScheduleSlotDto> GenerateSlotsForSchedule(
             ExperienceScheduleEntity schedule,
-            DateTime startDate,
-            DateTime endDate)
+            DateOnly startDate,
+            DateOnly endDate)
         {
             var slots = new List<ExperienceScheduleSlotDto>();
 
             if (schedule.RecurrenceType == RecurrenceType.Once)
             {
-                if (schedule.StartDate.Date >= startDate.Date && schedule.StartDate.Date <= endDate.Date)
+                if (schedule.StartDate >= startDate && schedule.StartDate <= endDate)
                 {
                     foreach (var timeSlot in schedule.TimeSlots)
                     {
                         slots.Add(new ExperienceScheduleSlotDto
                         {
                             ScheduleId = schedule.Id,
-                            Date = schedule.StartDate.Date,
+                            Date = schedule.StartDate,
                             StartTime = timeSlot.StartTime,
                             EndTime = timeSlot.EndTime
                         });
@@ -31,13 +31,13 @@ namespace Experience.Application.Utils
             }
             if (schedule.RecurrenceType == RecurrenceType.Weekly)
             {
-                var currentDate = startDate.Date > schedule.StartDate.Date
-                    ? startDate.Date
-                    : schedule.StartDate.Date;
+                var currentDate = startDate > schedule.StartDate
+                    ? startDate
+                    : schedule.StartDate;
 
-                var lastDate = endDate.Date < (schedule.EndDate?.Date ?? DateTime.MaxValue)
-                    ? endDate.Date
-                    : (schedule.EndDate?.Date ?? DateTime.MaxValue);
+                var lastDate = endDate < (schedule.EndDate ?? DateOnly.MaxValue)
+                    ? endDate
+                    : (schedule.EndDate ?? DateOnly.MaxValue);
 
                 while (currentDate <= lastDate)
                 {

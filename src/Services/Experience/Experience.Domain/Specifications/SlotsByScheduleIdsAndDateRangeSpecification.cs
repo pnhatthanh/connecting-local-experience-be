@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace Experience.Domain.Specifications
 {
-    public class SlotsByScheduleIdsAndDateRangeSpecification(List<Guid> ScheduleIds, DateTime StartDate, DateTime EndDate) : Specification<ExperienceScheduleSlotEntity>
+    public class SlotsByScheduleIdsAndDateRangeSpecification(List<Guid> ScheduleIds, DateOnly StartDate, DateOnly EndDate) : Specification<ExperienceScheduleSlotEntity>
     {
         public override Expression<Func<ExperienceScheduleSlotEntity, bool>> ToExpression()
         {

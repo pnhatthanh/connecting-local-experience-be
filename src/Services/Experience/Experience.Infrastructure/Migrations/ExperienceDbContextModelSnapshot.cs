@@ -4,7 +4,6 @@ using Experience.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -135,25 +134,9 @@ namespace Experience.Infrastructure.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("language");
 
-                    b.Property<Point>("Location")
-                        .IsRequired()
-                        .HasColumnType("geography(Point)")
-                        .HasColumnName("location");
-
                     b.Property<int>("MaxParticipants")
                         .HasColumnType("integer")
                         .HasColumnName("max_participants");
-
-                    b.Property<string>("MeetingLocation")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("meeting_location");
-
-                    b.Property<Point>("MeetingPoint")
-                        .IsRequired()
-                        .HasColumnType("geography(Point)")
-                        .HasColumnName("meeting_point");
 
                     b.Property<int>("MinAge")
                         .HasColumnType("integer")
@@ -291,8 +274,8 @@ namespace Experience.Infrastructure.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("days_of_week");
 
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<DateOnly?>("EndDate")
+                        .HasColumnType("date")
                         .HasColumnName("end_date");
 
                     b.Property<Guid>("ExperienceId")
@@ -303,8 +286,8 @@ namespace Experience.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("recurrence_type");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date")
                         .HasColumnName("start_date");
 
                     b.Property<string>("TimeSlots")
@@ -347,8 +330,8 @@ namespace Experience.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date")
                         .HasColumnName("date");
 
                     b.Property<TimeSpan>("EndTime")

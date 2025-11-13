@@ -1,0 +1,56 @@
+using BuildingBlocks.Application.Interfaces;
+using BuildingBlocks.Domain.Interfaces;
+using BuildingBlocks.EntityFramework;
+using Booking.Application.Interfaces;
+using Booking.Domain.Repositories;
+using Booking.Infrastructure.Configurations;
+using Booking.Infrastructure.Data;
+using Booking.Infrastructure.Repositories;
+using Booking.Infrastructure.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Booking.Infrastructure.Extensions
+{
+    public static class ServiceExtensions
+    {
+        public static IServiceCollection AddBookingInfrastructure(this IServiceCollection services, IConfiguration configuration)
+        {
+            var connectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? throw new ArgumentNullException("Connection string 'DefaultConnection' not found.");
+            
+            services.AddDbContext<BookingDbContext>(options =>
+            {
+                options.UseNpgsql(connectionString);
+            });
+            
+            services.AddUnitOfWork<BookingDbContext>();
+            services.AddScoped<IBookingRepository, BookingRepository>();
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
+            services.AddScoped<IRefundRepository, RefundRepository>();
+            services.AddScoped<IBookingCancellationRepository, BookingCancellationRepository>();
+            
+            services.AddHttpContextAccessor();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
+            
+            // Configure VNPay
+            services.Configure<VnPaySettings>(options =>
+            {
+                configuration.GetSection(VnPaySettings.VnPaySettingsKey).Bind(options);
+            });
+            services.AddScoped<IVnPayService, VnPayService>();
+            
+            // Configure Experience Service HTTP Client
+            services.AddHttpClient<IExperienceService, ExperienceService>(client =>
+            {
+                var experienceApiUrl = configuration["Services:ExperienceApi"]
+                    ?? throw new ArgumentNullException("Experience API URL not configured");
+                client.BaseAddress = new Uri(experienceApiUrl);
+            });
+
+            return services;
+        }
+    }
+}

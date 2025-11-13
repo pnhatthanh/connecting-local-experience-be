@@ -29,14 +29,9 @@ namespace IAM.Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("confirm-email")]
-        public async Task<ActionResult<bool>> ConfirmEmail([FromQuery] string email, [FromQuery] string token)
+        [HttpPost("confirm-email")]
+        public async Task<ActionResult<bool>> ConfirmEmail([FromBody] ConfirmEmailCommand command)
         {
-            var command = new ConfirmEmailCommand 
-            { 
-                Email = email, 
-                Token = token 
-            };
             var result = await _mediator.Send(command);
             return Ok(new { success = result, message = "Email confirmed successfully" });
         }

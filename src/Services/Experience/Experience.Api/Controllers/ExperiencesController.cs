@@ -6,7 +6,6 @@ using Experience.Application.Handlers.Commands.UpdateExperience;
 using Experience.Application.Handlers.Queries.GetExperience;
 using Experience.Application.Handlers.Queries.GetExperiences;
 using Experience.Application.Handlers.Queries.GetExperiencesByHost;
-using Experience.Application.Handlers.Queries.GetNearbyExperiences;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -73,23 +72,6 @@ namespace Experience.Api.Controllers
         public async Task<ActionResult<List<ExperienceDto>>> GetExperiencesByHost(Guid hostId)
         {
             var query = new GetExperiencesByHostQuery { HostId = hostId };
-            var result = await _mediator.Send(query);
-            return Ok(result);
-        }
-
-        [HttpGet("nearby")]
-        public async Task<ActionResult<List<ExperienceDto>>> GetNearbyExperiences(
-            [FromQuery] double latitude,
-            [FromQuery] double longitude,
-            [FromQuery] double radiusInKm = 10)
-        {
-            var query = new GetNearbyExperiencesQuery
-            {
-                Latitude = latitude,
-                Longitude = longitude,
-                RadiusInKm = radiusInKm
-            };
-
             var result = await _mediator.Send(query);
             return Ok(result);
         }

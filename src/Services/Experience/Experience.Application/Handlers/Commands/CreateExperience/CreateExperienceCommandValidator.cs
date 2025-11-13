@@ -16,9 +16,6 @@ namespace Experience.Application.Handlers.Commands.CreateExperience
             RuleFor(x => x.Description)
                 .NotEmpty()
                 .WithMessage("Description is required.");
-            RuleFor(x => x.Location)
-                .NotNull()
-                .WithMessage("Location is required.");
             RuleFor(x => x.Address)
                 .NotEmpty()
                 .WithMessage("Address is required.")
@@ -76,14 +73,6 @@ namespace Experience.Application.Handlers.Commands.CreateExperience
                 .WithMessage("Cancellation policy is required.")
                 .Must(policy => Enum.TryParse<CancellationPolicyType>(policy, true, out _))
                 .WithMessage("Invalid cancellation policy.");
-            RuleFor(x => x.MeetingPoint)
-                .NotNull()
-                .WithMessage("Meeting point is required.");
-            RuleFor(x => x.MeetingLocation)
-                .NotEmpty()
-                .WithMessage("Meeting location is required.")
-                .MaximumLength(500)
-                .WithMessage("Meeting location must not exceed 500 characters.");
             RuleFor(x => x.Language)
                 .NotEmpty()
                 .WithMessage("Language is required.")
@@ -118,6 +107,18 @@ namespace Experience.Application.Handlers.Commands.CreateExperience
                     .WithMessage("End date is required for weekly recurrence.")
                     .GreaterThanOrEqualTo(x => x.StartDate)
                     .WithMessage("End date must be greater than or equal to start date.");
+            });
+            When(x => x.RecurrenceType == RecurrenceType.Daily.ToString(), () =>
+            {
+                RuleFor(x => x.EndDate)
+                    .NotEmpty()
+                    .WithMessage("End date is required for daily recurrence.")
+                    .GreaterThanOrEqualTo(x => x.StartDate)
+                    .WithMessage("End date must be greater than or equal to start date.");
+                RuleFor(x => x.DaysOfWeek)
+                    .NotEmpty()
+                    .Must(days => days.Count == 7 && days.Distinct().Count() == 7)
+                    .WithMessage("All days of the week must be selected for daily recurrence.");
             });
             
             RuleFor(x => x.TimeSlots)
