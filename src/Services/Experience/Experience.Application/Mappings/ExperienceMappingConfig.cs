@@ -9,16 +9,6 @@ namespace Experience.Application.Mappings
         public void Register(TypeAdapterConfig config)
         {
             config.NewConfig<ExperienceEntity, ExperienceDto>()
-                .Map(dest => dest.Location, src => new LocationDto
-                {
-                    Latitude = src.Location.Y,
-                    Longitude = src.Location.X
-                })
-                .Map(dest => dest.MeetingPoint, src => new LocationDto
-                {
-                    Latitude = src.MeetingPoint.Y,
-                    Longitude = src.MeetingPoint.X
-                })
                 .Map(dest => dest.Category, src => src.Category != null ? new ExperienceCategoryDto
                 {
                     Id = src.Category.Id,

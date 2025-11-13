@@ -70,7 +70,6 @@ namespace Experience.Application.Handlers.Commands.UpdateExperience
             experience.Title = request.Title;
             experience.Description = request.Description;
             experience.Address = request.Address;
-            experience.Location = _geometryFactory.CreatePoint(new Coordinate(request.Location.Longitude, request.Location.Latitude));
             experience.District = request.District;
             experience.City = request.City;
             experience.Country = request.Country;
@@ -84,13 +83,12 @@ namespace Experience.Application.Handlers.Commands.UpdateExperience
             experience.MinAge = request.MinAge;
             experience.CancellationPolicy = Enum.Parse<CancellationPolicyType>(request.CancellationPolicy, true);
             experience.Language = request.Language;
-            experience.MeetingPoint = _geometryFactory.CreatePoint(new Coordinate(request.MeetingPoint.Longitude, request.MeetingPoint.Latitude));
         }
-        private async Task UpdateScheduleAsync(ExperienceEntity experience, UpdateExperienceCommand request, CancellationToken ct)
+        private Task UpdateScheduleAsync(ExperienceEntity experience, UpdateExperienceCommand request, CancellationToken ct)
         {
             if (experience.Schedule == null)
             {
-                if (request.RecurrenceType == null) return;
+                if (request.RecurrenceType == null) return Task.CompletedTask;
                 experience.Schedule = new ExperienceScheduleEntity();
             }
             experience.Schedule.RecurrenceType = Enum.Parse<RecurrenceType>(request.RecurrenceType!, true);
@@ -105,6 +103,7 @@ namespace Experience.Application.Handlers.Commands.UpdateExperience
                     EndTime = t.EndTime
                 })
                 .ToList() ?? new List<ScheduleTimeSlot>();
+            return Task.CompletedTask;
         }
         private async Task UpdateMediaAsync(ExperienceEntity experience, UpdateExperienceCommand request, CancellationToken ct)
         {

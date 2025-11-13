@@ -15,7 +15,6 @@ namespace Experience.Infrastructure.Data.Configurations
             entity.Property(e => e.HostId).HasColumnName("host_id").IsRequired();
             entity.Property(e => e.Title).HasColumnName("title").HasMaxLength(255).IsRequired();
             entity.Property(e => e.Description).HasColumnName("description").IsRequired();
-            entity.Property(e => e.Location).HasColumnName("location").HasColumnType("geography(Point)").IsRequired();
             entity.Property(e => e.Address).HasColumnName("address").HasMaxLength(500).IsRequired();
             entity.Property(e => e.District).HasColumnName("district").HasMaxLength(100).IsRequired();
             entity.Property(e => e.City).HasColumnName("city").HasMaxLength(100).IsRequired();
@@ -45,8 +44,6 @@ namespace Experience.Infrastructure.Data.Configurations
                 .HasConversion<string>()
                 .HasDefaultValue(CancellationPolicyType.AlwaysFreeCancellation)
                 .IsRequired();
-            entity.Property(e => e.MeetingPoint).HasColumnName("meeting_point").HasColumnType("geography(Point)").IsRequired();
-            entity.Property(e => e.MeetingLocation).HasColumnName("meeting_location").HasMaxLength(500).IsRequired();
             entity.Property(e => e.Language).HasColumnName("language").HasMaxLength(50).IsRequired();
             entity.Property(e => e.CreatedAt).HasColumnName("created_at");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");

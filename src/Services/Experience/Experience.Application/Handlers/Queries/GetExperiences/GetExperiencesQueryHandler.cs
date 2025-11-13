@@ -1,6 +1,5 @@
 using BuildingBlocks.Application.Dtos;
 using Experience.Application.Dtos;
-using Experience.Application.Extensions;
 using Experience.Domain.Enums;
 using Experience.Domain.Repositories;
 using Experience.Domain.Specifications;

@@ -9,8 +9,8 @@ namespace Experience.Domain.Entities
         public RecurrenceType RecurrenceType { get; set; } = RecurrenceType.Once;
         public List<DayOfWeek> DaysOfWeek { get; set; } = new();
         public List<ScheduleTimeSlot> TimeSlots { get; set; } = new();
-        public DateTime StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public DateOnly StartDate { get; set; }
+        public DateOnly? EndDate { get; set; }
         public virtual ExperienceEntity Experience { get; set; } = null!;
         public virtual ICollection<ExperienceScheduleSlotEntity> Slots { get; set; } = new List<ExperienceScheduleSlotEntity>();
     }

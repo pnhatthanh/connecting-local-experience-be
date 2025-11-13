@@ -7,7 +7,7 @@ namespace Experience.Application.Dtos
         public string RecurrenceType { get; set; } = string.Empty;
         public List<DayOfWeek> DaysOfWeek { get; set; } = new();
         public List<TimeSlotDto> TimeSlots { get; set; } = new();
-        public DateTime StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public DateOnly StartDate { get; set; }
+        public DateOnly? EndDate { get; set; }
     }
 }

@@ -7,7 +7,6 @@ namespace Experience.Application.Handlers.Commands.CreateExperience
     public record CreateExperienceCommand(
         string Title,
         string Description,
-        LocationDto Location,
         string Address,
         string District,
         string City,
@@ -21,14 +20,12 @@ namespace Experience.Application.Handlers.Commands.CreateExperience
         string SkillLevel,
         int MinAge,
         string CancellationPolicy,
-        LocationDto MeetingPoint,
-        string MeetingLocation,
         string Language,
         string RecurrenceType,
         List<DayOfWeek> DaysOfWeek,
         List<TimeSlotDto> TimeSlots,
-        DateTime StartDate,
-        DateTime? EndDate,
+        DateOnly StartDate,
+        DateOnly? EndDate,
         List<IFormFile>? MediaFiles,
         List<CreateExperienceItineraryDto>? Itineraries
     ) : ICommand<ExperienceDto>;

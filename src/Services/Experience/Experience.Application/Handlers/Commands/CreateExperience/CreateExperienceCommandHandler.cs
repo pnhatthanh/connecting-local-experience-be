@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using BuildingBlocks.Application.CQRS.Command;
 using BuildingBlocks.Application.Interfaces;
 using BuildingBlocks.Domain.Exceptions;
@@ -52,7 +53,6 @@ namespace Experience.Application.Handlers.Commands.CreateExperience
                 HostId = hostId,
                 Title = request.Title,
                 Description = request.Description,
-                Location = _geometryFactory.CreatePoint(new Coordinate(request.Location.Longitude, request.Location.Latitude)),
                 Address = request.Address,
                 District = request.District,
                 City = request.City,
@@ -61,14 +61,13 @@ namespace Experience.Application.Handlers.Commands.CreateExperience
                 ChildPrice = request.ChildPrice,
                 Duration = request.Duration,
                 MaxParticipants = request.MaxParticipants,
+                
                 CategoryId = request.CategoryId,
                 ActivityLevel = Enum.Parse<ActivityLevel>(request.ActivityLevel),
                 SkillLevel = Enum.Parse<SkillLevel>(request.SkillLevel),
                 MinAge = request.MinAge,
                 Status = ExperienceStatus.Draft,
                 CancellationPolicy = Enum.Parse<CancellationPolicyType>(request.CancellationPolicy),
-                MeetingPoint = _geometryFactory.CreatePoint(new Coordinate(request.MeetingPoint.Longitude, request.MeetingPoint.Latitude)),
-                MeetingLocation = request.MeetingLocation,
                 Language = request.Language,
             };
             
@@ -118,7 +117,7 @@ namespace Experience.Application.Handlers.Commands.CreateExperience
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Failed to upload media file for experience {experienceId}: {ex.Message}");
+                    Debug.WriteLine($"Failed to upload media file for experience {experienceId}: {ex.Message}");
                 }
             }
             return uploadedMedia;
@@ -139,7 +138,7 @@ namespace Experience.Application.Handlers.Commands.CreateExperience
                     }
                     catch (Exception ex)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Failed to upload itinerary photo for step {itinerary.StepNumber}: {ex.Message}");
+                        Debug.WriteLine($"Failed to upload itinerary photo for step {itinerary.StepNumber}: {ex.Message}");
                     }
                 }
                 itineraryEntities.Add(new ExperienceItineraryEntity

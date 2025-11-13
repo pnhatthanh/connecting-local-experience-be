@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using BuildingBlocks.Domain.Exceptions;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
@@ -59,6 +60,7 @@ namespace Experience.Infrastructure.Services
             }
             catch (Exception ex)
             {
+                Debug.WriteLine("Error uploading image to Cloudinary: " + ex);
                 throw new Exception($"Error uploading image to Cloudinary: {ex.Message}", ex);
             }
         }
@@ -93,6 +95,7 @@ namespace Experience.Infrastructure.Services
             }
             catch (Exception ex)
             {
+                Debug.WriteLine("Error deleting image from Cloudinary: " + ex);
                 throw new Exception($"Error deleting image from Cloudinary: {ex.Message}", ex);
             }
         }

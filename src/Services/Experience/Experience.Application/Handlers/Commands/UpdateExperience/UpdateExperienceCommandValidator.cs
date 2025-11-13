@@ -91,16 +91,6 @@ namespace Experience.Application.Handlers.Commands.UpdateExperience
                 .WithMessage("Cancellation policy is required.")
                 .Must(policy => Enum.TryParse<CancellationPolicyType>(policy, true, out _))
                 .WithMessage("Invalid cancellation policy.");
-
-            RuleFor(x => x.MeetingPoint)
-                .NotNull()
-                .WithMessage("Meeting point is required.");
-            
-            RuleFor(x => x.MeetingLocation)
-                .NotEmpty()
-                .WithMessage("Meeting location is required.")
-                .MaximumLength(500)
-                .WithMessage("Meeting location must not exceed 500 characters.");
                 
             RuleFor(x => x.Language)
                 .NotEmpty()

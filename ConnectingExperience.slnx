@@ -35,4 +35,10 @@
     <Project Path="src/services/User/User.Domain/User.Domain.csproj" />
     <Project Path="src/services/User/User.Infrastructure/User.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/src/services/Booking/">
+    <Project Path="src/services/Booking/Booking.Api/Booking.Api.csproj" />
+    <Project Path="src/services/Booking/Booking.Application/Booking.Application.csproj" />
+    <Project Path="src/services/Booking/Booking.Domain/Booking.Domain.csproj" />
+    <Project Path="src/services/Booking/Booking.Infrastructure/Booking.Infrastructure.csproj" />
+  </Folder>
 </Solution>

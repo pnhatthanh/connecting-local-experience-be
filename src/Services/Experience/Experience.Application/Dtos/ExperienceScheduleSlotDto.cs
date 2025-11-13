@@ -4,7 +4,7 @@ namespace Experience.Application.Dtos
     {
         public Guid Id { get; set; }
         public Guid ScheduleId { get; set; }
-        public DateTime Date { get; set; }
+        public DateOnly Date { get; set; }
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
         public int TotalSlots { get; set; }
