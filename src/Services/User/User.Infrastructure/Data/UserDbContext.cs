@@ -11,7 +11,8 @@ namespace User.Infrastructure.Data
         {}
         public DbSet<UserEntity> Users { get; set; }
         public DbSet<HostProfileEntity> HostProfiles { get; set; }
-        public DbSet<UserFavoriteExperienceEntity> UserFavoriteExperiences { get; set; }
+        public DbSet<UserWishlistEntity> UserWishlists { get; set; }
+        public DbSet<WishlistExperienceEntity> WishlistExperiences { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

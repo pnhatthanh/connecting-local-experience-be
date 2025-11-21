@@ -25,6 +25,19 @@ namespace User.Application.Mappings
                 .Map(dest => dest.HostingSince, src => src.HostProfile != null ? src.HostProfile.HostingSince : null)
                 .Map(dest => dest.IsVerified, src => src.HostProfile != null ? src.HostProfile.IsVerified : false)
                 .Map(dest => dest.ResponseTime, src => src.HostProfile != null ? src.HostProfile.ResponseTime.ToString() : null);
+
+            config.NewConfig<UserEntity, HostSummaryDto>()
+                .Map(dest => dest.Id, src => src.Id)
+                .Map(dest => dest.FullName, src => src.FullName)
+                .Map(dest => dest.Email, src => src.Email)
+                .Map(dest => dest.PhoneNumber, src => src.PhoneNumber)
+                .Map(dest => dest.Country, src => src.Country)
+                .Map(dest => dest.AvatarUrl, src => src.AvatarUrl)
+                .Map(dest => dest.Location, src => src.HostProfile != null ? src.HostProfile.Location : string.Empty)
+                .Map(dest => dest.Work, src => src.HostProfile != null ? src.HostProfile.Work : null)
+                .Map(dest => dest.Education, src => src.HostProfile != null ? src.HostProfile.Education : null)
+                .Map(dest => dest.IsVerified, src => src.HostProfile != null && src.HostProfile.IsVerified)
+                .Map(dest => dest.VerifyStatus, src => src.HostProfile != null ? src.HostProfile.VerifyStatus.ToString() : "Unverified");
         }
     }
 }

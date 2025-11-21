@@ -3,7 +3,7 @@ using Booking.Domain.Entities;
 
 namespace Booking.Domain.Repositories
 {
-    public interface IBookingRepository : IRepository<BookingEntity>
+    public interface IBookingRepository : IBaseRepository<BookingEntity>
     {
         Task<BookingEntity?> GetByBookingCodeAsync(string bookingCode);
         Task<IEnumerable<BookingEntity>> GetByUserIdAsync(Guid userId);

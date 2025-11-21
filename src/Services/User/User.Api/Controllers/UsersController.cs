@@ -3,13 +3,10 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using User.Application.DTOs;
-using User.Application.Handlers.Commands.AddFavorite;
 using User.Application.Handlers.Commands.BecomeHost;
-using User.Application.Handlers.Commands.RemoveFavorite;
 using User.Application.Handlers.Commands.UpdateUserProfile;
 using User.Application.Handlers.Queries.GetMyProfile;
 using User.Application.Handlers.Queries.GetUserById;
-using User.Application.Handlers.Queries.GetUserFavorites;
 using User.Application.Handlers.Queries.GetUsers;
 
 namespace User.Api.Controllers
@@ -76,46 +73,6 @@ namespace User.Api.Controllers
         public async Task<ActionResult<HostProfileDto>> BecomeHost( [FromForm] BecomeHostCommand command, 
             CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(command, cancellationToken);
-            return Ok(result);
-        }
-
-        [HttpGet("favorites")]
-        [Authorize]
-        public async Task<ActionResult<PaginationResult<UserFavoriteExperienceDto>>> GetUserFavorites(
-            [FromQuery] int pageIndex = 1,
-            [FromQuery] int pageSize = 10,
-            CancellationToken cancellationToken = default)
-        {
-            var query = new GetUserFavoritesQuery
-            {
-                PageIndex = pageIndex,
-                PageSize = pageSize
-            };
-            var result = await _mediator.Send(query, cancellationToken);
-            return Ok(result);
-        }
-
-        [HttpPost("favorites/{experienceId}")]
-        [Authorize]
-        public async Task<ActionResult<bool>> AddFavorite([FromRoute]Guid experienceId, CancellationToken cancellationToken)
-        {
-            var command = new AddFavoriteCommand 
-            {
-                ExperienceId = experienceId 
-            };
-            var result = await _mediator.Send(command, cancellationToken);
-            return Ok(result);
-        }
-
-        [HttpDelete("favorites/{experienceId}")]
-        [Authorize]
-        public async Task<ActionResult<bool>> RemoveFavorite([FromRoute]Guid experienceId, CancellationToken cancellationToken)
-        {
-            var command = new RemoveFavoriteCommand
-            {
-                ExperienceId = experienceId
-            };
             var result = await _mediator.Send(command, cancellationToken);
             return Ok(result);
         }

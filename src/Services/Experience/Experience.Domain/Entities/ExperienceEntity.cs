@@ -1,6 +1,5 @@
 using BuildingBlocks.Domain.Models;
 using Experience.Domain.Enums;
-using NetTopologySuite.Geometries;
 
 namespace Experience.Domain.Entities
 {
@@ -23,8 +22,10 @@ namespace Experience.Domain.Entities
         public int MinAge { get; set; }
         public string? Accessibility { get; set; }
         public ExperienceStatus Status { get; set; } = ExperienceStatus.Draft;
-        public CancellationPolicyType CancellationPolicy { get; set; } = CancellationPolicyType.AlwaysFreeCancellation;
+        public CancellationPolicyType CancellationPolicy { get;  set; } = CancellationPolicyType.AlwaysFreeCancellation;
         public string Language { get; set; } = string.Empty;
+        public int TotalReviews { get; set; } = 0;
+        public double AverageRating { get; set; } = 0.0;
         public virtual ExperienceCategoryEntity Category { get; set; } = null!;
         public virtual ExperienceScheduleEntity Schedule { get; set; } = null!;
         public virtual ICollection<ExperienceMediaEntity> Media { get; set; } = [];

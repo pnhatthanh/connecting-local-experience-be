@@ -14,7 +14,7 @@ namespace Experience.Application.Dtos
         public decimal ChildPrice { get; set; }
         public int Duration { get; set; }
         public int MaxParticipants { get; set; }
-        public ExperienceCategoryDto Category { get; set; } = null!;
+        public CategoryDto Category { get; set; } = null!;
         public string ActivityLevel { get; set; } = string.Empty;
         public string SkillLevel { get; set; } = string.Empty;
         public int MinAge { get; set; }

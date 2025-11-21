@@ -48,11 +48,6 @@ namespace User.Infrastructure.Data.Configurations
                 .WithOne(e => e.User)
                 .HasForeignKey<HostProfileEntity>(e => e.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasMany(e => e.FavoriteExperiences)
-                .WithOne(e => e.User)
-                .HasForeignKey(e => e.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

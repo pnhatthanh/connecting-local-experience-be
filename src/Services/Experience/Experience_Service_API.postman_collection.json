@@ -1,0 +1,557 @@
+{
+	"info": {
+		"_postman_id": "experience-service-api-collection",
+		"name": "Experience Service - Complete API",
+		"description": "Complete API collection for Experience Service including Experiences and Categories",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Experiences",
+			"item": [
+				{
+					"name": "Create Experience (Host)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{host_token}}",
+								"description": "Host JWT token"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "Title",
+									"value": "Beach Sunset Photography Tour",
+									"type": "text"
+								},
+								{
+									"key": "Description",
+									"value": "Capture stunning sunset moments at Da Nang beach with professional guidance",
+									"type": "text"
+								},
+								{
+									"key": "Address",
+									"value": "My Khe Beach",
+									"type": "text"
+								},
+								{
+									"key": "District",
+									"value": "Son Tra",
+									"type": "text"
+								},
+								{
+									"key": "City",
+									"value": "Da Nang",
+									"type": "text"
+								},
+								{
+									"key": "Country",
+									"value": "Vietnam",
+									"type": "text"
+								},
+								{
+									"key": "AdultPrice",
+									"value": "500000",
+									"type": "text"
+								},
+								{
+									"key": "ChildPrice",
+									"value": "250000",
+									"type": "text"
+								},
+								{
+									"key": "Duration",
+									"value": "180",
+									"type": "text",
+									"description": "Duration in minutes"
+								},
+								{
+									"key": "MaxParticipants",
+									"value": "10",
+									"type": "text"
+								},
+								{
+									"key": "CategoryId",
+									"value": "{{category_id}}",
+									"type": "text"
+								},
+								{
+									"key": "ActivityLevel",
+									"value": "Low",
+									"type": "text",
+									"description": "Low, Moderate, High, VeryHigh"
+								},
+								{
+									"key": "SkillLevel",
+									"value": "Beginner",
+									"type": "text",
+									"description": "Beginner, Intermediate, Advanced, Expert"
+								},
+								{
+									"key": "MinAge",
+									"value": "10",
+									"type": "text"
+								},
+								{
+									"key": "Accessibility",
+									"value": "Wheelchair accessible",
+									"type": "text"
+								},
+								{
+									"key": "CancellationPolicy",
+									"value": "AlwaysFreeCancellation",
+									"type": "text",
+									"description": "AlwaysFreeCancellation, FreeCancellation24Hours, FreeCancellation48Hours, NonRefundable"
+								},
+								{
+									"key": "Language",
+									"value": "English",
+									"type": "text"
+								},
+								{
+									"key": "Media",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "Media",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/experiences",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"experiences"
+							]
+						},
+						"description": "Create a new experience (Host only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Experience (Host)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{host_token}}",
+								"description": "Host JWT token"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "Title",
+									"value": "Updated Beach Photography Tour",
+									"type": "text"
+								},
+								{
+									"key": "Description",
+									"value": "Updated description",
+									"type": "text"
+								},
+								{
+									"key": "AdultPrice",
+									"value": "550000",
+									"type": "text"
+								},
+								{
+									"key": "Media",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/experiences/{{experience_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"experiences",
+								"{{experience_id}}"
+							]
+						},
+						"description": "Update an existing experience (Host only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Experiences",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/experiences?searchTerm=&categoryIds=&minDuration=&maxDuration=&languages=&pageNumber=1&pageSize=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"experiences"
+							],
+							"query": [
+								{
+									"key": "searchTerm",
+									"value": "",
+									"description": "Search in title & description"
+								},
+								{
+									"key": "categoryIds",
+									"value": "",
+									"description": "Category IDs (multiple: categoryIds=id1&categoryIds=id2)"
+								},
+								{
+									"key": "minDuration",
+									"value": "",
+									"description": "Min duration in minutes"
+								},
+								{
+									"key": "maxDuration",
+									"value": "",
+									"description": "Max duration in minutes"
+								},
+								{
+									"key": "languages",
+									"value": "",
+									"description": "Languages (multiple: languages=English&languages=Vietnamese)"
+								},
+								{
+									"key": "pageNumber",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Get paginated list of approved experiences with filters"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Experience By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/experiences/{{experience_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"experiences",
+								"{{experience_id}}"
+							]
+						},
+						"description": "Get detailed information of a specific experience"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Experiences by IDs (Batch)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/experiences/batch?ids={{experience_id}}&ids={{experience_id_2}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"experiences",
+								"batch"
+							],
+							"query": [
+								{
+									"key": "ids",
+									"value": "{{experience_id}}"
+								},
+								{
+									"key": "ids",
+									"value": "{{experience_id_2}}"
+								}
+							]
+						},
+						"description": "Get multiple experiences by their IDs (used by User Service for wishlist)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Experience (Host)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{host_token}}",
+								"description": "Host JWT token"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/experiences/{{experience_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"experiences",
+								"{{experience_id}}"
+							]
+						},
+						"description": "Delete an experience (Host only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Filter by Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/experiences?categoryIds={{category_id_1}}&categoryIds={{category_id_2}}&pageNumber=1&pageSize=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"experiences"
+							],
+							"query": [
+								{
+									"key": "categoryIds",
+									"value": "{{category_id_1}}"
+								},
+								{
+									"key": "categoryIds",
+									"value": "{{category_id_2}}"
+								},
+								{
+									"key": "pageNumber",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Filter experiences by multiple categories"
+					},
+					"response": []
+				},
+				{
+					"name": "Filter by Duration Range",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/experiences?minDuration=120&maxDuration=240&pageNumber=1&pageSize=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"experiences"
+							],
+							"query": [
+								{
+									"key": "minDuration",
+									"value": "120",
+									"description": "2 hours"
+								},
+								{
+									"key": "maxDuration",
+									"value": "240",
+									"description": "4 hours"
+								},
+								{
+									"key": "pageNumber",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Filter experiences by duration range (e.g., 2-4 hours)"
+					},
+					"response": []
+				},
+				{
+					"name": "Filter by Languages",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/experiences?languages=English&languages=Vietnamese&pageNumber=1&pageSize=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"experiences"
+							],
+							"query": [
+								{
+									"key": "languages",
+									"value": "English"
+								},
+								{
+									"key": "languages",
+									"value": "Vietnamese"
+								},
+								{
+									"key": "pageNumber",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Filter experiences by multiple languages"
+					},
+					"response": []
+				},
+				{
+					"name": "Search & Filter Combined",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/experiences?searchTerm=beach&categoryIds={{category_id}}&minDuration=120&maxDuration=240&languages=English&pageNumber=1&pageSize=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"experiences"
+							],
+							"query": [
+								{
+									"key": "searchTerm",
+									"value": "beach"
+								},
+								{
+									"key": "categoryIds",
+									"value": "{{category_id}}"
+								},
+								{
+									"key": "minDuration",
+									"value": "120"
+								},
+								{
+									"key": "maxDuration",
+									"value": "240"
+								},
+								{
+									"key": "languages",
+									"value": "English"
+								},
+								{
+									"key": "pageNumber",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Combine search term with all filters"
+					},
+					"response": []
+				}
+			],
+			"description": "Experience management endpoints"
+		},
+		{
+			"name": "Categories",
+			"item": [
+				{
+					"name": "Get All Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories"
+							]
+						},
+						"description": "Get all experience categories"
+					},
+					"response": []
+				}
+			],
+			"description": "Category endpoints"
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5002",
+			"type": "string",
+			"description": "Experience Service base URL"
+		},
+		{
+			"key": "host_token",
+			"value": "your_host_jwt_token_here",
+			"type": "string",
+			"description": "JWT token for Host user"
+		},
+		{
+			"key": "experience_id",
+			"value": "00000000-0000-0000-0000-000000000000",
+			"type": "string",
+			"description": "Experience ID"
+		},
+		{
+			"key": "experience_id_2",
+			"value": "00000000-0000-0000-0000-000000000000",
+			"type": "string",
+			"description": "Second Experience ID for batch request"
+		},
+		{
+			"key": "category_id",
+			"value": "00000000-0000-0000-0000-000000000000",
+			"type": "string",
+			"description": "Category ID"
+		},
+		{
+			"key": "category_id_1",
+			"value": "00000000-0000-0000-0000-000000000000",
+			"type": "string",
+			"description": "First Category ID for multi-category filter"
+		},
+		{
+			"key": "category_id_2",
+			"value": "00000000-0000-0000-0000-000000000000",
+			"type": "string",
+			"description": "Second Category ID for multi-category filter"
+		}
+	]
+}

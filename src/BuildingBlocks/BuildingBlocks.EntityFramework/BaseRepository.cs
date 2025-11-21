@@ -92,6 +92,11 @@ namespace BuildingBlocks.EntityFramework
         {
             if (string.IsNullOrEmpty(sortBy))
                 return query;
+            var property = typeof(T)
+                .GetProperties()
+                .FirstOrDefault(p => p.Name.Equals(sortBy, StringComparison.OrdinalIgnoreCase));
+            if (property == null)
+                return query;
             return isAscending ? query.OrderBy(sortBy) : query.OrderBy(sortBy + " descending");
         }
     }

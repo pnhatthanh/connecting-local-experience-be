@@ -25,5 +25,9 @@ namespace Booking.Infrastructure.Services
         public string? UserName => _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value;
 
         public string? Email => _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Email)?.Value;
+
+        public string[]? Roles => throw new NotImplementedException();
+
+        public bool IsAuthenticated => throw new NotImplementedException();
     }
 }

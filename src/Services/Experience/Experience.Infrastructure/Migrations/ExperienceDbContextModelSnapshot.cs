@@ -78,6 +78,9 @@ namespace Experience.Infrastructure.Migrations
                         .HasColumnType("decimal(10,2)")
                         .HasColumnName("adult_price");
 
+                    b.Property<double>("AverageRating")
+                        .HasColumnType("double precision");
+
                     b.Property<string>("CancellationPolicy")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -159,6 +162,9 @@ namespace Experience.Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("title");
+
+                    b.Property<int>("TotalReviews")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
