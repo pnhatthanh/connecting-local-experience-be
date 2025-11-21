@@ -3,7 +3,7 @@ using Booking.Domain.Entities;
 
 namespace Booking.Domain.Repositories
 {
-    public interface IRefundRepository : IRepository<RefundEntity>
+    public interface IRefundRepository : IBaseRepository<RefundEntity>
     {
         Task<IEnumerable<RefundEntity>> GetByBookingIdAsync(Guid bookingId);
         Task<RefundEntity?> GetByVnpRefundRefAsync(string vnpRefundRef);

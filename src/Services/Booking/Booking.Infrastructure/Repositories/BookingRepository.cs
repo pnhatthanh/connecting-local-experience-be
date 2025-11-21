@@ -67,7 +67,7 @@ namespace Booking.Infrastructure.Repositories
             int sequenceNumber = 1;
             if (lastBooking != null)
             {
-                var lastSequence = lastBooking.BookingCode.Substring(10); // After "BK20251113"
+                var lastSequence = lastBooking.BookingCode.Substring(10); 
                 if (int.TryParse(lastSequence, out int lastNumber))
                 {
                     sequenceNumber = lastNumber + 1;
@@ -77,7 +77,7 @@ namespace Booking.Infrastructure.Repositories
             return $"BK{datePrefix}{sequenceNumber:D3}";
         }
 
-        public override async Task<BookingEntity?> GetByIdAsync(Guid id)
+        public async Task<BookingEntity?> GetByIdAsync(Guid id)
         {
             return await _context.Bookings
                 .Include(b => b.Payment)

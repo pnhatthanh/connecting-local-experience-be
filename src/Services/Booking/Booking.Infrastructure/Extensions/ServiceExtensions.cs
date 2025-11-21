@@ -1,5 +1,4 @@
 using BuildingBlocks.Application.Interfaces;
-using BuildingBlocks.Domain.Interfaces;
 using BuildingBlocks.EntityFramework;
 using Booking.Application.Interfaces;
 using Booking.Domain.Repositories;
@@ -7,7 +6,6 @@ using Booking.Infrastructure.Configurations;
 using Booking.Infrastructure.Data;
 using Booking.Infrastructure.Repositories;
 using Booking.Infrastructure.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,14 +33,12 @@ namespace Booking.Infrastructure.Extensions
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             
-            // Configure VNPay
             services.Configure<VnPaySettings>(options =>
             {
                 configuration.GetSection(VnPaySettings.VnPaySettingsKey).Bind(options);
             });
             services.AddScoped<IVnPayService, VnPayService>();
             
-            // Configure Experience Service HTTP Client
             services.AddHttpClient<IExperienceService, ExperienceService>(client =>
             {
                 var experienceApiUrl = configuration["Services:ExperienceApi"]

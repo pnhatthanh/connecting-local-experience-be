@@ -10,7 +10,6 @@ using Experience.Domain.Repositories;
 using Experience.Domain.Specifications;
 using MapsterMapper;
 using Microsoft.AspNetCore.Http;
-using NetTopologySuite.Geometries;
 using System.Collections.Concurrent;
 
 namespace Experience.Application.Handlers.Commands.UpdateExperience
@@ -22,7 +21,6 @@ namespace Experience.Application.Handlers.Commands.UpdateExperience
         private readonly IMapper _mapper;
         private readonly IPhotoService _photoService;
         private readonly ICurrentUserService _currentUserService;
-        private readonly GeometryFactory _geometryFactory = new(new PrecisionModel(), 4326);
 
         public UpdateExperienceCommandHandler(IExperienceRepository experienceRepository, IUnitOfWork unitOfWork,
             IMapper mapper, IPhotoService photoService, ICurrentUserService currentUserService)
@@ -39,7 +37,7 @@ namespace Experience.Application.Handlers.Commands.UpdateExperience
             var experience = await LoadExperienceAsync(request.ExperienceId, cancellationToken);
             ValidateOwnership(experience);
             UpdateBasicInfo(experience, request);
-            await UpdateScheduleAsync(experience, request, cancellationToken);
+            UpdateSchedule(experience, request);
             await UpdateMediaAsync(experience, request, cancellationToken);
             await UpdateItinerariesAsync(experience, request, cancellationToken);
 
@@ -84,13 +82,8 @@ namespace Experience.Application.Handlers.Commands.UpdateExperience
             experience.CancellationPolicy = Enum.Parse<CancellationPolicyType>(request.CancellationPolicy, true);
             experience.Language = request.Language;
         }
-        private Task UpdateScheduleAsync(ExperienceEntity experience, UpdateExperienceCommand request, CancellationToken ct)
+        private void UpdateSchedule(ExperienceEntity experience, UpdateExperienceCommand request)
         {
-            if (experience.Schedule == null)
-            {
-                if (request.RecurrenceType == null) return Task.CompletedTask;
-                experience.Schedule = new ExperienceScheduleEntity();
-            }
             experience.Schedule.RecurrenceType = Enum.Parse<RecurrenceType>(request.RecurrenceType!, true);
             experience.Schedule.DaysOfWeek = request.DaysOfWeek;
             experience.Schedule.StartDate = request.StartDate;
@@ -103,7 +96,6 @@ namespace Experience.Application.Handlers.Commands.UpdateExperience
                     EndTime = t.EndTime
                 })
                 .ToList() ?? new List<ScheduleTimeSlot>();
-            return Task.CompletedTask;
         }
         private async Task UpdateMediaAsync(ExperienceEntity experience, UpdateExperienceCommand request, CancellationToken ct)
         {

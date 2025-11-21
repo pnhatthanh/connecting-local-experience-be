@@ -9,7 +9,7 @@ namespace Experience.Application.Mappings
         public void Register(TypeAdapterConfig config)
         {
             config.NewConfig<ExperienceEntity, ExperienceDto>()
-                .Map(dest => dest.Category, src => src.Category != null ? new ExperienceCategoryDto
+                .Map(dest => dest.Category, src => src.Category != null ? new CategoryDto
                 {
                     Id = src.Category.Id,
                     Name = src.Category.Name
@@ -22,7 +22,16 @@ namespace Experience.Application.Mappings
                 .Map(dest => dest.Itineraries, src => src.Itineraries);
             config.NewConfig<ExperienceMediaEntity, ExperienceMediaDto>();
             config.NewConfig<ExperienceItineraryEntity, ExperienceItineraryDto>();
-            config.NewConfig<ExperienceCategoryEntity, ExperienceCategoryDto>();
+            config.NewConfig<ExperienceEntity, ExperienceSummaryDto>()
+                .Map(dest => dest.Category, src => src.Category != null ? new CategoryDto
+                {
+                    Id = src.Category.Id,
+                    Name = src.Category.Name
+                } : null)
+                .Map(dest => dest.Media, src => src.Media)
+                .Map(dest => dest.AverageRating, src => src.AverageRating)
+                .Map(dest => dest.TotalReviews, src => src.TotalReviews)
+                .Map(dest => dest.Address, src => src.Address + ", " + src.District + ", " + src.City + ", " + src.Country);
         }
     }
 }

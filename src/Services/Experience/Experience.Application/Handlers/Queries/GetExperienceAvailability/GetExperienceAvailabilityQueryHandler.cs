@@ -1,59 +1,110 @@
-using BuildingBlocks.Domain.Exceptions;
-using BuildingBlocks.Domain.Specifications;
+using BuildingBlocks.Application.CQRS.Query;
+using BuildingBlocks.Application.Interfaces;
+using BuildingBlocks.Domain.Interfaces;
 using Experience.Application.Dtos;
 using Experience.Application.Utils;
-using Experience.Domain.Enums;
+using Experience.Domain.Entities;
 using Experience.Domain.Repositories;
 using Experience.Domain.Specifications;
-using MediatR;
 
 namespace Experience.Application.Handlers.Queries.GetExperienceAvailability
 {
-    public class GetExperienceAvailabilityQueryHandler : IRequestHandler<GetExperienceAvailabilityQuery, List<ExperienceScheduleSlotDto>>
+    public class GetExperienceAvailabilityQueryHandler : IQueryHandler<GetExperienceAvailabilityQuery, ExperienceCalendarDto>
     {
         private readonly IExperienceRepository _experienceRepository;
-        private readonly IExperienceScheduleSlotRepository _slotRepository;
+        private readonly IExperienceScheduleRepository _scheduleRepository;
+        private readonly IBaseRepository<ExperienceScheduleSlotEntity> _slotRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
         public GetExperienceAvailabilityQueryHandler(
             IExperienceRepository experienceRepository,
-            IExperienceScheduleSlotRepository slotRepository)
+            IExperienceScheduleRepository scheduleRepository,
+            IBaseRepository<ExperienceScheduleSlotEntity> slotRepository,
+            IUnitOfWork unitOfWork)
         {
             _experienceRepository = experienceRepository;
+            _scheduleRepository = scheduleRepository;
             _slotRepository = slotRepository;
+            _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<ExperienceScheduleSlotDto>> Handle(GetExperienceAvailabilityQuery request, CancellationToken cancellationToken)
+        public async Task<ExperienceCalendarDto> Handle(GetExperienceAvailabilityQuery request, CancellationToken cancellationToken)
         {
-            var spec = new ExperienceIdSpecification(request.ExperienceId);
-            var experience = await _experienceRepository.GetBySpecAsync(spec, e => e.Schedule)
-                ?? throw new BadRequestException($"Experience with ID {request.ExperienceId} not found "); 
-            var slotSpec = new SlotsByScheduleIdsAndDateRangeSpecification(
-                new List<Guid> { experience.Schedule.Id }, 
-                request.StartDate, 
-                request.EndDate);
-            var existingSlots = await _slotRepository.GetAllAsync(slotSpec);
-            var generatedSlots = SlotGenerator.GenerateSlotsForSchedule(experience.Schedule, request.StartDate, request.EndDate);
-            foreach (var slot in generatedSlots)
-            {
-                var existing = existingSlots.FirstOrDefault(x =>
-                    x.Date == slot.Date &&
-                    x.StartTime == slot.StartTime);
+            var experience = await _experienceRepository.GetByIdAsync(request.ExperienceId)
+                ?? throw new KeyNotFoundException($"Experience with ID {request.ExperienceId} not found");
 
-                if (existing != null)
+            var scheduleSpec = new ScheduleByExperienceSpecification(request.ExperienceId);
+            var schedule = await _scheduleRepository.GetBySpecAsync(scheduleSpec)
+                ?? throw new KeyNotFoundException($"Schedule not found for experience {request.ExperienceId}");
+
+            var potentialSlots = SlotGenerator.GenerateSlotsForSchedule(
+                schedule,
+                request.StartDate,
+                request.EndDate
+            );
+
+            var scheduleIds = new List<Guid> { schedule.Id };
+            var existingSlotsSpec = new SlotsByScheduleIdsAndDateRangeSpecification(
+                scheduleIds,
+                request.StartDate,
+                request.EndDate
+            );
+            var existingSlots = await _slotRepository.GetAllAsync(existingSlotsSpec);
+            var existingSlotsDict = existingSlots.ToDictionary(s => $"{s.Date}_{s.StartTime}_{s.EndTime}");
+
+            var availabilityList = new List<ExperienceAvailabilityDto>();
+
+            foreach (var potentialSlot in potentialSlots)
+            {
+                var key = $"{potentialSlot.Date}_{potentialSlot.StartTime}_{potentialSlot.EndTime}";
+                
+                int spotsAvailable;
+                if (existingSlotsDict.TryGetValue(key, out var existingSlot))
                 {
-                    slot.Id = existing.Id;
-                    slot.Status = existing.Status.ToString();
-                    slot.TotalSlots = existing.TotalSlots;
-                    slot.AvailableSlots = existing.AvailableSlots;
+                    spotsAvailable = existingSlot.AvailableSlots;
                 }
                 else
                 {
-                    slot.Status = SlotStatus.Open.ToString();
-                    slot.TotalSlots = experience.MaxParticipants;
-                    slot.AvailableSlots = experience.MaxParticipants;
+                    spotsAvailable = experience.MaxParticipants;
                 }
+
+                availabilityList.Add(new ExperienceAvailabilityDto
+                {
+                    Date = potentialSlot.Date,
+                    StartTime = potentialSlot.StartTime,
+                    EndTime = potentialSlot.EndTime,
+                    SpotsAvailable = spotsAvailable
+                });
             }
-            return generatedSlots.OrderBy(s => s.Date).ThenBy(s => s.StartTime).ToList();
+
+            var calendar = availabilityList
+                .GroupBy(a => a.Date)
+                .Select(g => new DateAvailabilityDto
+                {
+                    Date = g.Key,
+                    DayOfWeek = g.Key.DayOfWeek.ToString(),
+                    TotalSpotsAvailable = g.Sum(x => x.SpotsAvailable),
+                    TimeSlots = g.Select(x =>
+                    {
+                        var key = $"{x.Date}_{x.StartTime}_{x.EndTime}";
+                        var slotId = existingSlotsDict.TryGetValue(key, out var slot) ? slot.Id : (Guid?)null;
+                        
+                        return new TimeSlotAvailabilityDto
+                        {
+                            StartTime = x.StartTime,
+                            EndTime = x.EndTime,
+                            SpotsAvailable = x.SpotsAvailable,
+                            SlotId = slotId
+                        };
+                    }).ToList()
+                })
+                .OrderBy(d => d.Date)
+                .ToList();
+
+            return new ExperienceCalendarDto
+            {
+                Calendar = calendar
+            };
         }
     }
 }

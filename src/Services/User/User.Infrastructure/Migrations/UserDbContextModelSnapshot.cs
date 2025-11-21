@@ -231,7 +231,50 @@ namespace User.Infrastructure.Migrations
                     b.ToTable("tbl_users", (string)null);
                 });
 
-            modelBuilder.Entity("User.Domain.Entities.UserFavoriteExperienceEntity", b =>
+            modelBuilder.Entity("User.Domain.Entities.UserWishlistEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<int>("ExperienceCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("experience_count");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("tbl_user_wishlists", (string)null);
+                });
+
+            modelBuilder.Entity("User.Domain.Entities.WishlistExperienceEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -249,20 +292,23 @@ namespace User.Infrastructure.Migrations
                         .HasColumnName("experience_id");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("WishlistId")
                         .HasColumnType("uuid")
-                        .HasColumnName("user_id");
+                        .HasColumnName("wishlist_id");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ExperienceId");
 
-                    b.HasIndex("UserId", "ExperienceId")
+                    b.HasIndex("WishlistId");
+
+                    b.HasIndex("WishlistId", "ExperienceId")
                         .IsUnique();
 
-                    b.ToTable("tbl_user_favorite_experiences", (string)null);
+                    b.ToTable("tbl_wishlist_experiences", (string)null);
                 });
 
             modelBuilder.Entity("User.Domain.Entities.HostProfileEntity", b =>
@@ -276,10 +322,10 @@ namespace User.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("User.Domain.Entities.UserFavoriteExperienceEntity", b =>
+            modelBuilder.Entity("User.Domain.Entities.UserWishlistEntity", b =>
                 {
                     b.HasOne("User.Domain.Entities.UserEntity", "User")
-                        .WithMany("FavoriteExperiences")
+                        .WithMany("Wishlists")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -287,11 +333,27 @@ namespace User.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("User.Domain.Entities.WishlistExperienceEntity", b =>
+                {
+                    b.HasOne("User.Domain.Entities.UserWishlistEntity", "Wishlist")
+                        .WithMany("WishlistExperiences")
+                        .HasForeignKey("WishlistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Wishlist");
+                });
+
             modelBuilder.Entity("User.Domain.Entities.UserEntity", b =>
                 {
-                    b.Navigation("FavoriteExperiences");
-
                     b.Navigation("HostProfile");
+
+                    b.Navigation("Wishlists");
+                });
+
+            modelBuilder.Entity("User.Domain.Entities.UserWishlistEntity", b =>
+                {
+                    b.Navigation("WishlistExperiences");
                 });
 #pragma warning restore 612, 618
         }

@@ -24,7 +24,8 @@ namespace User.Infrastructure.Extensions
 
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IHostProfileRepository, HostProfileRepository>();
-            services.AddScoped<IUserFavoriteExperienceRepository, UserFavoriteExperienceRepository>();
+            services.AddScoped<IUserWishlistRepository, UserWishlistRepository>();
+            services.AddScoped<IWishlistExperienceRepository, WishlistExperienceRepository>();
 
             var rabbitMQSetting = configuration.GetSection("RabbitMQ").Get<RabbitMQConfig>()
                 ?? throw new ArgumentNullException("RabbitMQ configuration is null");
@@ -34,6 +35,9 @@ namespace User.Infrastructure.Extensions
             services.AddScoped<IPhotoService, CloudinaryService>();
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+            services.AddHttpClient();
+            services.AddScoped<IExperienceServiceClient, ExperienceServiceClient>();
 
             return services;
         }

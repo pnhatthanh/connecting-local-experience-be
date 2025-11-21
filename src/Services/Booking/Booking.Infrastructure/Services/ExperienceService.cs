@@ -1,5 +1,6 @@
 using Booking.Application.Dtos;
 using Booking.Application.Interfaces;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace Booking.Infrastructure.Services

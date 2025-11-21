@@ -1,9 +1,9 @@
-using BuildingBlocks.Domain.Interfaces;
 using Booking.Domain.Entities;
+using BuildingBlocks.Domain.Interfaces;
 
 namespace Booking.Domain.Repositories
 {
-    public interface IBookingCancellationRepository : IRepository<BookingCancellationEntity>
+    public interface IBookingCancellationRepository : IBaseRepository<BookingCancellationEntity>
     {
         Task<BookingCancellationEntity?> GetByBookingIdAsync(Guid bookingId);
     }
