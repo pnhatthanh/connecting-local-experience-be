@@ -8,7 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddIAMApplication()
-                .AddIAMInfrastructure(builder.Configuration);
+                .AddIAMInfrastructure(builder.Configuration)
+                .AddAuthenticationExtension(builder.Configuration);
 
 var app = builder.Build();
 

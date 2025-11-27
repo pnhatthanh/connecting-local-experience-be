@@ -24,20 +24,8 @@ namespace User.Api.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<PaginationResult<UserDto>>> GetUsers(
-            [FromQuery] int pageIndex = 1,
-            [FromQuery] int pageSize = 10,
-            [FromQuery] string? searchTerm = null,
-            [FromQuery] string? role = null,
-            CancellationToken cancellationToken = default)
+        public async Task<ActionResult<PaginationResult<UserDto>>> GetUsers( [FromQuery] GetUsersQuery query, CancellationToken cancellationToken = default)
         {
-            var query = new GetUsersQuery
-            {
-                PageIndex = pageIndex,
-                PageSize = pageSize,
-                SearchTerm = searchTerm,
-                Role = role
-            };
             var result = await _mediator.Send(query, cancellationToken);
             return Ok(result);
         }

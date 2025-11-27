@@ -21,17 +21,10 @@ namespace User.Application.Handlers.Queries.GetHostDetail
         public async Task<HostDetailDto> Handle(GetHostDetailQuery request, CancellationToken cancellationToken)
         {
             var spec = new UserByIdSpecification(request.HostId);
-            var user = await _userRepository.GetBySpecAsync(spec, includes: u => u.HostProfile!);
-
-            if (user == null)
-            {
-                throw new NotFoundException("User not found");
-            }
-
+            var user = await _userRepository.GetBySpecAsync(spec, includes: u => u.HostProfile!) 
+                ?? throw new NotFoundException("User not found");
             if (user.HostProfile == null)
-            {
                 throw new NotFoundException("This user is not a host");
-            }
 
             var dto = _mapper.Map<HostDetailDto>(user);
             return dto;

@@ -8,12 +8,16 @@ namespace Booking.Application.Dtos
         public Guid ExperienceId { get; set; }
         public string BookingCode { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
+        public DateOnly Date { get; set; }
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan EndTime { get; set; }
         public int Adults { get; set; }
         public int Children { get; set; }
         public decimal TotalPrice { get; set; }
-        public string ContactName { get; set; } = string.Empty;
+        public decimal PlatformFee { get; set; }
+        public decimal HostAmount { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
         public string ContactEmail { get; set; } = string.Empty;
         public string ContactPhone { get; set; } = string.Empty;
         public string? Notes { get; set; }

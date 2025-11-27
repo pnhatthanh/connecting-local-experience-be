@@ -21,7 +21,7 @@ namespace Experience.Domain.Entities
         public SkillLevel SkillLevel { get; set; }
         public int MinAge { get; set; }
         public string? Accessibility { get; set; }
-        public ExperienceStatus Status { get; set; } = ExperienceStatus.Draft;
+        public ExperienceStatus Status { get; set; } = ExperienceStatus.Pending;
         public CancellationPolicyType CancellationPolicy { get;  set; } = CancellationPolicyType.AlwaysFreeCancellation;
         public string Language { get; set; } = string.Empty;
         public int TotalReviews { get; set; } = 0;

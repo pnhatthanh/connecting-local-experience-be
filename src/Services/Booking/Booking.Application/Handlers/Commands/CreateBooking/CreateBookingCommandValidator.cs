@@ -9,9 +9,13 @@ namespace Booking.Application.Handlers.Commands.CreateBooking
             RuleFor(x => x.ExperienceId)
                 .NotEmpty().WithMessage("Experience ID is required");
             
+            RuleFor(x => x.Date)
+                .NotEmpty().WithMessage("Date is required")
+                .Must(date => date >= DateOnly.FromDateTime(DateTime.UtcNow.Date))
+                .WithMessage("Date must be today or in the future");
+            
             RuleFor(x => x.StartTime)
-                .NotEmpty().WithMessage("Start time is required")
-                .GreaterThan(DateTime.UtcNow).WithMessage("Start time must be in the future");
+                .NotEmpty().WithMessage("Start time is required");
             
             RuleFor(x => x.EndTime)
                 .NotEmpty().WithMessage("End time is required")
@@ -23,9 +27,13 @@ namespace Booking.Application.Handlers.Commands.CreateBooking
             RuleFor(x => x.Children)
                 .GreaterThanOrEqualTo(0).WithMessage("Children count cannot be negative");
             
-            RuleFor(x => x.ContactName)
-                .NotEmpty().WithMessage("Contact name is required")
-                .MaximumLength(255).WithMessage("Contact name cannot exceed 255 characters");
+            RuleFor(x => x.FirstName)
+                .NotEmpty().WithMessage("First name is required")
+                .MaximumLength(255).WithMessage("First name cannot exceed 255 characters");
+
+            RuleFor(x => x.LastName)
+                .NotEmpty().WithMessage("Last name is required")
+                .MaximumLength(255).WithMessage("Last name cannot exceed 255 characters");
             
             RuleFor(x => x.ContactEmail)
                 .NotEmpty().WithMessage("Contact email is required")

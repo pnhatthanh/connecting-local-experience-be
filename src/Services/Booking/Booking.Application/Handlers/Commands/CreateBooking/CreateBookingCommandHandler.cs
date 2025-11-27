@@ -6,6 +6,7 @@ using BuildingBlocks.Domain.Interfaces;
 using Booking.Application.Dtos;
 using Booking.Application.Events;
 using Booking.Application.Interfaces;
+using Booking.Application.Utils;
 using Booking.Domain.Entities;
 using Booking.Domain.Enums;
 using Booking.Domain.Repositories;
@@ -19,6 +20,7 @@ namespace Booking.Application.Handlers.Commands.CreateBooking
         private readonly IPaymentRepository _paymentRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IExperienceService _experienceService;
+        private readonly IMomoService _momoService;
         private readonly ICurrentUserService _currentUserService;
         private readonly IEventBus _eventBus;
         private readonly IMapper _mapper;
@@ -28,6 +30,7 @@ namespace Booking.Application.Handlers.Commands.CreateBooking
             IPaymentRepository paymentRepository,
             IUnitOfWork unitOfWork,
             IExperienceService experienceService,
+            IMomoService momoService,
             ICurrentUserService currentUserService,
             IEventBus eventBus,
             IMapper mapper)
@@ -36,6 +39,7 @@ namespace Booking.Application.Handlers.Commands.CreateBooking
             _paymentRepository = paymentRepository;
             _unitOfWork = unitOfWork;
             _experienceService = experienceService;
+            _momoService = momoService;
             _currentUserService = currentUserService;
             _eventBus = eventBus;
             _mapper = mapper;
@@ -45,17 +49,11 @@ namespace Booking.Application.Handlers.Commands.CreateBooking
         {
             var userId = _currentUserService.UserId;
 
-            // Validate experience exists and get details
-            var experience = await _experienceService.GetExperienceAsync(request.ExperienceId);
-            if (experience == null)
-                throw new NotFoundException("Experience not found");
-
-            if (experience.Status != "Published")
-                throw new BadRequestException("Experience is not available for booking");
-
-            // Validate availability
+            var experience = await _experienceService.GetExperienceAsync(request.ExperienceId) 
+                ?? throw new BadRequestException("Experience not found");
             var isAvailable = await _experienceService.ValidateAvailabilityAsync(
                 request.ExperienceId, 
+                request.Date,
                 request.StartTime, 
                 request.EndTime, 
                 request.Adults, 
@@ -63,14 +61,16 @@ namespace Booking.Application.Handlers.Commands.CreateBooking
 
             if (!isAvailable)
                 throw new BadRequestException("Selected time slot is not available");
+            
 
-            // Calculate total price
             var totalPrice = (experience.AdultPrice * request.Adults) + (experience.ChildPrice * request.Children);
 
-            // Generate booking code
-            var bookingCode = await _bookingRepository.GenerateBookingCodeAsync();
+            var platformFeePercentage = 0.15m;
+            var platformFee = totalPrice * platformFeePercentage;
+            var hostAmount = totalPrice - platformFee;  // Host receives 85%
 
-            // Create booking entity
+            var bookingCode = BookingCodeGenerator.Generate();
+
             var booking = new BookingEntity
             {
                 Id = Guid.NewGuid(),
@@ -79,53 +79,86 @@ namespace Booking.Application.Handlers.Commands.CreateBooking
                 ExperienceId = request.ExperienceId,
                 BookingCode = bookingCode,
                 Status = BookingStatus.Pending,
+                Date = request.Date,
                 StartTime = request.StartTime,
                 EndTime = request.EndTime,
                 Adults = request.Adults,
                 Children = request.Children,
-                TotalPrice = totalPrice,
-                ContactName = request.ContactName,
+                TotalPrice = totalPrice,            
+                PlatformFee = platformFee,            
+                HostAmount = hostAmount,           
+                IsPayoutCreated = false,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
                 ContactEmail = request.ContactEmail,
                 ContactPhone = request.ContactPhone,
                 Notes = request.Notes,
                 CreatedAt = DateTime.UtcNow
             };
 
-            // Create payment record
             var payment = new PaymentEntity
             {
                 Id = Guid.NewGuid(),
                 BookingId = booking.Id,
                 Amount = totalPrice,
                 Currency = "VND",
-                Provider = PaymentProvider.VnPay,
+                Provider = request.PaymentProvider,  
                 Status = PaymentStatus.Pending,
                 CreatedAt = DateTime.UtcNow
             };
-
             await _bookingRepository.AddAsync(booking);
             await _paymentRepository.AddAsync(payment);
             await _unitOfWork.SaveChangeAsync();
 
-            // Publish event to update experience slots
+            // Create payment URL immediately after booking creation
+            var paymentUrlResult = await _momoService.CreatePaymentUrlAsync(
+                booking.Id,
+                totalPrice,
+                bookingCode,
+                "127.0.0.1"); // IP address will be set from controller
+
+            if (paymentUrlResult.success && !string.IsNullOrEmpty(paymentUrlResult.paymentUrl))
+            {
+                payment.PaymentUrl = paymentUrlResult.paymentUrl;
+                await _unitOfWork.SaveChangeAsync();
+            }
+
             var bookingCreatedEvent = new BookingCreatedEvent(
                 booking.Id,
                 booking.ExperienceId,
                 booking.UserId,
                 booking.HostId,
                 booking.BookingCode,
+                booking.Date,
                 booking.StartTime,
                 booking.EndTime,
                 booking.Adults,
                 booking.Children,
                 booking.TotalPrice,
-                booking.ContactName,
+                booking.FirstName + " " + booking.LastName,
                 booking.ContactEmail
             );
-
             await _eventBus.PublishAsync(bookingCreatedEvent, cancellationToken);
 
-            return _mapper.Map<BookingDto>(booking);
+            var bookingDto = _mapper.Map<BookingDto>(booking);
+            
+            // Include payment info with URL in response
+            if (payment.PaymentUrl != null)
+            {
+                bookingDto.Payment = new PaymentDto
+                {
+                    Id = payment.Id,
+                    BookingId = payment.BookingId,
+                    Amount = payment.Amount,
+                    Currency = payment.Currency,
+                    Provider = payment.Provider.ToString(),
+                    Status = payment.Status.ToString(),
+                    PaymentUrl = payment.PaymentUrl,
+                    CreatedAt = payment.CreatedAt
+                };
+            }
+
+            return bookingDto;
         }
     }
 }

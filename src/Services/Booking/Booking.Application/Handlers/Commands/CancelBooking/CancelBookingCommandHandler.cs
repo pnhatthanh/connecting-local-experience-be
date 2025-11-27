@@ -8,6 +8,8 @@ using Booking.Application.Interfaces;
 using Booking.Domain.Entities;
 using Booking.Domain.Enums;
 using Booking.Domain.Repositories;
+using Booking.Domain.Specifications;
+using Microsoft.Extensions.Logging;
 
 namespace Booking.Application.Handlers.Commands.CancelBooking
 {
@@ -19,9 +21,10 @@ namespace Booking.Application.Handlers.Commands.CancelBooking
         private readonly IBookingCancellationRepository _cancellationRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IExperienceService _experienceService;
-        private readonly IVnPayService _vnPayService;
+        private readonly IMomoService _momoService;
         private readonly ICurrentUserService _currentUserService;
         private readonly IEventBus _eventBus;
+        private readonly ILogger<CancelBookingCommandHandler> _logger;
 
         public CancelBookingCommandHandler(
             IBookingRepository bookingRepository,
@@ -30,9 +33,10 @@ namespace Booking.Application.Handlers.Commands.CancelBooking
             IBookingCancellationRepository cancellationRepository,
             IUnitOfWork unitOfWork,
             IExperienceService experienceService,
-            IVnPayService vnPayService,
+            IMomoService momoService,
             ICurrentUserService currentUserService,
-            IEventBus eventBus)
+            IEventBus eventBus,
+            ILogger<CancelBookingCommandHandler> logger)
         {
             _bookingRepository = bookingRepository;
             _paymentRepository = paymentRepository;
@@ -40,17 +44,19 @@ namespace Booking.Application.Handlers.Commands.CancelBooking
             _cancellationRepository = cancellationRepository;
             _unitOfWork = unitOfWork;
             _experienceService = experienceService;
-            _vnPayService = vnPayService;
+            _momoService = momoService;
             _currentUserService = currentUserService;
             _eventBus = eventBus;
+            _logger = logger;
         }
 
         public async Task<bool> Handle(CancelBookingCommand request, CancellationToken cancellationToken)
         {
             var userId = _currentUserService.UserId;
 
-            // Get booking with related entities
-            var booking = await _bookingRepository.GetByIdAsync(request.BookingId);
+            // Get booking with related entities using specification
+            var spec = new BookingByIdSpecification(request.BookingId);
+            var booking = await _bookingRepository.GetBySpecAsync(spec, b => b.Payment!, b => b.Cancellation!);
             if (booking == null)
                 throw new NotFoundException("Booking not found");
 
@@ -73,8 +79,9 @@ namespace Booking.Application.Handlers.Commands.CancelBooking
             if (experience == null)
                 throw new NotFoundException("Experience not found");
 
-            // Get payment
-            var payment = await _paymentRepository.GetByBookingIdAsync(booking.Id);
+            // Get payment using specification
+            var paymentSpec = new PaymentByBookingIdSpecification(booking.Id);
+            var payment = await _paymentRepository.GetBySpecAsync(paymentSpec);
             if (payment == null || payment.Status != PaymentStatus.Paid)
             {
                 // If not paid yet, just cancel without refund
@@ -101,10 +108,11 @@ namespace Booking.Application.Handlers.Commands.CancelBooking
             }
 
             // Calculate refund based on cancellation policy
+            var bookingStartDateTime = booking.Date.ToDateTime(TimeOnly.FromTimeSpan(booking.StartTime));
             var (refundAmount, cancellationFee) = CalculateRefund(
                 booking.TotalPrice, 
                 experience.CancellationPolicy, 
-                booking.StartTime,
+                bookingStartDateTime,
                 request.IsCancelledByHost
             );
 
@@ -137,23 +145,27 @@ namespace Booking.Application.Handlers.Commands.CancelBooking
                     CreatedAt = DateTime.UtcNow
                 };
 
-                // Process VNPay refund
-                var (success, responseCode) = await _vnPayService.ProcessRefundAsync(
-                    payment.Id, 
-                    refundAmount, 
+                // Process refund via Momo
+                var refundResult = await _momoService.ProcessRefundAsync(
+                    payment.Id,
+                    refundAmount,
                     request.Reason
                 );
 
-                if (success)
+                if (refundResult.success)
                 {
                     refund.Status = RefundStatus.Processed;
-                    refund.VnpResponseCode = responseCode;
+                    refund.VnpRefundRef = refundResult.refundId;  // Store refund reference
                     refund.ProcessedAt = DateTime.UtcNow;
+                    _logger.LogInformation("Momo refund processed for booking {BookingId}, Refund ID: {RefundId}", 
+                        booking.Id, refundResult.refundId);
                 }
                 else
                 {
                     refund.Status = RefundStatus.Failed;
-                    refund.VnpResponseCode = responseCode;
+                    refund.VnpResponseCode = refundResult.message;
+                    _logger.LogWarning("Momo refund failed for booking {BookingId}: {Message}", 
+                        booking.Id, refundResult.message);
                 }
 
                 await _refundRepository.AddAsync(refund);
@@ -178,7 +190,6 @@ namespace Booking.Application.Handlers.Commands.CancelBooking
             DateTime bookingStartTime,
             bool isCancelledByHost)
         {
-            // If host cancels, always full refund
             if (isCancelledByHost)
                 return (totalPrice, 0);
 
@@ -193,18 +204,21 @@ namespace Booking.Application.Handlers.Commands.CancelBooking
                 
                 "NonRefundable" => (0, totalPrice),
                 
-                _ => (totalPrice, 0) // Default to full refund
+                _ => (totalPrice, 0) 
             };
         }
 
         private async Task PublishCancellationEvent(BookingEntity booking, BookingCancellationEntity cancellation)
         {
+            var startDateTime = booking.Date.ToDateTime(TimeOnly.FromTimeSpan(booking.StartTime));
+            var endDateTime = booking.Date.ToDateTime(TimeOnly.FromTimeSpan(booking.EndTime));
+            
             var cancellationEvent = new BookingCancelledEvent(
                 booking.Id,
                 booking.ExperienceId,
                 booking.BookingCode,
-                booking.StartTime,
-                booking.EndTime,
+                startDateTime,
+                endDateTime,
                 booking.Adults,
                 booking.Children,
                 cancellation.CancelledBy.ToString(),

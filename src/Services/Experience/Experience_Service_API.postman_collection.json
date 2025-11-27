@@ -1,23 +1,249 @@
 {
 	"info": {
-		"_postman_id": "experience-service-api-collection",
-		"name": "Experience Service - Complete API",
-		"description": "Complete API collection for Experience Service including Experiences and Categories",
+		"_postman_id": "experience-service-api",
+		"name": "Experience Service API",
+		"description": "API collection for Experience Service - Connecting Local Experience",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Experiences",
+			"name": "Public APIs",
 			"item": [
 				{
-					"name": "Create Experience (Host)",
+					"name": "Get All Experiences (Public)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/experiences?searchTerm=&pageNumber=1&pageSize=10&sortBy=CreatedAt&isAscending=false",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"experiences"
+							],
+							"query": [
+								{
+									"key": "searchTerm",
+									"value": "",
+									"description": "Search in title, description, city"
+								},
+								{
+									"key": "hostId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "categoryIds",
+									"value": "",
+									"disabled": true,
+									"description": "Comma-separated GUIDs"
+								},
+								{
+									"key": "minDuration",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "maxDuration",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "minPrice",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "maxPrice",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "languages",
+									"value": "",
+									"disabled": true,
+									"description": "Comma-separated"
+								},
+								{
+									"key": "pageNumber",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								},
+								{
+									"key": "sortBy",
+									"value": "CreatedAt",
+									"description": "Title, CreatedAt, AdultPrice"
+								},
+								{
+									"key": "isAscending",
+									"value": "false"
+								}
+							]
+						},
+						"description": "Get paginated list of approved experiences (public)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Experience by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/experiences/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"experiences",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "004eb976-4eac-4b46-911c-2c1414ad868a"
+								}
+							]
+						},
+						"description": "Get detailed information of a specific experience"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Experiences by IDs (Batch)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/experiences/batch?ids=004eb976-4eac-4b46-911c-2c1414ad868a&ids=123e4567-e89b-12d3-a456-426614174000",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"experiences",
+								"batch"
+							],
+							"query": [
+								{
+									"key": "ids",
+									"value": "004eb976-4eac-4b46-911c-2c1414ad868a"
+								},
+								{
+									"key": "ids",
+									"value": "123e4567-e89b-12d3-a456-426614174000"
+								}
+							]
+						},
+						"description": "Get multiple experiences by their IDs"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Experience Availability",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/experiences/:id/availability?startDate=2025-12-01&endDate=2025-12-07",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"experiences",
+								":id",
+								"availability"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2025-12-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2025-12-07"
+								}
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "004eb976-4eac-4b46-911c-2c1414ad868a"
+								}
+							]
+						},
+						"description": "Get available time slots for an experience in a date range"
+					},
+					"response": []
+				},
+				{
+					"name": "Validate Booking Availability",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/experiences/:id/validate-booking?date=2025-12-01&startTime=09:00:00&endTime=12:00:00&adults=2&children=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"experiences",
+								":id",
+								"validate-booking"
+							],
+							"query": [
+								{
+									"key": "date",
+									"value": "2025-12-01"
+								},
+								{
+									"key": "startTime",
+									"value": "09:00:00"
+								},
+								{
+									"key": "endTime",
+									"value": "12:00:00"
+								},
+								{
+									"key": "adults",
+									"value": "2"
+								},
+								{
+									"key": "children",
+									"value": "1"
+								}
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "004eb976-4eac-4b46-911c-2c1414ad868a"
+								}
+							]
+						},
+						"description": "Validate if a specific time slot is available for booking"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Host APIs",
+			"item": [
+				{
+					"name": "Create Experience",
 					"request": {
 						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{host_token}}",
-								"description": "Host JWT token"
+								"value": "Bearer {{access_token}}"
 							}
 						],
 						"body": {
@@ -25,27 +251,27 @@
 							"formdata": [
 								{
 									"key": "Title",
-									"value": "Beach Sunset Photography Tour",
+									"value": "Vietnamese Cooking Class",
 									"type": "text"
 								},
 								{
 									"key": "Description",
-									"value": "Capture stunning sunset moments at Da Nang beach with professional guidance",
+									"value": "Learn to cook authentic Vietnamese dishes",
 									"type": "text"
 								},
 								{
 									"key": "Address",
-									"value": "My Khe Beach",
+									"value": "123 Street Name",
 									"type": "text"
 								},
 								{
 									"key": "District",
-									"value": "Son Tra",
+									"value": "District 1",
 									"type": "text"
 								},
 								{
 									"key": "City",
-									"value": "Da Nang",
+									"value": "Ho Chi Minh",
 									"type": "text"
 								},
 								{
@@ -76,20 +302,20 @@
 								},
 								{
 									"key": "CategoryId",
-									"value": "{{category_id}}",
+									"value": "57f120ec-a780-4e25-a14c-c3d17691c3ce",
 									"type": "text"
 								},
 								{
 									"key": "ActivityLevel",
-									"value": "Low",
+									"value": "Moderate",
 									"type": "text",
-									"description": "Low, Moderate, High, VeryHigh"
+									"description": "Light, Moderate, Intense"
 								},
 								{
 									"key": "SkillLevel",
 									"value": "Beginner",
 									"type": "text",
-									"description": "Beginner, Intermediate, Advanced, Expert"
+									"description": "Beginner, Intermediate, Advanced"
 								},
 								{
 									"key": "MinAge",
@@ -97,28 +323,112 @@
 									"type": "text"
 								},
 								{
-									"key": "Accessibility",
-									"value": "Wheelchair accessible",
-									"type": "text"
-								},
-								{
 									"key": "CancellationPolicy",
-									"value": "AlwaysFreeCancellation",
+									"value": "FreeCancellation24Hours",
 									"type": "text",
-									"description": "AlwaysFreeCancellation, FreeCancellation24Hours, FreeCancellation48Hours, NonRefundable"
+									"description": "AlwaysFreeCancellation, FreeCancellation24Hours, NonRefundable"
 								},
 								{
 									"key": "Language",
-									"value": "English",
+									"value": "Vietnamese, English",
 									"type": "text"
 								},
 								{
-									"key": "Media",
+									"key": "RecurrenceType",
+									"value": "Weekly",
+									"type": "text",
+									"description": "Once, Daily, Weekly, Custom"
+								},
+								{
+									"key": "DaysOfWeek[0]",
+									"value": "1",
+									"type": "text",
+									"description": "DayOfWeek enum: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday"
+								},
+								{
+									"key": "DaysOfWeek[1]",
+									"value": "3",
+									"type": "text"
+								},
+								{
+									"key": "TimeSlots[0].StartTime",
+									"value": "09:00:00",
+									"type": "text"
+								},
+								{
+									"key": "TimeSlots[0].EndTime",
+									"value": "12:00:00",
+									"type": "text"
+								},
+								{
+									"key": "TimeSlots[1].StartTime",
+									"value": "14:00:00",
+									"type": "text"
+								},
+								{
+									"key": "TimeSlots[1].EndTime",
+									"value": "17:00:00",
+									"type": "text"
+								},
+								{
+									"key": "StartDate",
+									"value": "2025-12-01",
+									"type": "text"
+								},
+								{
+									"key": "EndDate",
+									"value": "2026-12-01",
+									"type": "text"
+								},
+								{
+									"key": "MediaFiles",
+									"type": "file",
+									"src": [],
+									"description": "Main experience photos"
+								},
+								{
+									"key": "MediaFiles",
+									"type": "file",
+									"src": [],
+									"description": "Can add multiple files"
+								},
+								{
+									"key": "Itineraries[0].StepNumber",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "Itineraries[0].Title",
+									"value": "Market Tour",
+									"type": "text"
+								},
+								{
+									"key": "Itineraries[0].Description",
+									"value": "Visit local market to buy fresh ingredients",
+									"type": "text"
+								},
+								{
+									"key": "Itineraries[0].PhotoFile",
 									"type": "file",
 									"src": []
 								},
 								{
-									"key": "Media",
+									"key": "Itineraries[1].StepNumber",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "Itineraries[1].Title",
+									"value": "Cooking Session",
+									"type": "text"
+								},
+								{
+									"key": "Itineraries[1].Description",
+									"value": "Learn to cook traditional Vietnamese dishes",
+									"type": "text"
+								},
+								{
+									"key": "Itineraries[1].PhotoFile",
 									"type": "file",
 									"src": []
 								}
@@ -139,14 +449,13 @@
 					"response": []
 				},
 				{
-					"name": "Update Experience (Host)",
+					"name": "Update Experience",
 					"request": {
 						"method": "PUT",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{host_token}}",
-								"description": "Host JWT token"
+								"value": "Bearer {{access_token}}"
 							}
 						],
 						"body": {
@@ -154,7 +463,7 @@
 							"formdata": [
 								{
 									"key": "Title",
-									"value": "Updated Beach Photography Tour",
+									"value": "Updated Title",
 									"type": "text"
 								},
 								{
@@ -164,308 +473,115 @@
 								},
 								{
 									"key": "AdultPrice",
-									"value": "550000",
+									"value": "600000",
 									"type": "text"
-								},
-								{
-									"key": "Media",
-									"type": "file",
-									"src": []
 								}
 							]
 						},
 						"url": {
-							"raw": "{{base_url}}/api/experiences/{{experience_id}}",
+							"raw": "{{base_url}}/api/experiences/:id",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"experiences",
-								"{{experience_id}}"
-							]
-						},
-						"description": "Update an existing experience (Host only)"
-					},
-					"response": []
-				},
-				{
-					"name": "Get All Experiences",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/experiences?searchTerm=&categoryIds=&minDuration=&maxDuration=&languages=&pageNumber=1&pageSize=10",
-							"host": [
-								"{{base_url}}"
+								":id"
 							],
-							"path": [
-								"api",
-								"experiences"
-							],
-							"query": [
+							"variable": [
 								{
-									"key": "searchTerm",
-									"value": "",
-									"description": "Search in title & description"
-								},
-								{
-									"key": "categoryIds",
-									"value": "",
-									"description": "Category IDs (multiple: categoryIds=id1&categoryIds=id2)"
-								},
-								{
-									"key": "minDuration",
-									"value": "",
-									"description": "Min duration in minutes"
-								},
-								{
-									"key": "maxDuration",
-									"value": "",
-									"description": "Max duration in minutes"
-								},
-								{
-									"key": "languages",
-									"value": "",
-									"description": "Languages (multiple: languages=English&languages=Vietnamese)"
-								},
-								{
-									"key": "pageNumber",
-									"value": "1"
-								},
-								{
-									"key": "pageSize",
-									"value": "10"
+									"key": "id",
+									"value": "004eb976-4eac-4b46-911c-2c1414ad868a"
 								}
 							]
 						},
-						"description": "Get paginated list of approved experiences with filters"
+						"description": "Update an existing experience (Host only, own experiences)"
 					},
 					"response": []
 				},
 				{
-					"name": "Get Experience By ID",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/experiences/{{experience_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"experiences",
-								"{{experience_id}}"
-							]
-						},
-						"description": "Get detailed information of a specific experience"
-					},
-					"response": []
-				},
-				{
-					"name": "Get Experiences by IDs (Batch)",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/experiences/batch?ids={{experience_id}}&ids={{experience_id_2}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"experiences",
-								"batch"
-							],
-							"query": [
-								{
-									"key": "ids",
-									"value": "{{experience_id}}"
-								},
-								{
-									"key": "ids",
-									"value": "{{experience_id_2}}"
-								}
-							]
-						},
-						"description": "Get multiple experiences by their IDs (used by User Service for wishlist)"
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Experience (Host)",
+					"name": "Delete Experience",
 					"request": {
 						"method": "DELETE",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{host_token}}",
-								"description": "Host JWT token"
+								"value": "Bearer {{access_token}}"
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/experiences/{{experience_id}}",
+							"raw": "{{base_url}}/api/experiences/:id",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"experiences",
-								"{{experience_id}}"
-							]
-						},
-						"description": "Delete an experience (Host only)"
-					},
-					"response": []
-				},
-				{
-					"name": "Filter by Categories",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/experiences?categoryIds={{category_id_1}}&categoryIds={{category_id_2}}&pageNumber=1&pageSize=10",
-							"host": [
-								"{{base_url}}"
+								":id"
 							],
-							"path": [
-								"api",
-								"experiences"
-							],
-							"query": [
+							"variable": [
 								{
-									"key": "categoryIds",
-									"value": "{{category_id_1}}"
-								},
-								{
-									"key": "categoryIds",
-									"value": "{{category_id_2}}"
-								},
-								{
-									"key": "pageNumber",
-									"value": "1"
-								},
-								{
-									"key": "pageSize",
-									"value": "10"
+									"key": "id",
+									"value": "004eb976-4eac-4b46-911c-2c1414ad868a"
 								}
 							]
 						},
-						"description": "Filter experiences by multiple categories"
+						"description": "Delete an experience (Host only, own experiences)"
 					},
 					"response": []
-				},
+				}
+			]
+		},
+		{
+			"name": "Admin APIs",
+			"item": [
 				{
-					"name": "Filter by Duration Range",
+					"name": "Get All Experiences (Admin)",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
 						"url": {
-							"raw": "{{base_url}}/api/experiences?minDuration=120&maxDuration=240&pageNumber=1&pageSize=10",
+							"raw": "{{base_url}}/api/experiences/admin/all?searchTerm=&status=&hostId=&categoryId=&sortBy=CreatedAt&isAscending=false&pageNumber=1&pageSize=10",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
-								"experiences"
-							],
-							"query": [
-								{
-									"key": "minDuration",
-									"value": "120",
-									"description": "2 hours"
-								},
-								{
-									"key": "maxDuration",
-									"value": "240",
-									"description": "4 hours"
-								},
-								{
-									"key": "pageNumber",
-									"value": "1"
-								},
-								{
-									"key": "pageSize",
-									"value": "10"
-								}
-							]
-						},
-						"description": "Filter experiences by duration range (e.g., 2-4 hours)"
-					},
-					"response": []
-				},
-				{
-					"name": "Filter by Languages",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/experiences?languages=English&languages=Vietnamese&pageNumber=1&pageSize=10",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"experiences"
-							],
-							"query": [
-								{
-									"key": "languages",
-									"value": "English"
-								},
-								{
-									"key": "languages",
-									"value": "Vietnamese"
-								},
-								{
-									"key": "pageNumber",
-									"value": "1"
-								},
-								{
-									"key": "pageSize",
-									"value": "10"
-								}
-							]
-						},
-						"description": "Filter experiences by multiple languages"
-					},
-					"response": []
-				},
-				{
-					"name": "Search & Filter Combined",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/experiences?searchTerm=beach&categoryIds={{category_id}}&minDuration=120&maxDuration=240&languages=English&pageNumber=1&pageSize=10",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"experiences"
+								"experiences",
+								"admin",
+								"all"
 							],
 							"query": [
 								{
 									"key": "searchTerm",
-									"value": "beach"
+									"value": "",
+									"description": "Search in title, description, city"
 								},
 								{
-									"key": "categoryIds",
-									"value": "{{category_id}}"
+									"key": "status",
+									"value": "",
+									"description": "Draft, Pending, Approved, Rejected"
 								},
 								{
-									"key": "minDuration",
-									"value": "120"
+									"key": "hostId",
+									"value": ""
 								},
 								{
-									"key": "maxDuration",
-									"value": "240"
+									"key": "categoryId",
+									"value": ""
 								},
 								{
-									"key": "languages",
-									"value": "English"
+									"key": "sortBy",
+									"value": "CreatedAt"
+								},
+								{
+									"key": "isAscending",
+									"value": "false"
 								},
 								{
 									"key": "pageNumber",
@@ -477,12 +593,131 @@
 								}
 							]
 						},
-						"description": "Combine search term with all filters"
+						"description": "Get all experiences with all statuses (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Experience",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"action\": \"Approve\",\n  \"reason\": \"Experience meets all quality standards\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/experiences/:id/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"experiences",
+								":id",
+								"status"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "004eb976-4eac-4b46-911c-2c1414ad868a"
+								}
+							]
+						},
+						"description": "Approve an experience (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Reject Experience",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"action\": \"Reject\",\n  \"reason\": \"Incomplete information or does not meet quality standards\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/experiences/:id/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"experiences",
+								":id",
+								"status"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "004eb976-4eac-4b46-911c-2c1414ad868a"
+								}
+							]
+						},
+						"description": "Reject an experience (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Lock Experience",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"action\": \"Lock\",\n  \"reason\": \"Violates community guidelines or reported by users\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/experiences/:id/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"experiences",
+								":id",
+								"status"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "004eb976-4eac-4b46-911c-2c1414ad868a"
+								}
+							]
+						},
+						"description": "Lock an experience (Admin only)"
 					},
 					"response": []
 				}
-			],
-			"description": "Experience management endpoints"
+			]
 		},
 		{
 			"name": "Categories",
@@ -505,53 +740,51 @@
 						"description": "Get all experience categories"
 					},
 					"response": []
+				},
+				{
+					"name": "Get Category by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/categories/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "57f120ec-a780-4e25-a14c-c3d17691c3ce"
+								}
+							]
+						},
+						"description": "Get a specific category by ID"
+					},
+					"response": []
 				}
-			],
-			"description": "Category endpoints"
+			]
 		}
 	],
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "http://localhost:5002",
-			"type": "string",
-			"description": "Experience Service base URL"
+			"value": "http://localhost:5000",
+			"type": "string"
 		},
 		{
-			"key": "host_token",
+			"key": "access_token",
 			"value": "your_host_jwt_token_here",
-			"type": "string",
-			"description": "JWT token for Host user"
+			"type": "string"
 		},
 		{
-			"key": "experience_id",
-			"value": "00000000-0000-0000-0000-000000000000",
-			"type": "string",
-			"description": "Experience ID"
-		},
-		{
-			"key": "experience_id_2",
-			"value": "00000000-0000-0000-0000-000000000000",
-			"type": "string",
-			"description": "Second Experience ID for batch request"
-		},
-		{
-			"key": "category_id",
-			"value": "00000000-0000-0000-0000-000000000000",
-			"type": "string",
-			"description": "Category ID"
-		},
-		{
-			"key": "category_id_1",
-			"value": "00000000-0000-0000-0000-000000000000",
-			"type": "string",
-			"description": "First Category ID for multi-category filter"
-		},
-		{
-			"key": "category_id_2",
-			"value": "00000000-0000-0000-0000-000000000000",
-			"type": "string",
-			"description": "Second Category ID for multi-category filter"
+			"key": "admin_token",
+			"value": "your_admin_jwt_token_here",
+			"type": "string"
 		}
 	]
 }

@@ -15,5 +15,6 @@ namespace Experience.Application.Dtos
         public int TotalReviews { get; set; }
         public string Language { get; set; } = string.Empty;
         public List<ExperienceMediaDto>? Media { get; set; }
+        public string Status { get; set; } = string.Empty;
     }
 }

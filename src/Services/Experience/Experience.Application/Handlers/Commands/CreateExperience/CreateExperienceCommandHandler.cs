@@ -10,7 +10,6 @@ using Experience.Domain.Enums;
 using Experience.Domain.Repositories;
 using MapsterMapper;
 using Microsoft.AspNetCore.Http;
-using NetTopologySuite.Geometries;
 
 namespace Experience.Application.Handlers.Commands.CreateExperience
 {
@@ -22,7 +21,6 @@ namespace Experience.Application.Handlers.Commands.CreateExperience
         private readonly IPhotoService _photoService;
         private readonly ICurrentUserService _currentUserService;
         private readonly IMapper _mapper;
-        private readonly GeometryFactory _geometryFactory; 
 
         public CreateExperienceCommandHandler(
             IExperienceRepository experienceRepository,
@@ -38,7 +36,6 @@ namespace Experience.Application.Handlers.Commands.CreateExperience
             _photoService = photoService;
             _currentUserService = currentUserService;
             _mapper = mapper;
-            _geometryFactory = new GeometryFactory(new PrecisionModel(), 4326); 
         }
 
         public async Task<ExperienceDto> Handle(CreateExperienceCommand request, CancellationToken cancellationToken)
@@ -66,7 +63,7 @@ namespace Experience.Application.Handlers.Commands.CreateExperience
                 ActivityLevel = Enum.Parse<ActivityLevel>(request.ActivityLevel),
                 SkillLevel = Enum.Parse<SkillLevel>(request.SkillLevel),
                 MinAge = request.MinAge,
-                Status = ExperienceStatus.Draft,
+                Status = ExperienceStatus.Pending,
                 CancellationPolicy = Enum.Parse<CancellationPolicyType>(request.CancellationPolicy),
                 Language = request.Language,
             };

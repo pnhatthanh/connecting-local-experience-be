@@ -25,7 +25,15 @@ namespace Booking.Api.Controllers
         public async Task<IActionResult> CreateBooking([FromBody] CreateBookingCommand command)
         {
             var result = await _mediator.Send(command);
-            return Ok(new { success = true, data = result });
+            
+            return Ok(new 
+            { 
+                success = true, 
+                paymentUrl = result.Payment?.PaymentUrl,
+                message = result.Payment?.PaymentUrl != null 
+                    ? "Booking created successfully. Please proceed to payment." 
+                    : "Booking created but payment URL not available" 
+            });
         }
 
         [HttpGet("{id}")]

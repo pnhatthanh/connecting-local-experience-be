@@ -1,8 +1,8 @@
 {
 	"info": {
 		"_postman_id": "user-service-api-collection",
-		"name": "User Service - Complete API",
-		"description": "Complete API collection for User Service including Users, Hosts, and Wishlists",
+		"name": "User Service API",
+		"description": "Complete API collection for User Service - Users, Hosts, Wishlists",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -130,11 +130,12 @@
 								{
 									"key": "Gender",
 									"value": "Male",
-									"type": "text"
+									"type": "text",
+									"description": "Male, Female, Other"
 								},
 								{
-									"key": "Address",
-									"value": "123 Street, Da Nang",
+									"key": "Country",
+									"value": "Vietnam",
 									"type": "text"
 								},
 								{
@@ -173,29 +174,115 @@
 							"mode": "formdata",
 							"formdata": [
 								{
-									"key": "CompanyName",
-									"value": "My Travel Company",
+									"key": "FullName",
+									"value": "John Doe",
 									"type": "text"
 								},
 								{
-									"key": "CompanyDescription",
-									"value": "We provide amazing travel experiences",
+									"key": "PhoneNumber",
+									"value": "+84912345678",
 									"type": "text"
 								},
 								{
-									"key": "BusinessLicense",
-									"value": "BL123456789",
+									"key": "DateOfBirth",
+									"value": "1985-05-20",
 									"type": "text"
 								},
 								{
-									"key": "TaxCode",
-									"value": "TAX987654321",
+									"key": "Gender",
+									"value": "Male",
 									"type": "text"
 								},
 								{
-									"key": "BusinessLicenseFile",
+									"key": "Country",
+									"value": "Vietnam",
+									"type": "text"
+								},
+								{
+									"key": "Avatar",
 									"type": "file",
 									"src": []
+								},
+								{
+									"key": "Bio",
+									"value": "Passionate local guide with 5+ years of experience",
+									"type": "text"
+								},
+								{
+									"key": "SpokenLanguages[0]",
+									"value": "Vietnamese",
+									"type": "text"
+								},
+								{
+									"key": "SpokenLanguages[1]",
+									"value": "English",
+									"type": "text"
+								},
+								{
+									"key": "Location",
+									"value": "Ho Chi Minh City, Vietnam",
+									"type": "text"
+								},
+								{
+									"key": "Document",
+									"type": "file",
+									"src": [],
+									"description": "ID card or passport"
+								},
+								{
+									"key": "Work",
+									"value": "Tour Guide",
+									"type": "text"
+								},
+								{
+									"key": "Education",
+									"value": "Tourism Management",
+									"type": "text"
+								},
+								{
+									"key": "FunFact",
+									"value": "I've visited 20+ countries",
+									"type": "text"
+								},
+								{
+									"key": "TopicsOfInterest[0]",
+									"value": "Food",
+									"type": "text"
+								},
+								{
+									"key": "TopicsOfInterest[1]",
+									"value": "Culture",
+									"type": "text"
+								},
+								{
+									"key": "TopicsOfInterest[2]",
+									"value": "History",
+									"type": "text"
+								},
+								{
+									"key": "DesiredHostingStyle",
+									"value": "Interactive and Educational",
+									"type": "text"
+								},
+								{
+									"key": "ResponseTime",
+									"value": "Within 1 hour",
+									"type": "text"
+								},
+								{
+									"key": "FacebookUrl",
+									"value": "https://facebook.com/johndoe",
+									"type": "text"
+								},
+								{
+									"key": "InstagramUrl",
+									"value": "https://instagram.com/johndoe",
+									"type": "text"
+								},
+								{
+									"key": "LinkedInUrl",
+									"value": "https://linkedin.com/in/johndoe",
+									"type": "text"
 								}
 							]
 						},
@@ -210,7 +297,7 @@
 								"become-host"
 							]
 						},
-						"description": "Register as a host"
+						"description": "Register to become a host with complete profile"
 					},
 					"response": []
 				}
@@ -256,7 +343,7 @@
 								{
 									"key": "Status",
 									"value": "",
-									"description": "Pending, Approved, Rejected"
+									"description": "Pending, Verified, Rejected"
 								}
 							]
 						},
@@ -307,7 +394,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"status\": \"Approved\",\n  \"rejectionReason\": null\n}"
+							"raw": "{\n  \"status\": \"Verified\",\n  \"reason\": \"All documents verified and profile meets requirements\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/hosts/{{account_id}}/verify",
@@ -321,7 +408,7 @@
 								"verify"
 							]
 						},
-						"description": "Approve or reject host application (Admin only). Status: Approved, Rejected"
+						"description": "Verify or reject host application (Admin only). Status: Verified, Rejected"
 					},
 					"response": []
 				}
@@ -348,7 +435,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"My Favorite Experiences\",\n  \"description\": \"Places I want to visit in Da Nang\"\n}"
+							"raw": "{\n  \"name\": \"My Favorite Experiences\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/wishlists",

@@ -5,7 +5,5 @@ namespace Booking.Domain.Repositories
 {
     public interface IRefundRepository : IBaseRepository<RefundEntity>
     {
-        Task<IEnumerable<RefundEntity>> GetByBookingIdAsync(Guid bookingId);
-        Task<RefundEntity?> GetByVnpRefundRefAsync(string vnpRefundRef);
     }
 }

@@ -10,17 +10,24 @@ namespace Booking.Domain.Entities
         public Guid ExperienceId { get; set; }
         public string BookingCode { get; set; } = string.Empty;
         public BookingStatus Status { get; set; } = BookingStatus.Pending;
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
+        public DateOnly Date { get; set; }
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan EndTime { get; set; }
         public int Adults { get; set; } = 1;
         public int Children { get; set; } = 0;
-        public decimal TotalPrice { get; set; }
-        public string ContactName { get; set; } = string.Empty;
+        public decimal TotalPrice { get; set; }             
+        public decimal PlatformFee { get; set; }             
+        public decimal HostAmount { get; set; }              
+        public bool IsPayoutCreated { get; set; } = false;
+        public DateTime? PayoutScheduledDate { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
         public string ContactEmail { get; set; } = string.Empty;
         public string ContactPhone { get; set; } = string.Empty;
         public string? Notes { get; set; }
         public virtual PaymentEntity? Payment { get; set; }
         public virtual BookingCancellationEntity? Cancellation { get; set; }
         public virtual ICollection<RefundEntity> Refunds { get; set; } = [];
+        public virtual HostPayoutEntity? HostPayout { get; set; }
     }
 }
