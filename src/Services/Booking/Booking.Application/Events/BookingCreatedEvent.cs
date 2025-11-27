@@ -9,8 +9,9 @@ namespace Booking.Application.Events
         public Guid UserId { get; set; }
         public Guid HostId { get; set; }
         public string BookingCode { get; set; } = string.Empty;
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
+        public DateOnly Date { get; set; }
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan EndTime { get; set; }
         public int Adults { get; set; }
         public int Children { get; set; }
         public decimal TotalPrice { get; set; }
@@ -20,7 +21,7 @@ namespace Booking.Application.Events
         public BookingCreatedEvent() { }
         
         public BookingCreatedEvent(Guid bookingId, Guid experienceId, Guid userId, Guid hostId, 
-            string bookingCode, DateTime startTime, DateTime endTime, int adults, int children, 
+            string bookingCode, DateOnly date, TimeSpan startTime, TimeSpan endTime, int adults, int children, 
             decimal totalPrice, string contactName, string contactEmail)
         {
             BookingId = bookingId;
@@ -28,6 +29,7 @@ namespace Booking.Application.Events
             UserId = userId;
             HostId = hostId;
             BookingCode = bookingCode;
+            Date = date;
             StartTime = startTime;
             EndTime = endTime;
             Adults = adults;

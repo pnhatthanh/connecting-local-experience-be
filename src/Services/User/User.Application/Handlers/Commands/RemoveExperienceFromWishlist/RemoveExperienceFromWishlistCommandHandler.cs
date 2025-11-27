@@ -37,6 +37,9 @@ namespace User.Application.Handlers.Commands.RemoveExperienceFromWishlist
             var wishlistExperienceSpec = new WishlistByExperienceIdSpecification(request.WishlistId, request.ExperienceId);
             var wishlistExperience = await _wishlistExperienceRepository.GetBySpecAsync(wishlistExperienceSpec)
                 ?? throw new BadRequestException("Experience not found in this wishlist");
+            if (wishlist.ExperienceCount >= 1)
+                wishlist.ExperienceCount--;
+            _wishlistRepository.Update(wishlist);
 
             _wishlistExperienceRepository.Delete(wishlistExperience);
             await _unitOfWork.SaveChangeAsync();

@@ -2,6 +2,7 @@ using BuildingBlocks.Application.CQRS.Query;
 using BuildingBlocks.Domain.Exceptions;
 using Booking.Application.Dtos;
 using Booking.Domain.Repositories;
+using Booking.Domain.Specifications;
 using MapsterMapper;
 
 namespace Booking.Application.Handlers.Queries.GetBooking
@@ -19,7 +20,8 @@ namespace Booking.Application.Handlers.Queries.GetBooking
 
         public async Task<BookingDto?> Handle(GetBookingQuery request, CancellationToken cancellationToken)
         {
-            var booking = await _bookingRepository.GetByIdAsync(request.BookingId);
+            var spec = new BookingByIdSpecification(request.BookingId);
+            var booking = await _bookingRepository.GetBySpecAsync(spec, b => b.Payment!, b => b.Cancellation!);
             return booking == null ? null : _mapper.Map<BookingDto>(booking);
         }
     }

@@ -5,6 +5,7 @@ namespace Experience.Domain.Enums
         Draft,
         Pending,
         Approved,
-        Rejected
+        Rejected,
+        Locked
     }
 }

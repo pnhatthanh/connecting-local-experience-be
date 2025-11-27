@@ -9,6 +9,7 @@
         "Linq",
         "Mapster",
         "Mediat",
+        "MOMO",
         "Npgsql",
         "rabbitmq",
         "rabbitmqctl",

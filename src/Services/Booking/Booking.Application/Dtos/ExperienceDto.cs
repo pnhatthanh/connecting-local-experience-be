@@ -10,6 +10,5 @@ namespace Booking.Application.Dtos
         public int Duration { get; set; }
         public int MaxParticipants { get; set; }
         public string CancellationPolicy { get; set; } = string.Empty;
-        public string Status { get; set; } = string.Empty;
     }
 }

@@ -33,11 +33,12 @@ namespace Booking.Infrastructure.Extensions
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             
-            services.Configure<VnPaySettings>(options =>
+            // Configure Momo payment service
+            services.Configure<MomoSettings>(options =>
             {
-                configuration.GetSection(VnPaySettings.VnPaySettingsKey).Bind(options);
+                configuration.GetSection(MomoSettings.MomoSettingsKey).Bind(options);
             });
-            services.AddScoped<IVnPayService, VnPayService>();
+            services.AddHttpClient<IMomoService, MomoService>();
             
             services.AddHttpClient<IExperienceService, ExperienceService>(client =>
             {

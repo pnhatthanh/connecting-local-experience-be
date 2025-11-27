@@ -1,6 +1,7 @@
 using BuildingBlocks.Application.CQRS.Query;
 using Booking.Application.Dtos;
 using Booking.Domain.Repositories;
+using Booking.Domain.Specifications;
 using MapsterMapper;
 
 namespace Booking.Application.Handlers.Queries.GetUserBookings
@@ -18,7 +19,8 @@ namespace Booking.Application.Handlers.Queries.GetUserBookings
 
         public async Task<IEnumerable<BookingDto>> Handle(GetUserBookingsQuery request, CancellationToken cancellationToken)
         {
-            var bookings = await _bookingRepository.GetByUserIdAsync(request.UserId);
+            var spec = new BookingByUserIdSpecification(request.UserId);
+            var bookings = await _bookingRepository.GetAllAsync(spec, b => b.Payment!, b => b.Cancellation!);
             return _mapper.Map<IEnumerable<BookingDto>>(bookings);
         }
     }

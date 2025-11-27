@@ -30,10 +30,11 @@ namespace Booking.Infrastructure.Services
                 }
 
                 var content = await response.Content.ReadAsStringAsync();
-                var result = JsonSerializer.Deserialize<ApiResponse<ExperienceDto>>(content, 
+                var experience = JsonSerializer.Deserialize<ExperienceDto>(content, 
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 
-                return result?.Data;
+                _logger.LogInformation("Successfully retrieved experience: {Title}", experience?.Title);
+                return experience;
             }
             catch (Exception ex)
             {
@@ -42,12 +43,12 @@ namespace Booking.Infrastructure.Services
             }
         }
 
-        public async Task<bool> ValidateAvailabilityAsync(Guid experienceId, DateTime startTime, DateTime endTime, int adults, int children)
+        public async Task<bool> ValidateAvailabilityAsync(Guid experienceId, DateOnly date, TimeSpan startTime, TimeSpan endTime, int adults, int children)
         {
             try
             {
                 var response = await _httpClient.GetAsync(
-                    $"/api/experiences/{experienceId}/availability?startTime={startTime:o}&endTime={endTime:o}&adults={adults}&children={children}");
+                    $"/api/experiences/{experienceId}/validate-booking?date={date}&startTime={startTime}&endTime={endTime}&adults={adults}&children={children}");
                 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -57,23 +58,16 @@ namespace Booking.Infrastructure.Services
                 }
 
                 var content = await response.Content.ReadAsStringAsync();
-                var result = JsonSerializer.Deserialize<ApiResponse<bool>>(content, 
+                var isAvailable = JsonSerializer.Deserialize<bool>(content, 
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 
-                return result?.Data ?? false;
+                return isAvailable;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error validating availability for experience {ExperienceId}", experienceId);
                 return false;
             }
-        }
-
-        private class ApiResponse<T>
-        {
-            public bool Success { get; set; }
-            public T? Data { get; set; }
-            public string? Message { get; set; }
         }
     }
 }

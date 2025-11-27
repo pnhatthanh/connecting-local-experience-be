@@ -7,5 +7,5 @@ namespace Experience.Application.Handlers.Queries.GetExperienceAvailability
         Guid ExperienceId,
         DateOnly StartDate,
         DateOnly EndDate
-    ) : IQuery<ExperienceCalendarDto>;
+    ) : IQuery<List<ExperienceAvailabilityDto>>;
 }

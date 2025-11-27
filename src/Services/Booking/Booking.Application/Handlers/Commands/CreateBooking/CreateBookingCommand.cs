@@ -1,17 +1,21 @@
 using BuildingBlocks.Application.CQRS.Command;
 using Booking.Application.Dtos;
+using Booking.Domain.Enums;
 
 namespace Booking.Application.Handlers.Commands.CreateBooking
 {
     public record CreateBookingCommand(
         Guid ExperienceId,
-        DateTime StartTime,
-        DateTime EndTime,
+        DateOnly Date,
+        TimeSpan StartTime,
+        TimeSpan EndTime,
         int Adults,
         int Children,
-        string ContactName,
+        string FirstName,
+        string LastName,
         string ContactEmail,
         string ContactPhone,
-        string? Notes
+        string? Notes,
+        PaymentProvider PaymentProvider = PaymentProvider.Momo  
     ) : ICommand<BookingDto>;
 }

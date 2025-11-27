@@ -1,7 +1,6 @@
 using BuildingBlocks.RabbitMQ;
 using BuildingBlocks.RabbitMQ.Configurations;
 using BuildingBlocks.Application.EventBus.Abstractions;
-using Microsoft.Extensions.Options;
 using Booking.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,9 +10,9 @@ namespace Booking.Api.Extensions
     {
         public static IServiceCollection AddBookingRabbitMQ(this IServiceCollection services, IConfiguration configuration)
         {
-            services.Configure<RabbitMQConfig>(configuration.GetSection("RabbitMQ"));
-            services.AddSingleton<BuildingBlocks.RabbitMQ.Connections.IRabbitMQConnection, BuildingBlocks.RabbitMQ.Connections.RabbitMQConnection>();
-            services.AddSingleton<IEventBus, RabbitMQEventBus>();
+            var rabbitMQSetting = configuration.GetSection("RabbitMQ").Get<RabbitMQConfig>()
+                ?? throw new ArgumentNullException("RabbitMQ configuration is null");
+            services.AddRabbitMQ(rabbitMQSetting);
             
             return services;
         }
@@ -22,9 +21,6 @@ namespace Booking.Api.Extensions
         {
             using var scope = app.ApplicationServices.CreateScope();
             var eventBus = scope.ServiceProvider.GetRequiredService<IEventBus>();
-            
-            // Subscribe to events here if needed (e.g., ExperienceUpdatedEvent to update cached data)
-            
             return app;
         }
 
@@ -32,7 +28,6 @@ namespace Booking.Api.Extensions
         {
             using var scope = serviceProvider.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<BookingDbContext>();
-            
             if ((await dbContext.Database.GetPendingMigrationsAsync()).Any())
             {
                 await dbContext.Database.MigrateAsync();

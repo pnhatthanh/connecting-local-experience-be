@@ -1,41 +1,36 @@
 using BuildingBlocks.Application.CQRS.Query;
-using BuildingBlocks.Application.Interfaces;
-using BuildingBlocks.Domain.Interfaces;
+using BuildingBlocks.Domain.Exceptions;
 using Experience.Application.Dtos;
 using Experience.Application.Utils;
-using Experience.Domain.Entities;
 using Experience.Domain.Repositories;
 using Experience.Domain.Specifications;
 
 namespace Experience.Application.Handlers.Queries.GetExperienceAvailability
 {
-    public class GetExperienceAvailabilityQueryHandler : IQueryHandler<GetExperienceAvailabilityQuery, ExperienceCalendarDto>
+    public class GetExperienceAvailabilityQueryHandler : IQueryHandler<GetExperienceAvailabilityQuery, List<ExperienceAvailabilityDto>>
     {
         private readonly IExperienceRepository _experienceRepository;
         private readonly IExperienceScheduleRepository _scheduleRepository;
-        private readonly IBaseRepository<ExperienceScheduleSlotEntity> _slotRepository;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IExperienceScheduleSlotRepository _slotRepository;
 
         public GetExperienceAvailabilityQueryHandler(
             IExperienceRepository experienceRepository,
             IExperienceScheduleRepository scheduleRepository,
-            IBaseRepository<ExperienceScheduleSlotEntity> slotRepository,
-            IUnitOfWork unitOfWork)
+            IExperienceScheduleSlotRepository slotRepository)
         {
             _experienceRepository = experienceRepository;
             _scheduleRepository = scheduleRepository;
             _slotRepository = slotRepository;
-            _unitOfWork = unitOfWork;
         }
 
-        public async Task<ExperienceCalendarDto> Handle(GetExperienceAvailabilityQuery request, CancellationToken cancellationToken)
+        public async Task<List<ExperienceAvailabilityDto>> Handle(GetExperienceAvailabilityQuery request, CancellationToken cancellationToken)
         {
             var experience = await _experienceRepository.GetByIdAsync(request.ExperienceId)
-                ?? throw new KeyNotFoundException($"Experience with ID {request.ExperienceId} not found");
+                ?? throw new BadRequestException($"Experience with ID {request.ExperienceId} not found");
 
             var scheduleSpec = new ScheduleByExperienceSpecification(request.ExperienceId);
             var schedule = await _scheduleRepository.GetBySpecAsync(scheduleSpec)
-                ?? throw new KeyNotFoundException($"Schedule not found for experience {request.ExperienceId}");
+                ?? throw new BadRequestException($"Schedule not found for experience {request.ExperienceId}");
 
             var potentialSlots = SlotGenerator.GenerateSlotsForSchedule(
                 schedule,
@@ -77,34 +72,8 @@ namespace Experience.Application.Handlers.Queries.GetExperienceAvailability
                 });
             }
 
-            var calendar = availabilityList
-                .GroupBy(a => a.Date)
-                .Select(g => new DateAvailabilityDto
-                {
-                    Date = g.Key,
-                    DayOfWeek = g.Key.DayOfWeek.ToString(),
-                    TotalSpotsAvailable = g.Sum(x => x.SpotsAvailable),
-                    TimeSlots = g.Select(x =>
-                    {
-                        var key = $"{x.Date}_{x.StartTime}_{x.EndTime}";
-                        var slotId = existingSlotsDict.TryGetValue(key, out var slot) ? slot.Id : (Guid?)null;
-                        
-                        return new TimeSlotAvailabilityDto
-                        {
-                            StartTime = x.StartTime,
-                            EndTime = x.EndTime,
-                            SpotsAvailable = x.SpotsAvailable,
-                            SlotId = slotId
-                        };
-                    }).ToList()
-                })
-                .OrderBy(d => d.Date)
-                .ToList();
-
-            return new ExperienceCalendarDto
-            {
-                Calendar = calendar
-            };
+            return availabilityList.OrderBy(x => x.Date)
+                    .ThenBy(x => x.StartTime).ToList();
         }
     }
 }

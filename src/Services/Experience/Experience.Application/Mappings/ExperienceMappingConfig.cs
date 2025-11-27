@@ -19,9 +19,14 @@ namespace Experience.Application.Mappings
                 .Map(dest => dest.Status, src => src.Status.ToString())
                 .Map(dest => dest.CancellationPolicy, src => src.CancellationPolicy.ToString())
                 .Map(dest => dest.Media, src => src.Media)
+                .Map(dest => dest.Schedule, src => src.Schedule)
                 .Map(dest => dest.Itineraries, src => src.Itineraries);
+            
             config.NewConfig<ExperienceMediaEntity, ExperienceMediaDto>();
             config.NewConfig<ExperienceItineraryEntity, ExperienceItineraryDto>();
+            config.NewConfig<ExperienceScheduleEntity, ExperienceScheduleDto>()
+                .Map(dest => dest.RecurrenceType, src => src.RecurrenceType.ToString());
+            config.NewConfig<ScheduleTimeSlot, TimeSlotDto>();
             config.NewConfig<ExperienceEntity, ExperienceSummaryDto>()
                 .Map(dest => dest.Category, src => src.Category != null ? new CategoryDto
                 {
@@ -31,7 +36,8 @@ namespace Experience.Application.Mappings
                 .Map(dest => dest.Media, src => src.Media)
                 .Map(dest => dest.AverageRating, src => src.AverageRating)
                 .Map(dest => dest.TotalReviews, src => src.TotalReviews)
-                .Map(dest => dest.Address, src => src.Address + ", " + src.District + ", " + src.City + ", " + src.Country);
+                .Map(dest => dest.Address, src => src.Address + ", " + src.District + ", " + src.City + ", " + src.Country)
+                .Map(dest => dest.Status, src => src.Status.ToString());
         }
     }
 }

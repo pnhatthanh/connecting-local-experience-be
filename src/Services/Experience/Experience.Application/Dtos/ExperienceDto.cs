@@ -22,10 +22,12 @@ namespace Experience.Application.Dtos
         public string Status { get; set; } = string.Empty;
         public string CancellationPolicy { get; set; } = string.Empty;
         public string Language { get; set; } = string.Empty;
+        public double AverageRating { get; set; }
+        public int TotalReviews { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public List<ExperienceMediaDto>? Media { get; set; }
+        public ExperienceScheduleDto? Schedule { get; set; }
         public List<ExperienceItineraryDto>? Itineraries { get; set; }
-        public double? Distance { get; set; } 
     }
 }

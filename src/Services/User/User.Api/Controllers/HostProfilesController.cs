@@ -31,7 +31,6 @@ namespace User.Api.Controllers
         }
 
         [HttpGet("{userId}")]
-        [Authorize]
         public async Task<ActionResult<HostDetailDto>> GetHostDetail(
             [FromRoute] Guid userId,
             CancellationToken cancellationToken)
@@ -43,8 +42,8 @@ namespace User.Api.Controllers
 
         [HttpPut("{accountId}/verify")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<HostProfileDto>> VerifyHostProfile(
-            [FromRoute] Guid accountId,
+        public async Task<ActionResult<HostProfileDto>> VerifyHostProfile( 
+            [FromRoute] Guid accountId, 
             [FromBody] VerifyHostCommand command,
             CancellationToken cancellationToken)
         {
