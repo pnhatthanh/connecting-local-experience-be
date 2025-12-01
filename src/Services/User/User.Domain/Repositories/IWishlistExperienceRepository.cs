@@ -5,5 +5,6 @@ namespace User.Domain.Repositories
 {
     public interface IWishlistExperienceRepository : IBaseRepository<WishlistExperienceEntity>
     {
+        Task<List<Guid>> GetFavoriteExperienceIdsByUserIdAsync(Guid userId, List<Guid> experienceIds);
     }
 }

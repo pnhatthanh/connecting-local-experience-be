@@ -6,6 +6,7 @@ using User.Application.Handlers.Commands.AddExperienceToWishlist;
 using User.Application.Handlers.Commands.CreateWishlist;
 using User.Application.Handlers.Commands.DeleteWishlist;
 using User.Application.Handlers.Commands.RemoveExperienceFromWishlist;
+using User.Application.Handlers.Queries.CheckExperiencesInWishlist;
 using User.Application.Handlers.Queries.GetUserWishlists;
 using User.Application.Handlers.Queries.GetWishlistDetail;
 
@@ -86,6 +87,20 @@ namespace User.Api.Controllers
             var command = new DeleteWishlistCommand { WishlistId = wishlistId };
             await _mediator.Send(command, cancellationToken);
             return Ok(new {isSuccess = true, message = "Wishlist deleted successfully" });
+        }
+
+        [HttpGet("check-experiences")]
+        [AllowAnonymous]
+        public async Task<ActionResult<List<Guid>>> CheckExperiencesInWishlist(
+            [FromQuery] Guid userId,
+            [FromQuery] List<Guid> experienceIds,
+            CancellationToken cancellationToken)
+        {
+            var query = new CheckExperiencesInWishlistQuery(
+                userId, 
+                experienceIds);
+            var result = await _mediator.Send(query, cancellationToken);
+            return Ok(result);
         }
     }
 }

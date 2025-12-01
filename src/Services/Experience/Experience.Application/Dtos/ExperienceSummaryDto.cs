@@ -16,5 +16,6 @@ namespace Experience.Application.Dtos
         public string Language { get; set; } = string.Empty;
         public List<ExperienceMediaDto>? Media { get; set; }
         public string Status { get; set; } = string.Empty;
+        public bool IsFavorite { get; set; }
     }
 }

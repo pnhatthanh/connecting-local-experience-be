@@ -1,14 +1,11 @@
 using BuildingBlocks.Application.Interfaces;
-using BuildingBlocks.Domain.Interfaces;
 using BuildingBlocks.EntityFramework;
 using Experience.Application.Interfaces;
-using Experience.Domain.Entities;
 using Experience.Domain.Repositories;
 using Experience.Infrastructure.Configurations;
 using Experience.Infrastructure.Data;
 using Experience.Infrastructure.Repositories;
 using Experience.Infrastructure.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,6 +40,9 @@ namespace Experience.Infrastructure.Extensions
                 configuration.GetSection(CloudinarySettings.CloudinarySettingsKey).Bind(options);
             });
             services.AddScoped<IPhotoService, CloudinaryService>();
+
+            services.AddHttpClient();
+            services.AddScoped<IUserServiceClient, UserServiceClient>();
 
             return services;
         }

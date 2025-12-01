@@ -48,9 +48,6 @@ namespace Booking.Infrastructure.Data.Configurations
             entity.Property(e => e.HostAmount)
                 .HasPrecision(10, 2)
                 .HasDefaultValue(0);
-            
-            entity.Property(e => e.IsPayoutCreated)
-                .HasDefaultValue(false);
 
             // Indexes
             entity.HasIndex(e => e.UserId);

@@ -29,5 +29,6 @@ namespace Experience.Application.Dtos
         public List<ExperienceMediaDto>? Media { get; set; }
         public ExperienceScheduleDto? Schedule { get; set; }
         public List<ExperienceItineraryDto>? Itineraries { get; set; }
+        public bool IsFavorite { get; set; }
     }
 }
