@@ -11,7 +11,6 @@ namespace Booking.Infrastructure.Data
         public DbSet<PaymentEntity> Payments { get; set; }
         public DbSet<RefundEntity> Refunds { get; set; }
         public DbSet<BookingCancellationEntity> BookingCancellations { get; set; }
-        public DbSet<HostPayoutEntity> HostPayouts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

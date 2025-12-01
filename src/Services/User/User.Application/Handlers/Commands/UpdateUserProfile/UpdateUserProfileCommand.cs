@@ -1,7 +1,6 @@
 using BuildingBlocks.Application.CQRS.Command;
 using Microsoft.AspNetCore.Http;
 using User.Application.DTOs;
-using User.Domain.Enums;
 
 namespace User.Application.Handlers.Commands.UpdateUserProfile
 {

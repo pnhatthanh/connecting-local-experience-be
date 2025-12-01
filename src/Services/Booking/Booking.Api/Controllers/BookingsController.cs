@@ -3,6 +3,7 @@ using Booking.Application.Handlers.Commands.CancelBooking;
 using Booking.Application.Handlers.Queries.GetBooking;
 using Booking.Application.Handlers.Queries.GetUserBookings;
 using Booking.Application.Handlers.Queries.GetHostBookings;
+using Booking.Application.Handlers.Queries.GetExperienceBookings;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -57,6 +58,16 @@ namespace Booking.Api.Controllers
         public async Task<IActionResult> GetHostBookings(Guid hostId)
         {
             var result = await _mediator.Send(new GetHostBookingsQuery(hostId));
+            return Ok(new { success = true, data = result });
+        }
+
+        [HttpGet("experience/{experienceId}")]
+        public async Task<IActionResult> GetExperienceBookings(
+            Guid experienceId,
+            [FromQuery] DateOnly? date = null,
+            [FromQuery] TimeSpan? startTime = null)
+        {
+            var result = await _mediator.Send(new GetExperienceBookingsQuery(experienceId, date, startTime));
             return Ok(new { success = true, data = result });
         }
 

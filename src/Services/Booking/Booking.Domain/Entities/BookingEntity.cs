@@ -17,9 +17,7 @@ namespace Booking.Domain.Entities
         public int Children { get; set; } = 0;
         public decimal TotalPrice { get; set; }             
         public decimal PlatformFee { get; set; }             
-        public decimal HostAmount { get; set; }              
-        public bool IsPayoutCreated { get; set; } = false;
-        public DateTime? PayoutScheduledDate { get; set; }
+        public decimal HostAmount { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string ContactEmail { get; set; } = string.Empty;
@@ -28,6 +26,5 @@ namespace Booking.Domain.Entities
         public virtual PaymentEntity? Payment { get; set; }
         public virtual BookingCancellationEntity? Cancellation { get; set; }
         public virtual ICollection<RefundEntity> Refunds { get; set; } = [];
-        public virtual HostPayoutEntity? HostPayout { get; set; }
     }
 }

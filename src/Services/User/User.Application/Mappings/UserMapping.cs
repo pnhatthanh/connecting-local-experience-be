@@ -20,6 +20,7 @@ namespace User.Application.Mappings
                 .Map(dest => dest.Role, src => src.Role.ToString())
                 .Map(dest => dest.CreatedAt, src => src.CreatedAt)
                 .Map(dest => dest.UpdatedAt, src => src.UpdatedAt)
+                .Map(dest => dest.Status, src => src.Status.ToString())
                 .Map(dest => dest.HostProfile, src => src.HostProfile ?? null);
             
             config.NewConfig<UserEntity, UserSummaryDto>()

@@ -47,6 +47,13 @@ namespace Booking.Infrastructure.Extensions
                 client.BaseAddress = new Uri(experienceApiUrl);
             });
 
+            services.AddHttpClient<IUserService, UserService>(client =>
+            {
+                var userApiUrl = configuration["Services:UserApi"]
+                    ?? throw new ArgumentNullException("User API URL not configured");
+                client.BaseAddress = new Uri(userApiUrl);
+            });
+
             return services;
         }
     }
