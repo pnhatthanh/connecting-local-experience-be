@@ -1,5 +1,7 @@
 using BuildingBlocks.Application.Interfaces;
 using BuildingBlocks.EntityFramework;
+using BuildingBlocks.RabbitMQ;
+using BuildingBlocks.RabbitMQ.Configurations;
 using Experience.Application.Interfaces;
 using Experience.Domain.Repositories;
 using Experience.Infrastructure.Configurations;
@@ -31,6 +33,7 @@ namespace Experience.Infrastructure.Extensions
             services.AddScoped<IExperienceScheduleSlotRepository, ExperienceScheduleSlotRepository>();
             services.AddScoped<IExperienceMediaRepository, ExperienceMediaRepository>();
             services.AddScoped<IExperienceItineraryRepository, ExperienceItineraryRepository>();
+            services.AddScoped<IReviewRepository, ReviewRepository>();
             
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
@@ -43,6 +46,12 @@ namespace Experience.Infrastructure.Extensions
 
             services.AddHttpClient();
             services.AddScoped<IUserServiceClient, UserServiceClient>();
+            services.AddScoped<IBookingServiceClient, BookingServiceClient>();
+
+            // Add RabbitMQ
+            var rabbitMQSetting = configuration.GetSection("RabbitMQ").Get<RabbitMQConfig>()
+                ?? throw new ArgumentNullException("RabbitMQ configuration is null");
+            services.AddRabbitMQ(rabbitMQSetting);
 
             return services;
         }

@@ -40,14 +40,13 @@ namespace Booking.Infrastructure.Data.Configurations
             entity.Property(e => e.TotalPrice)
                 .HasPrecision(10, 2);
             
-            // Payment Aggregation fields
-            entity.Property(e => e.PlatformFee)
-                .HasPrecision(10, 2)
-                .HasDefaultValue(0);
+            entity.Property(e => e.ExperienceTitle)
+                .IsRequired()
+                .HasMaxLength(500);
             
-            entity.Property(e => e.HostAmount)
-                .HasPrecision(10, 2)
-                .HasDefaultValue(0);
+            entity.Property(e => e.ImageUrl)
+                .IsRequired()
+                .HasMaxLength(1000);
 
             // Indexes
             entity.HasIndex(e => e.UserId);

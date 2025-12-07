@@ -15,7 +15,6 @@ namespace Booking.Domain.Entities
         public RefundStatus Status { get; set; } = RefundStatus.Requested;
         public DateTime RequestedAt { get; set; }
         public DateTime? ProcessedAt { get; set; }
-        public virtual PaymentEntity? Payment { get; set; }
         public virtual BookingEntity Booking { get; set; } = null!;
     }
 }

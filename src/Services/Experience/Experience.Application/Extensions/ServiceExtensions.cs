@@ -1,4 +1,6 @@
 using BuildingBlocks.Application.Behaviors;
+using Experience.Application.EventHandlers;
+using Experience.Application.Events;
 using FluentValidation;
 using Mapster;
 using MapsterMapper;
@@ -6,6 +8,7 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Experience.Application.Handlers.Commands.CreateExperience;
 using System.Reflection;
+using BuildingBlocks.Application.EventBus.Abstractions;
 
 namespace Experience.Application.Extensions
 {
@@ -22,7 +25,16 @@ namespace Experience.Application.Extensions
             services.AddSingleton(config);
             services.AddScoped<IMapper, ServiceMapper>();
             
+            // Register event handlers
+            services.AddScoped<IIntegrationEventHandler<BookingConfirmedEvent>, BookingConfirmedEventHandler>();
+            
             return services;
+        }
+        public static async Task<IServiceProvider> SubscribeToEventsAsync(this IServiceProvider serviceProvider)
+        {
+            var eventBus = serviceProvider.GetRequiredService<IEventBus>();
+            await eventBus.SubscribeAsync<BookingConfirmedEvent, BookingConfirmedEventHandler>();
+            return serviceProvider;
         }
     }
 }

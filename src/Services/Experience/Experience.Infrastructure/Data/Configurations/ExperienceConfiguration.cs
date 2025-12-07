@@ -45,6 +45,8 @@ namespace Experience.Infrastructure.Data.Configurations
                 .HasDefaultValue(CancellationPolicyType.AlwaysFreeCancellation)
                 .IsRequired();
             entity.Property(e => e.Language).HasColumnName("language").HasMaxLength(50).IsRequired();
+            entity.Property(e => e.TotalReviews).HasColumnName("total_reviews").HasDefaultValue(0).IsRequired();
+            entity.Property(e => e.AverageRating).HasColumnName("average_rating").HasColumnType("double precision").HasDefaultValue(0.0).IsRequired();
             entity.Property(e => e.CreatedAt).HasColumnName("created_at");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
 
@@ -69,6 +71,13 @@ namespace Experience.Infrastructure.Data.Configurations
             entity.HasMany(e => e.Itineraries)
                 .WithOne(i => i.Experience)
                 .HasForeignKey(i => i.ExperienceId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
+
+            // Configure Reviews relationship with cascade delete
+            entity.HasMany(e => e.Reviews)
+                .WithOne(r => r.Experience)
+                .HasForeignKey(r => r.ExperienceId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired();
 

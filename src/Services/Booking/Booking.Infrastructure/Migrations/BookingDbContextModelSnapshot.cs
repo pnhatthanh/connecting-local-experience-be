@@ -106,41 +106,35 @@ namespace Booking.Infrastructure.Migrations
                     b.Property<Guid>("ExperienceId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("ExperienceTitle")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<decimal>("HostAmount")
-                        .ValueGeneratedOnAdd()
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)")
-                        .HasDefaultValue(0m);
-
                     b.Property<Guid>("HostId")
                         .HasColumnType("uuid");
 
-                    b.Property<bool>("IsPayoutCreated")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<string>("Notes")
+                    b.Property<string>("Location")
+                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("PayoutScheduledDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("PlatformFee")
-                        .ValueGeneratedOnAdd()
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)")
-                        .HasDefaultValue(0m);
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
 
                     b.Property<TimeSpan>("StartTime")
                         .HasColumnType("interval");
@@ -177,75 +171,6 @@ namespace Booking.Infrastructure.Migrations
                     b.ToTable("bookings", (string)null);
                 });
 
-            modelBuilder.Entity("Booking.Domain.Entities.HostPayoutEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)");
-
-                    b.Property<string>("BankAccountName")
-                        .HasColumnType("text");
-
-                    b.Property<string>("BankAccountNumber")
-                        .HasColumnType("text");
-
-                    b.Property<string>("BankName")
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("BookingId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(3)
-                        .HasColumnType("character varying(3)")
-                        .HasDefaultValue("VND");
-
-                    b.Property<string>("FailureReason")
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("HostId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("ProcessedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("ScheduledDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TransactionReference")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BookingId")
-                        .IsUnique();
-
-                    b.HasIndex("HostId");
-
-                    b.HasIndex("ScheduledDate");
-
-                    b.HasIndex("Status");
-
-                    b.ToTable("host_payouts", (string)null);
-                });
-
             modelBuilder.Entity("Booking.Domain.Entities.PaymentEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -269,15 +194,12 @@ namespace Booking.Infrastructure.Migrations
                         .HasColumnType("character varying(3)")
                         .HasDefaultValue("VND");
 
-                    b.Property<string>("Method")
-                        .HasColumnType("text");
-
                     b.Property<DateTime?>("PaidAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("PaymentUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<string>("Provider")
                         .IsRequired()
@@ -358,7 +280,8 @@ namespace Booking.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BookingId");
+                    b.HasIndex("BookingId")
+                        .IsUnique();
 
                     b.HasIndex("PaymentId");
 
@@ -372,17 +295,6 @@ namespace Booking.Infrastructure.Migrations
                     b.HasOne("Booking.Domain.Entities.BookingEntity", "Booking")
                         .WithOne("Cancellation")
                         .HasForeignKey("Booking.Domain.Entities.BookingCancellationEntity", "BookingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Booking");
-                });
-
-            modelBuilder.Entity("Booking.Domain.Entities.HostPayoutEntity", b =>
-                {
-                    b.HasOne("Booking.Domain.Entities.BookingEntity", "Booking")
-                        .WithOne("HostPayout")
-                        .HasForeignKey("Booking.Domain.Entities.HostPayoutEntity", "BookingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -403,34 +315,20 @@ namespace Booking.Infrastructure.Migrations
             modelBuilder.Entity("Booking.Domain.Entities.RefundEntity", b =>
                 {
                     b.HasOne("Booking.Domain.Entities.BookingEntity", "Booking")
-                        .WithMany("Refunds")
-                        .HasForeignKey("BookingId")
+                        .WithOne("Refunds")
+                        .HasForeignKey("Booking.Domain.Entities.RefundEntity", "BookingId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Booking.Domain.Entities.PaymentEntity", "Payment")
-                        .WithMany("Refunds")
-                        .HasForeignKey("PaymentId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.Navigation("Booking");
-
-                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("Booking.Domain.Entities.BookingEntity", b =>
                 {
                     b.Navigation("Cancellation");
 
-                    b.Navigation("HostPayout");
-
                     b.Navigation("Payment");
 
-                    b.Navigation("Refunds");
-                });
-
-            modelBuilder.Entity("Booking.Domain.Entities.PaymentEntity", b =>
-                {
                     b.Navigation("Refunds");
                 });
 #pragma warning restore 612, 618

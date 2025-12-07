@@ -30,5 +30,6 @@ namespace Experience.Domain.Entities
         public virtual ExperienceScheduleEntity Schedule { get; set; } = null!;
         public virtual ICollection<ExperienceMediaEntity> Media { get; set; } = [];
         public virtual ICollection<ExperienceItineraryEntity> Itineraries { get; set; } = [];
+        public virtual ICollection<ReviewEntity> Reviews { get; set; } = [];
     }
 }

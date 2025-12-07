@@ -79,7 +79,10 @@ namespace Experience.Infrastructure.Migrations
                         .HasColumnName("adult_price");
 
                     b.Property<double>("AverageRating")
-                        .HasColumnType("double precision");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("double precision")
+                        .HasDefaultValue(0.0)
+                        .HasColumnName("average_rating");
 
                     b.Property<string>("CancellationPolicy")
                         .IsRequired()
@@ -164,7 +167,10 @@ namespace Experience.Infrastructure.Migrations
                         .HasColumnName("title");
 
                     b.Property<int>("TotalReviews")
-                        .HasColumnType("integer");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("total_reviews");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -378,6 +384,55 @@ namespace Experience.Infrastructure.Migrations
                     b.ToTable("tbl_experience_schedule_slot", (string)null);
                 });
 
+            modelBuilder.Entity("Experience.Domain.Entities.ReviewEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id_review");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("description");
+
+                    b.Property<Guid>("ExperienceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("experience_id");
+
+                    b.Property<Guid>("HostId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsHidden")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_hidden");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("integer")
+                        .HasColumnName("rating");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExperienceId");
+
+                    b.ToTable("tbl_review", (string)null);
+                });
+
             modelBuilder.Entity("Experience.Domain.Entities.ExperienceEntity", b =>
                 {
                     b.HasOne("Experience.Domain.Entities.ExperienceCategoryEntity", "Category")
@@ -433,6 +488,17 @@ namespace Experience.Infrastructure.Migrations
                     b.Navigation("Schedule");
                 });
 
+            modelBuilder.Entity("Experience.Domain.Entities.ReviewEntity", b =>
+                {
+                    b.HasOne("Experience.Domain.Entities.ExperienceEntity", "Experience")
+                        .WithMany("Reviews")
+                        .HasForeignKey("ExperienceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Experience");
+                });
+
             modelBuilder.Entity("Experience.Domain.Entities.ExperienceCategoryEntity", b =>
                 {
                     b.Navigation("Experiences");
@@ -443,6 +509,8 @@ namespace Experience.Infrastructure.Migrations
                     b.Navigation("Itineraries");
 
                     b.Navigation("Media");
+
+                    b.Navigation("Reviews");
 
                     b.Navigation("Schedule")
                         .IsRequired();

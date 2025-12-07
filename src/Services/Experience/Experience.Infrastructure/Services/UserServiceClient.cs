@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using Experience.Application.Dtos;
 using Experience.Application.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -48,6 +49,32 @@ namespace Experience.Infrastructure.Services
             {
                 _logger.LogError(ex, "Error calling User Service");
                 return new List<Guid>();
+            }
+        }
+        public async Task<Dictionary<Guid, UserInfoDto>> GetUsersInfoAsync(List<Guid> userIds)
+        {
+            try
+            {
+                if (!userIds.Any())
+                    return new Dictionary<Guid, UserInfoDto>();
+
+                var httpClient = _httpClientFactory.CreateClient();
+                var queryParams = string.Join("&", userIds.Select(id => $"userIds={id}"));
+                var response = await httpClient.GetAsync($"{_baseUrl}/api/users/batch-info?{queryParams}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("Failed to fetch users info: {StatusCode}", response.StatusCode);
+                    return new Dictionary<Guid, UserInfoDto>();
+                }
+
+                var users = await response.Content.ReadFromJsonAsync<List<UserInfoDto>>();
+                return users?.ToDictionary(u => u.Id, u => u) ?? new Dictionary<Guid, UserInfoDto>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching users info");
+                return new Dictionary<Guid, UserInfoDto>();
             }
         }
     }

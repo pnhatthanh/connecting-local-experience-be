@@ -15,7 +15,6 @@ namespace Booking.Application.Mappings
 
             config.NewConfig<PaymentEntity, PaymentDto>()
                 .Map(dest => dest.Provider, src => src.Provider.ToString())
-                .Map(dest => dest.Method, src => src.Method != null ? src.Method.ToString() : null)
                 .Map(dest => dest.Status, src => src.Status.ToString());
 
             config.NewConfig<BookingCancellationEntity, BookingCancellationDto>()
@@ -23,6 +22,11 @@ namespace Booking.Application.Mappings
 
             config.NewConfig<RefundEntity, RefundDto>()
                 .Map(dest => dest.Status, src => src.Status.ToString());
+
+            config.NewConfig<BookingEntity, BookingSummaryDto>()
+                .Map(dest => dest.Status, src => src.Status.ToString())
+                .Map(dest => dest.Location, src => src.Location);
         }
+
     }
 }

@@ -10,6 +10,7 @@
     <ProjectReference Include="..\Experience.Domain\Experience.Domain.csproj" />
     <ProjectReference Include="..\Experience.Application\Experience.Application.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\BuildingBlocks.EntityFramework\BuildingBlocks.EntityFramework.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\BuildingBlocks.RabbitMQ\BuildingBlocks.RabbitMQ.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -20,15 +20,12 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddAuthenticationExtension(builder.Configuration);
-builder.Services.AddBookingRabbitMQ(builder.Configuration);
-
 builder.Services.AddBookingApplication()
                 .AddBookingInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
 await app.Services.ApplyMigrationAsync();
-await app.SubscribeToEvents();
 
 if (app.Environment.IsDevelopment())
 {
