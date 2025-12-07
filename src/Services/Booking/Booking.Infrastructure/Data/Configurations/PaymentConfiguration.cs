@@ -23,9 +23,6 @@ namespace Booking.Infrastructure.Data.Configurations
                 .IsRequired()
                 .HasConversion<string>();
             
-            entity.Property(e => e.Method)
-                .HasConversion<string>();
-            
             entity.Property(e => e.Status)
                 .IsRequired()
                 .HasConversion<string>();
@@ -34,7 +31,7 @@ namespace Booking.Infrastructure.Data.Configurations
                 .HasMaxLength(100);
 
             entity.Property(e => e.PaymentUrl)
-                .HasMaxLength(500);
+                .HasMaxLength(2000);
 
             entity.HasIndex(e => e.BookingId);
             entity.HasIndex(e => e.TransactionId);

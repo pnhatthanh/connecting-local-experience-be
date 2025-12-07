@@ -1,0 +1,1924 @@
+{
+	"info": {
+		"_postman_id": "connecting-experience-api",
+		"name": "ConnectingExperience API",
+		"description": "API Collection for ConnectingExperience microservices",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "IAM Service",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"Password123!\",\n  \"passwordConfirm\": \"Password123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					}
+				},
+				{
+					"name": "Confirm Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"token\": \"confirmation-token-here\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/confirm-email",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"confirm-email"
+							]
+						}
+					}
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"Password123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"your-refresh-token-here\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/refresh",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"refresh"
+							]
+						}
+					}
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john.doe@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/password/forgot",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"password",
+								"forgot"
+							]
+						}
+					}
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"token\": \"reset-token-here\",\n  \"password\": \"NewPassword123!\",\n  \"confirmPassword\": \"NewPassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/password/reset",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"password",
+								"reset"
+							]
+						}
+					}
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currentPassword\": \"Password123!\",\n  \"newPassword\": \"NewPassword123!\",\n  \"confirmPassword\": \"NewPassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/password/change",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"password",
+								"change"
+							]
+						}
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"your-refresh-token-here\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Account Status (Admin)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/accounts/:accountId/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"accounts",
+								":accountId",
+								"status"
+							],
+							"variable": [
+								{
+									"key": "accountId",
+									"value": "00000000-0000-0000-0000-000000000000"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Experience Service",
+			"item": [
+				{
+					"name": "Categories",
+					"item": [
+						{
+							"name": "Get Categories",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/categories",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"categories"
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Experiences",
+					"item": [
+						{
+							"name": "Create Experience (Host)",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "Title",
+											"value": "Amazing City Tour",
+											"type": "text"
+										},
+										{
+											"key": "Description",
+											"value": "Experience the best of the city",
+											"type": "text"
+										},
+										{
+											"key": "Address",
+											"value": "123 Main Street",
+											"type": "text"
+										},
+										{
+											"key": "District",
+											"value": "District 1",
+											"type": "text"
+										},
+										{
+											"key": "City",
+											"value": "Ho Chi Minh",
+											"type": "text"
+										},
+										{
+											"key": "Country",
+											"value": "Vietnam",
+											"type": "text"
+										},
+										{
+											"key": "AdultPrice",
+											"value": "500000",
+											"type": "text"
+										},
+										{
+											"key": "ChildPrice",
+											"value": "250000",
+											"type": "text"
+										},
+										{
+											"key": "Duration",
+											"value": "180",
+											"type": "text"
+										},
+										{
+											"key": "MaxParticipants",
+											"value": "10",
+											"type": "text"
+										},
+										{
+											"key": "CategoryId",
+											"value": "00000000-0000-0000-0000-000000000000",
+											"type": "text"
+										},
+										{
+											"key": "ActivityLevel",
+											"value": "Moderate",
+											"type": "text"
+										},
+										{
+											"key": "SkillLevel",
+											"value": "Beginner",
+											"type": "text"
+										},
+										{
+											"key": "MinAge",
+											"value": "12",
+											"type": "text"
+										},
+										{
+											"key": "CancellationPolicy",
+											"value": "Flexible",
+											"type": "text"
+										},
+										{
+											"key": "Language",
+											"value": "English, Vietnamese",
+											"type": "text"
+										},
+										{
+											"key": "RecurrenceType",
+											"value": "Weekly",
+											"type": "text"
+										},
+										{
+											"key": "DaysOfWeek",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "DaysOfWeek",
+											"value": "3",
+											"type": "text"
+										},
+										{
+											"key": "DaysOfWeek",
+											"value": "5",
+											"type": "text"
+										},
+										{
+											"key": "TimeSlots[0].StartTime",
+											"value": "09:00:00",
+											"type": "text"
+										},
+										{
+											"key": "TimeSlots[0].EndTime",
+											"value": "12:00:00",
+											"type": "text"
+										},
+										{
+											"key": "TimeSlots[1].StartTime",
+											"value": "14:00:00",
+											"type": "text"
+										},
+										{
+											"key": "TimeSlots[1].EndTime",
+											"value": "17:00:00",
+											"type": "text"
+										},
+										{
+											"key": "StartDate",
+											"value": "2024-01-01",
+											"type": "text"
+										},
+										{
+											"key": "EndDate",
+											"value": "2024-12-31",
+											"type": "text"
+										},
+										{
+											"key": "MediaFiles",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "Itineraries[0].StepNumber",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "Itineraries[0].Title",
+											"value": "Meeting Point",
+											"type": "text"
+										},
+										{
+											"key": "Itineraries[0].Description",
+											"value": "Meet at the main square",
+											"type": "text"
+										},
+										{
+											"key": "Itineraries[0].PhotoFile",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/experiences",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"experiences"
+									]
+								}
+							}
+						},
+						{
+							"name": "Update Experience (Host)",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "Title",
+											"value": "Updated City Tour",
+											"type": "text"
+										},
+										{
+											"key": "Description",
+											"value": "Updated description",
+											"type": "text"
+										},
+										{
+											"key": "Address",
+											"value": "123 Main Street",
+											"type": "text"
+										},
+										{
+											"key": "District",
+											"value": "District 1",
+											"type": "text"
+										},
+										{
+											"key": "City",
+											"value": "Ho Chi Minh",
+											"type": "text"
+										},
+										{
+											"key": "Country",
+											"value": "Vietnam",
+											"type": "text"
+										},
+										{
+											"key": "AdultPrice",
+											"value": "550000",
+											"type": "text"
+										},
+										{
+											"key": "ChildPrice",
+											"value": "275000",
+											"type": "text"
+										},
+										{
+											"key": "Duration",
+											"value": "180",
+											"type": "text"
+										},
+										{
+											"key": "MaxParticipants",
+											"value": "12",
+											"type": "text"
+										},
+										{
+											"key": "CategoryId",
+											"value": "00000000-0000-0000-0000-000000000000",
+											"type": "text"
+										},
+										{
+											"key": "ActivityLevel",
+											"value": "Moderate",
+											"type": "text"
+										},
+										{
+											"key": "SkillLevel",
+											"value": "Beginner",
+											"type": "text"
+										},
+										{
+											"key": "MinAge",
+											"value": "12",
+											"type": "text"
+										},
+										{
+											"key": "CancellationPolicy",
+											"value": "Flexible",
+											"type": "text"
+										},
+										{
+											"key": "Language",
+											"value": "English, Vietnamese",
+											"type": "text"
+										},
+										{
+											"key": "RecurrenceType",
+											"value": "Weekly",
+											"type": "text"
+										},
+										{
+											"key": "DaysOfWeek",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "TimeSlots[0].StartTime",
+											"value": "09:00:00",
+											"type": "text"
+										},
+										{
+											"key": "TimeSlots[0].EndTime",
+											"value": "12:00:00",
+											"type": "text"
+										},
+										{
+											"key": "StartDate",
+											"value": "2024-01-01",
+											"type": "text"
+										},
+										{
+											"key": "EndDate",
+											"value": "2024-12-31",
+											"type": "text"
+										},
+										{
+											"key": "KeepMediaIds",
+											"value": "00000000-0000-0000-0000-000000000000",
+											"type": "text"
+										},
+										{
+											"key": "NewMediaFiles",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/experiences/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"experiences",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "00000000-0000-0000-0000-000000000000"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Experiences",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/experiences?PageNumber=1&PageSize=10&CategoryId=&City=&MinPrice=&MaxPrice=&SortBy=",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"experiences"
+									],
+									"query": [
+										{
+											"key": "PageNumber",
+											"value": "1"
+										},
+										{
+											"key": "PageSize",
+											"value": "10"
+										},
+										{
+											"key": "CategoryId",
+											"value": ""
+										},
+										{
+											"key": "City",
+											"value": ""
+										},
+										{
+											"key": "MinPrice",
+											"value": ""
+										},
+										{
+											"key": "MaxPrice",
+											"value": ""
+										},
+										{
+											"key": "SortBy",
+											"value": ""
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get All Experiences (Admin)",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/experiences/admin/all?PageNumber=1&PageSize=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"experiences",
+										"admin",
+										"all"
+									],
+									"query": [
+										{
+											"key": "PageNumber",
+											"value": "1"
+										},
+										{
+											"key": "PageSize",
+											"value": "10"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Experiences by IDs",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/experiences/batch?ids=00000000-0000-0000-0000-000000000000&ids=00000000-0000-0000-0000-000000000001",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"experiences",
+										"batch"
+									],
+									"query": [
+										{
+											"key": "ids",
+											"value": "00000000-0000-0000-0000-000000000000"
+										},
+										{
+											"key": "ids",
+											"value": "00000000-0000-0000-0000-000000000001"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Experience by ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/experiences/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"experiences",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "00000000-0000-0000-0000-000000000000"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Experience Availability",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/experiences/:id/availability?startDate=2024-01-01&endDate=2024-01-31",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"experiences",
+										":id",
+										"availability"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2024-01-01"
+										},
+										{
+											"key": "endDate",
+											"value": "2024-01-31"
+										}
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "00000000-0000-0000-0000-000000000000"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Validate Booking Availability",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/experiences/:id/validate-booking?date=2024-01-15&startTime=09:00:00&endTime=12:00:00&adults=2&children=1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"experiences",
+										":id",
+										"validate-booking"
+									],
+									"query": [
+										{
+											"key": "date",
+											"value": "2024-01-15"
+										},
+										{
+											"key": "startTime",
+											"value": "09:00:00"
+										},
+										{
+											"key": "endTime",
+											"value": "12:00:00"
+										},
+										{
+											"key": "adults",
+											"value": "2"
+										},
+										{
+											"key": "children",
+											"value": "1"
+										}
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "00000000-0000-0000-0000-000000000000"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Update Experience Status (Admin)",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"action\": \"approve\",\n  \"reason\": null\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/experiences/:id/status",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"experiences",
+										":id",
+										"status"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "00000000-0000-0000-0000-000000000000"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Delete Experience (Host)",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/experiences/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"experiences",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "00000000-0000-0000-0000-000000000000"
+										}
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Reviews",
+					"item": [
+						{
+							"name": "Create Review",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"rating\": 5,\n  \"description\": \"Amazing experience! Highly recommended.\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/experiences/:experienceId/reviews",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"experiences",
+										":experienceId",
+										"reviews"
+									],
+									"variable": [
+										{
+											"key": "experienceId",
+											"value": "00000000-0000-0000-0000-000000000000"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Reviews",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/experiences/:experienceId/reviews?pageNumber=1&pageSize=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"experiences",
+										":experienceId",
+										"reviews"
+									],
+									"query": [
+										{
+											"key": "pageNumber",
+											"value": "1"
+										},
+										{
+											"key": "pageSize",
+											"value": "10"
+										}
+									],
+									"variable": [
+										{
+											"key": "experienceId",
+											"value": "00000000-0000-0000-0000-000000000000"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Hide Review (Admin)",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/experiences/:experienceId/reviews/:reviewId/hide",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"experiences",
+										":experienceId",
+										"reviews",
+										":reviewId",
+										"hide"
+									],
+									"variable": [
+										{
+											"key": "experienceId",
+											"value": "00000000-0000-0000-0000-000000000000"
+										},
+										{
+											"key": "reviewId",
+											"value": "00000000-0000-0000-0000-000000000000"
+										}
+									]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Booking Service",
+			"item": [
+				{
+					"name": "Create Booking",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"experienceId\": \"00000000-0000-0000-0000-000000000000\",\n  \"date\": \"2024-01-15\",\n  \"startTime\": \"09:00:00\",\n  \"endTime\": \"12:00:00\",\n  \"adults\": 2,\n  \"children\": 1,\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"contactEmail\": \"john.doe@example.com\",\n  \"contactPhone\": \"+84901234567\",\n  \"notes\": \"Special dietary requirements\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/bookings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"bookings"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get User Bookings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/bookings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"bookings"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Booking by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/bookings/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"bookings",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "00000000-0000-0000-0000-000000000000"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Host Bookings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/bookings/host/:hostId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"bookings",
+								"host",
+								":hostId"
+							],
+							"variable": [
+								{
+									"key": "hostId",
+									"value": "00000000-0000-0000-0000-000000000000"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Experience Bookings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/bookings/experience/:experienceId?date=2024-01-15&startTime=09:00:00",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"bookings",
+								"experience",
+								":experienceId"
+							],
+							"query": [
+								{
+									"key": "date",
+									"value": "2024-01-15"
+								},
+								{
+									"key": "startTime",
+									"value": "09:00:00"
+								}
+							],
+							"variable": [
+								{
+									"key": "experienceId",
+									"value": "00000000-0000-0000-0000-000000000000"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Cancel Booking",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"Change of plans\",\n  \"isCancelledByHost\": false\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/bookings/:id/cancel",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"bookings",
+								":id",
+								"cancel"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "00000000-0000-0000-0000-000000000000"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Check Completed Booking",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/bookings/check-completed?userId=00000000-0000-0000-0000-000000000000&experienceId=00000000-0000-0000-0000-000000000000",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"bookings",
+								"check-completed"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "00000000-0000-0000-0000-000000000000"
+								},
+								{
+									"key": "experienceId",
+									"value": "00000000-0000-0000-0000-000000000000"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "VNPay Return",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments/vnpay-return",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments",
+								"vnpay-return"
+							]
+						}
+					}
+				},
+				{
+					"name": "VNPay IPN",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments/vnpay-ipn",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"payments",
+								"vnpay-ipn"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "User Service",
+			"item": [
+				{
+					"name": "Users",
+					"item": [
+						{
+							"name": "Get Users (Admin)",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/users?PageNumber=1&PageSize=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"users"
+									],
+									"query": [
+										{
+											"key": "PageNumber",
+											"value": "1"
+										},
+										{
+											"key": "PageSize",
+											"value": "10"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get User by ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/users/:userId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"users",
+										":userId"
+									],
+									"variable": [
+										{
+											"key": "userId",
+											"value": "00000000-0000-0000-0000-000000000000"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get My Profile",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/users/me",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"users",
+										"me"
+									]
+								}
+							}
+						},
+						{
+							"name": "Update User Profile",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "PhoneNumber",
+											"value": "+84901234567",
+											"type": "text"
+										},
+										{
+											"key": "FullName",
+											"value": "John Doe",
+											"type": "text"
+										},
+										{
+											"key": "DateOfBirth",
+											"value": "1990-01-15",
+											"type": "text"
+										},
+										{
+											"key": "Gender",
+											"value": "Male",
+											"type": "text"
+										},
+										{
+											"key": "Country",
+											"value": "Vietnam",
+											"type": "text"
+										},
+										{
+											"key": "Avatar",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/users",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"users"
+									]
+								}
+							}
+						},
+						{
+							"name": "Become Host",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "FullName",
+											"value": "John Doe",
+											"type": "text"
+										},
+										{
+											"key": "PhoneNumber",
+											"value": "+84901234567",
+											"type": "text"
+										},
+										{
+											"key": "DateOfBirth",
+											"value": "1990-01-15",
+											"type": "text"
+										},
+										{
+											"key": "Gender",
+											"value": "Male",
+											"type": "text"
+										},
+										{
+											"key": "Country",
+											"value": "Vietnam",
+											"type": "text"
+										},
+										{
+											"key": "Bio",
+											"value": "Passionate tour guide with 5 years of experience",
+											"type": "text"
+										},
+										{
+											"key": "SpokenLanguages",
+											"value": "English",
+											"type": "text"
+										},
+										{
+											"key": "SpokenLanguages",
+											"value": "Vietnamese",
+											"type": "text"
+										},
+										{
+											"key": "Location",
+											"value": "Ho Chi Minh City",
+											"type": "text"
+										},
+										{
+											"key": "Work",
+											"value": "Professional Tour Guide",
+											"type": "text"
+										},
+										{
+											"key": "Education",
+											"value": "Tourism Management",
+											"type": "text"
+										},
+										{
+											"key": "FunFact",
+											"value": "I've visited 30 countries!",
+											"type": "text"
+										},
+										{
+											"key": "TopicsOfInterest",
+											"value": "History",
+											"type": "text"
+										},
+										{
+											"key": "TopicsOfInterest",
+											"value": "Culture",
+											"type": "text"
+										},
+										{
+											"key": "DesiredHostingStyle",
+											"value": "Interactive and engaging",
+											"type": "text"
+										},
+										{
+											"key": "ResponseTime",
+											"value": "Within 24 hours",
+											"type": "text"
+										},
+										{
+											"key": "FacebookUrl",
+											"value": "https://facebook.com/johndoe",
+											"type": "text"
+										},
+										{
+											"key": "InstagramUrl",
+											"value": "https://instagram.com/johndoe",
+											"type": "text"
+										},
+										{
+											"key": "LinkedInUrl",
+											"value": "https://linkedin.com/in/johndoe",
+											"type": "text"
+										},
+										{
+											"key": "Avatar",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "Document",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/users/become-host",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"users",
+										"become-host"
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Batch User Info",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/users/batch-info?userIds=00000000-0000-0000-0000-000000000000&userIds=00000000-0000-0000-0000-000000000001",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"users",
+										"batch-info"
+									],
+									"query": [
+										{
+											"key": "userIds",
+											"value": "00000000-0000-0000-0000-000000000000"
+										},
+										{
+											"key": "userIds",
+											"value": "00000000-0000-0000-0000-000000000001"
+										}
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Hosts",
+					"item": [
+						{
+							"name": "Get Hosts (Admin)",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/hosts?PageNumber=1&PageSize=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"hosts"
+									],
+									"query": [
+										{
+											"key": "PageNumber",
+											"value": "1"
+										},
+										{
+											"key": "PageSize",
+											"value": "10"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Host Detail",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/hosts/:userId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"hosts",
+										":userId"
+									],
+									"variable": [
+										{
+											"key": "userId",
+											"value": "00000000-0000-0000-0000-000000000000"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Verify Host Profile (Admin)",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"status\": \"Approved\",\n  \"reason\": null\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/hosts/:accountId/verify",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"hosts",
+										":accountId",
+										"verify"
+									],
+									"variable": [
+										{
+											"key": "accountId",
+											"value": "00000000-0000-0000-0000-000000000000"
+										}
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Wishlists",
+					"item": [
+						{
+							"name": "Get My Wishlists",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/wishlists",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"wishlists"
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Wishlist Detail",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/wishlists/:wishlistId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"wishlists",
+										":wishlistId"
+									],
+									"variable": [
+										{
+											"key": "wishlistId",
+											"value": "00000000-0000-0000-0000-000000000000"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Create Wishlist",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"My Favorite Experiences\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/wishlists",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"wishlists"
+									]
+								}
+							}
+						},
+						{
+							"name": "Add Experience to Wishlist",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/wishlists/:wishlistId/experiences/:experienceId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"wishlists",
+										":wishlistId",
+										"experiences",
+										":experienceId"
+									],
+									"variable": [
+										{
+											"key": "wishlistId",
+											"value": "00000000-0000-0000-0000-000000000000"
+										},
+										{
+											"key": "experienceId",
+											"value": "00000000-0000-0000-0000-000000000000"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Remove Experience from Wishlist",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/wishlists/:wishlistId/experiences/:experienceId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"wishlists",
+										":wishlistId",
+										"experiences",
+										":experienceId"
+									],
+									"variable": [
+										{
+											"key": "wishlistId",
+											"value": "00000000-0000-0000-0000-000000000000"
+										},
+										{
+											"key": "experienceId",
+											"value": "00000000-0000-0000-0000-000000000000"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Delete Wishlist",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/wishlists/:wishlistId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"wishlists",
+										":wishlistId"
+									],
+									"variable": [
+										{
+											"key": "wishlistId",
+											"value": "00000000-0000-0000-0000-000000000000"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Check Experiences in Wishlist",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/wishlists/check-experiences?userId=00000000-0000-0000-0000-000000000000&experienceIds=00000000-0000-0000-0000-000000000000&experienceIds=00000000-0000-0000-0000-000000000001",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"wishlists",
+										"check-experiences"
+									],
+									"query": [
+										{
+											"key": "userId",
+											"value": "00000000-0000-0000-0000-000000000000"
+										},
+										{
+											"key": "experienceIds",
+											"value": "00000000-0000-0000-0000-000000000000"
+										},
+										{
+											"key": "experienceIds",
+											"value": "00000000-0000-0000-0000-000000000001"
+										}
+									]
+								}
+							}
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000",
+			"type": "default"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "default"
+		}
+	]
+}

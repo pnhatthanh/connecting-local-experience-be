@@ -1,6 +1,5 @@
 using BuildingBlocks.EntityFramework;
 using Experience.Domain.Entities;
-using Experience.Infrastructure.Data.Configurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Experience.Infrastructure.Data
@@ -14,6 +13,7 @@ namespace Experience.Infrastructure.Data
         public DbSet<ExperienceScheduleSlotEntity> ExperienceScheduleSlots { get; set; }
         public DbSet<ExperienceMediaEntity> ExperienceMedias { get; set; }
         public DbSet<ExperienceItineraryEntity> ExperienceItineraries { get; set; }
+        public DbSet<ReviewEntity> Reviews { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

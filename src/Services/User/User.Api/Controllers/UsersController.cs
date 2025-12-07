@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using User.Application.DTOs;
 using User.Application.Handlers.Commands.BecomeHost;
 using User.Application.Handlers.Commands.UpdateUserProfile;
+using User.Application.Handlers.Queries.GetBatchUserInfo;
 using User.Application.Handlers.Queries.GetMyProfile;
 using User.Application.Handlers.Queries.GetUserById;
 using User.Application.Handlers.Queries.GetUsers;
@@ -62,6 +63,13 @@ namespace User.Api.Controllers
             CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(command, cancellationToken);
+            return Ok(result);
+        }
+        [HttpGet("batch-info")]
+        public async Task<ActionResult<List<UserInfoDto>>> GetBatchUserInfo([FromQuery] List<Guid> userIds, CancellationToken cancellationToken)
+        {
+            var query = new GetBatchUserInfoQuery(userIds);
+            var result = await _mediator.Send(query, cancellationToken);
             return Ok(result);
         }
     }

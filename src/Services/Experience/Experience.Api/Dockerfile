@@ -10,6 +10,7 @@ COPY ["src/BuildingBlocks/BuildingBlocks.Application/BuildingBlocks.Application.
 COPY ["src/BuildingBlocks/BuildingBlocks.Domain/BuildingBlocks.Domain.csproj", "src/BuildingBlocks/BuildingBlocks.Domain/"]
 COPY ["src/BuildingBlocks/BuildingBlocks.EntityFramework/BuildingBlocks.EntityFramework.csproj", "src/BuildingBlocks/BuildingBlocks.EntityFramework/"]
 COPY ["src/BuildingBlocks/BuildingBlocks.Presentation/BuildingBlocks.Presentation.csproj", "src/BuildingBlocks/BuildingBlocks.Presentation/"]
+COPY ["src/BuildingBlocks/BuildingBlocks.RabbitMQ/BuildingBlocks.RabbitMQ.csproj", "src/BuildingBlocks/BuildingBlocks.RabbitMQ/"]
 
 RUN dotnet restore src/Services/Experience/Experience.Api/Experience.Api.csproj
 
@@ -19,6 +20,7 @@ COPY ["src/BuildingBlocks/BuildingBlocks.Application/", "src/BuildingBlocks/Buil
 COPY ["src/BuildingBlocks/BuildingBlocks.Domain/", "src/BuildingBlocks/BuildingBlocks.Domain/"]
 COPY ["src/BuildingBlocks/BuildingBlocks.EntityFramework/", "src/BuildingBlocks/BuildingBlocks.EntityFramework/"]
 COPY ["src/BuildingBlocks/BuildingBlocks.Presentation/", "src/BuildingBlocks/BuildingBlocks.Presentation/"]
+COPY ["src/BuildingBlocks/BuildingBlocks.RabbitMQ/", "src/BuildingBlocks/BuildingBlocks.RabbitMQ/"]
 
 RUN dotnet publish src/Services/Experience/Experience.Api/Experience.Api.csproj -c Release -o /app/publish /p:UseAppHost=false
 

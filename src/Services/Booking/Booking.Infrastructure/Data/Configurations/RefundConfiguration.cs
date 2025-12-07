@@ -38,13 +38,8 @@ namespace Booking.Infrastructure.Data.Configurations
 
             // Relationships
             entity.HasOne(e => e.Booking)
-                .WithMany(b => b.Refunds)
-                .HasForeignKey(e => e.BookingId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.Payment)
-                .WithMany(p => p.Refunds)
-                .HasForeignKey(e => e.PaymentId)
+                .WithOne(b => b.Refunds)
+                .HasForeignKey<RefundEntity>(e => e.BookingId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

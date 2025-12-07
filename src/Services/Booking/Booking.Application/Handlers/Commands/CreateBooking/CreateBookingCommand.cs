@@ -1,6 +1,4 @@
 using BuildingBlocks.Application.CQRS.Command;
-using Booking.Application.Dtos;
-using Booking.Domain.Enums;
 
 namespace Booking.Application.Handlers.Commands.CreateBooking
 {
@@ -16,6 +14,12 @@ namespace Booking.Application.Handlers.Commands.CreateBooking
         string ContactEmail,
         string ContactPhone,
         string? Notes,
-        PaymentProvider PaymentProvider = PaymentProvider.Momo  
-    ) : ICommand<BookingDto>;
+        string? IpAddress = null
+    ) : ICommand<CreateBookingResponse>;
+
+    public record CreateBookingResponse(
+        bool Success,
+        string? PaymentUrl,
+        string Message
+    );
 }

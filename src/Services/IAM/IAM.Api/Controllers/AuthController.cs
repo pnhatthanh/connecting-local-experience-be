@@ -1,9 +1,11 @@
 using IAM.Application.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using IAM.Application.Handlers.Commands.ChangePassword;
 using IAM.Application.Handlers.Commands.ConfirmEmail;
 using IAM.Application.Handlers.Commands.Register;
 using IAM.Application.Handlers.Commands.Login;
+using IAM.Application.Handlers.Commands.Logout;
 using IAM.Application.Handlers.Commands.RefreshToken;
 using IAM.Application.Handlers.Commands.ForgotPassword;
 using IAM.Application.Handlers.Commands.ResetPassword;
@@ -64,27 +66,33 @@ namespace IAM.Api.Controllers
             return Ok(new { success = result, message = "Password has been reset successfully" });
         }
 
+        [HttpPut("password/change")]
+        [Authorize]
+        public async Task<ActionResult<bool>> ChangePassword([FromBody] ChangePasswordCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(new { success = result, message = "Password changed successfully" });
+        }
+
+        [HttpPost("logout")]
+        [Authorize]
+        public async Task<ActionResult> Logout([FromBody] LogoutCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(new { success = result, message = "Logged out successfully" });
+        }
+
         [HttpPatch("accounts/{accountId}/status")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<bool>> UpdateAccountStatus(
             [FromRoute] Guid accountId,
-            [FromBody] UpdateAccountStatusRequest request)
+            [FromBody] UpdateAccountStatusCommand command)
         {
-            var command = new UpdateAccountStatusCommand 
-            { 
-                AccountId = accountId,
-                IsActive = request.IsActive
-            };
-            var result = await _mediator.Send(command);
-            var message = request.IsActive 
+            var result = await _mediator.Send(command with { AccountId = accountId });
+            var message = command.IsActive 
                 ? "Account has been activated successfully" 
                 : "Account has been deactivated successfully";
             return Ok(new { success = result, message });
         }
-    }
-
-    public class UpdateAccountStatusRequest
-    {
-        public bool IsActive { get; set; }
     }
 }

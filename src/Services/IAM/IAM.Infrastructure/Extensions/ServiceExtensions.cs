@@ -1,3 +1,4 @@
+using BuildingBlocks.Application.Interfaces;
 using BuildingBlocks.EntityFramework;
 using BuildingBlocks.RabbitMQ;
 using BuildingBlocks.RabbitMQ.Configurations;
@@ -31,6 +32,8 @@ namespace IAM.Infrastructure.Extensions
             services.AddRabbitMQ(rabbitMQSetting);
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
+            services.AddHttpContextAccessor();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
             return services;
         }
     }

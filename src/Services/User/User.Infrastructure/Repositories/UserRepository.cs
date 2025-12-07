@@ -8,5 +8,12 @@ namespace User.Infrastructure.Repositories
 {
     public class UserRepository(UserDbContext context) 
         : BaseRepository<UserEntity>(context), IUserRepository
-    {}
+    {
+        public async Task<List<UserEntity>> GetByIdsAsync(List<Guid> userIds)
+        {
+            return await context.Set<UserEntity>()
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
+        }
+    }
 }

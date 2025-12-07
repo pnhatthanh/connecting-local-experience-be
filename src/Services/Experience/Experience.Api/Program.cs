@@ -17,6 +17,7 @@ builder.Services.AddExperienceApplication()
 var app = builder.Build();
 
 await app.Services.ApplyMigrationAsync();
+await app.Services.SubscribeToEventsAsync();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

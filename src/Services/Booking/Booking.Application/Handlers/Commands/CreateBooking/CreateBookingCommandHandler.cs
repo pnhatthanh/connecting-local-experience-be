@@ -14,38 +14,28 @@ using MapsterMapper;
 
 namespace Booking.Application.Handlers.Commands.CreateBooking
 {
-    public class CreateBookingCommandHandler : ICommandHandler<CreateBookingCommand, BookingDto>
+    public class CreateBookingCommandHandler : ICommandHandler<CreateBookingCommand, CreateBookingResponse>
     {
         private readonly IBookingRepository _bookingRepository;
         private readonly IPaymentRepository _paymentRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IExperienceService _experienceService;
-        private readonly IMomoService _momoService;
+        private readonly IVnPayService _vnPayService;
         private readonly ICurrentUserService _currentUserService;
-        private readonly IEventBus _eventBus;
-        private readonly IMapper _mapper;
 
-        public CreateBookingCommandHandler(
-            IBookingRepository bookingRepository,
-            IPaymentRepository paymentRepository,
-            IUnitOfWork unitOfWork,
-            IExperienceService experienceService,
-            IMomoService momoService,
-            ICurrentUserService currentUserService,
-            IEventBus eventBus,
-            IMapper mapper)
+        public CreateBookingCommandHandler(IBookingRepository bookingRepository, IPaymentRepository paymentRepository,
+            IUnitOfWork unitOfWork, IExperienceService experienceService, IVnPayService vnPayService,
+            ICurrentUserService currentUserService)
         {
             _bookingRepository = bookingRepository;
             _paymentRepository = paymentRepository;
             _unitOfWork = unitOfWork;
             _experienceService = experienceService;
-            _momoService = momoService;
+            _vnPayService = vnPayService;
             _currentUserService = currentUserService;
-            _eventBus = eventBus;
-            _mapper = mapper;
         }
 
-        public async Task<BookingDto> Handle(CreateBookingCommand request, CancellationToken cancellationToken)
+        public async Task<CreateBookingResponse> Handle(CreateBookingCommand request, CancellationToken cancellationToken)
         {
             var userId = _currentUserService.UserId;
 
@@ -62,31 +52,25 @@ namespace Booking.Application.Handlers.Commands.CreateBooking
             if (!isAvailable)
                 throw new BadRequestException("Selected time slot is not available");
             
-
             var totalPrice = (experience.AdultPrice * request.Adults) + (experience.ChildPrice * request.Children);
-
-            var platformFeePercentage = 0.15m;
-            var platformFee = totalPrice * platformFeePercentage;
-            var hostAmount = totalPrice - platformFee;  // Host receives 85%
-
             var bookingCode = BookingCodeGenerator.Generate();
-
             var booking = new BookingEntity
             {
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 HostId = experience.HostId,
                 ExperienceId = request.ExperienceId,
+                ExperienceTitle = experience.Title,
+                ImageUrl = experience.Media != null && experience.Media.Any() ? experience.Media[0].Url : string.Empty,
                 BookingCode = bookingCode,
                 Status = BookingStatus.Pending,
                 Date = request.Date,
                 StartTime = request.StartTime,
                 EndTime = request.EndTime,
+                Location = experience.City + ", " + experience.Country,
                 Adults = request.Adults,
                 Children = request.Children,
-                TotalPrice = totalPrice,            
-                PlatformFee = platformFee,            
-                HostAmount = hostAmount,
+                TotalPrice = totalPrice,        
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 ContactEmail = request.ContactEmail,
@@ -101,63 +85,29 @@ namespace Booking.Application.Handlers.Commands.CreateBooking
                 BookingId = booking.Id,
                 Amount = totalPrice,
                 Currency = "VND",
-                Provider = request.PaymentProvider,  
                 Status = PaymentStatus.Pending,
                 CreatedAt = DateTime.UtcNow
             };
-            await _bookingRepository.AddAsync(booking);
-            await _paymentRepository.AddAsync(payment);
-            await _unitOfWork.SaveChangeAsync();
 
-            // Create payment URL immediately after booking creation
-            var paymentUrlResult = await _momoService.CreatePaymentUrlAsync(
+            var paymentUrlResult = await _vnPayService.CreatePaymentUrlAsync(
                 booking.Id,
                 totalPrice,
-                bookingCode,
-                "127.0.0.1"); // IP address will be set from controller
-
+                bookingCode);
             if (paymentUrlResult.success && !string.IsNullOrEmpty(paymentUrlResult.paymentUrl))
             {
                 payment.PaymentUrl = paymentUrlResult.paymentUrl;
-                await _unitOfWork.SaveChangeAsync();
+                payment.TransactionId = paymentUrlResult.transactionId;
             }
-
-            var bookingCreatedEvent = new BookingCreatedEvent(
-                booking.Id,
-                booking.ExperienceId,
-                booking.UserId,
-                booking.HostId,
-                booking.BookingCode,
-                booking.Date,
-                booking.StartTime,
-                booking.EndTime,
-                booking.Adults,
-                booking.Children,
-                booking.TotalPrice,
-                booking.FirstName + " " + booking.LastName,
-                booking.ContactEmail
+            await _bookingRepository.AddAsync(booking);
+            await _paymentRepository.AddAsync(payment);
+            await _unitOfWork.SaveChangeAsync();
+            return new CreateBookingResponse(
+                Success: true,
+                PaymentUrl: payment.PaymentUrl,
+                Message: payment.PaymentUrl != null 
+                    ? "Booking created successfully. Please proceed to payment." 
+                    : "Booking created but payment URL not available"
             );
-            await _eventBus.PublishAsync(bookingCreatedEvent, cancellationToken);
-
-            var bookingDto = _mapper.Map<BookingDto>(booking);
-            
-            // Include payment info with URL in response
-            if (payment.PaymentUrl != null)
-            {
-                bookingDto.Payment = new PaymentDto
-                {
-                    Id = payment.Id,
-                    BookingId = payment.BookingId,
-                    Amount = payment.Amount,
-                    Currency = payment.Currency,
-                    Provider = payment.Provider.ToString(),
-                    Status = payment.Status.ToString(),
-                    PaymentUrl = payment.PaymentUrl,
-                    CreatedAt = payment.CreatedAt
-                };
-            }
-
-            return bookingDto;
         }
     }
 }

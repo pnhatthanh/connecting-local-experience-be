@@ -34,12 +34,12 @@ namespace User.Application.Handlers.Commands.UpdateUserProfile
             var userSpec = new UserByIdSpecification(_currentUserService.UserId);
             var user = await _userRepository.GetBySpecAsync(userSpec)
                 ?? throw new BadRequestException($"User with Id {_currentUserService.UserId} not found");
-            
-            user.PhoneNumber = request.PhoneNumber;
-            user.FullName = request.FullName ?? user.FullName;
-            user.DateOfBirth = request.DateOfBirth;
+
+            user.PhoneNumber = request.PhoneNumber ?? user.PhoneNumber;
+            user.FullName = request.FullName;
+            user.DateOfBirth = request.DateOfBirth ?? user.DateOfBirth;
             user.Gender = request.Gender != null ? Enum.Parse<Gender>(request.Gender) : user.Gender;
-            user.Country = request.Country;
+            user.Country = request.Country ?? user.Country;
             if (request.Avatar != null)
             {
                 if (!string.IsNullOrWhiteSpace(user.AvatarUrl))

@@ -21,7 +21,6 @@ namespace Booking.Application.Handlers.Commands.CancelBooking
         private readonly IBookingCancellationRepository _cancellationRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IExperienceService _experienceService;
-        private readonly IMomoService _momoService;
         private readonly ICurrentUserService _currentUserService;
         private readonly IEventBus _eventBus;
         private readonly ILogger<CancelBookingCommandHandler> _logger;
@@ -33,7 +32,6 @@ namespace Booking.Application.Handlers.Commands.CancelBooking
             IBookingCancellationRepository cancellationRepository,
             IUnitOfWork unitOfWork,
             IExperienceService experienceService,
-            IMomoService momoService,
             ICurrentUserService currentUserService,
             IEventBus eventBus,
             ILogger<CancelBookingCommandHandler> logger)
@@ -44,7 +42,6 @@ namespace Booking.Application.Handlers.Commands.CancelBooking
             _cancellationRepository = cancellationRepository;
             _unitOfWork = unitOfWork;
             _experienceService = experienceService;
-            _momoService = momoService;
             _currentUserService = currentUserService;
             _eventBus = eventBus;
             _logger = logger;
@@ -145,28 +142,10 @@ namespace Booking.Application.Handlers.Commands.CancelBooking
                     CreatedAt = DateTime.UtcNow
                 };
 
-                // Process refund via Momo
-                var refundResult = await _momoService.ProcessRefundAsync(
-                    payment.Id,
-                    refundAmount,
-                    request.Reason
-                );
-
-                if (refundResult.success)
-                {
-                    refund.Status = RefundStatus.Processed;
-                    refund.VnpRefundRef = refundResult.refundId;  // Store refund reference
-                    refund.ProcessedAt = DateTime.UtcNow;
-                    _logger.LogInformation("Momo refund processed for booking {BookingId}, Refund ID: {RefundId}", 
-                        booking.Id, refundResult.refundId);
-                }
-                else
-                {
-                    refund.Status = RefundStatus.Failed;
-                    refund.VnpResponseCode = refundResult.message;
-                    _logger.LogWarning("Momo refund failed for booking {BookingId}: {Message}", 
-                        booking.Id, refundResult.message);
-                }
+                // Refund will be processed manually or via VNPay
+                refund.Status = RefundStatus.Requested;
+                _logger.LogInformation("Refund requested for booking {BookingId}, Amount: {Amount}", 
+                    booking.Id, refundAmount);
 
                 await _refundRepository.AddAsync(refund);
             }
