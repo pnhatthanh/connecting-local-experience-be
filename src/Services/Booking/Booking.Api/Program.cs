@@ -21,7 +21,8 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddAuthenticationExtension(builder.Configuration);
 builder.Services.AddBookingApplication()
-                .AddBookingInfrastructure(builder.Configuration);
+                .AddBookingInfrastructure(builder.Configuration)
+                .AddPermissionAuthorization();
 
 var app = builder.Build();
 

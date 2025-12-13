@@ -6,6 +6,7 @@ namespace Experience.Application.Events
     {
         public Guid BookingId { get; set; }
         public Guid ExperienceId { get; set; }
+        public Guid UserId { get; set; }
         public DateOnly Date { get; set; }
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
@@ -14,11 +15,12 @@ namespace Experience.Application.Events
         public int TotalParticipants { get; set; }
         
         public BookingConfirmedEvent() { }
-        public BookingConfirmedEvent(Guid bookingId, Guid experienceId, DateOnly date, 
+        public BookingConfirmedEvent(Guid bookingId, Guid experienceId, Guid userId, DateOnly date, 
             TimeSpan startTime, TimeSpan endTime, int adults, int children, int totalParticipants)
         {
             BookingId = bookingId;
             ExperienceId = experienceId;
+            UserId = userId;
             Date = date;
             StartTime = startTime;
             EndTime = endTime;

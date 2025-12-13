@@ -26,6 +26,8 @@ namespace IAM.Infrastructure.Extensions
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IPermissionRepository, PermissionRepository>();
+            services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
             services.Configure<JwtSetting>(configuration.GetSection(JwtSetting.JwtSettingKey));
             var rabbitMQSetting = configuration.GetSection("RabbitMQ").Get<RabbitMQConfig>()
                 ?? throw new ArgumentNullException("RabbitMQ configuration is null");

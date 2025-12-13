@@ -1,8 +1,10 @@
 using BuildingBlocks.Application.CQRS.Command;
+using BuildingBlocks.Application.EventBus.Abstractions;
 using BuildingBlocks.Application.Interfaces;
 using BuildingBlocks.Domain.Exceptions;
 using BuildingBlocks.Domain.Interfaces;
 using Experience.Application.Dtos;
+using Experience.Application.Events;
 using Experience.Application.Interfaces;
 using Experience.Domain.Entities;
 using Experience.Domain.Repositories;
@@ -18,10 +20,11 @@ namespace Experience.Application.Handlers.Commands.CreateReview
         private readonly ICurrentUserService _currentUserService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IEventBus _eventBus;
 
         public CreateReviewCommandHandler(IReviewRepository reviewRepository, IExperienceRepository experienceRepository,
             IBookingServiceClient bookingServiceClient, ICurrentUserService currentUserService,
-            IUnitOfWork unitOfWork, IMapper mapper)
+            IUnitOfWork unitOfWork, IMapper mapper, IEventBus eventBus)
         {
             _reviewRepository = reviewRepository;
             _experienceRepository = experienceRepository;
@@ -29,6 +32,7 @@ namespace Experience.Application.Handlers.Commands.CreateReview
             _currentUserService = currentUserService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _eventBus = eventBus;
         }
 
         public async Task<ReviewDto> Handle(CreateReviewCommand request, CancellationToken cancellationToken)
@@ -61,6 +65,12 @@ namespace Experience.Application.Handlers.Commands.CreateReview
             _experienceRepository.Update(experience);   
 
             await _unitOfWork.SaveChangeAsync();
+            // Publish event
+            var userRatedEvent = new UserRatedExperienceEvent(
+                userId,
+                request.ExperienceId, 
+                request.Rating);
+            await _eventBus.PublishAsync(userRatedEvent);
 
             return _mapper.Map<ReviewDto>(review);
         }

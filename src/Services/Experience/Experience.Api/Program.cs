@@ -12,7 +12,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAuthenticationExtension(builder.Configuration);
 
 builder.Services.AddExperienceApplication()
-                .AddExperienceInfrastructure(builder.Configuration);
+                .AddExperienceInfrastructure(builder.Configuration)
+                .AddPermissionAuthorization();
 
 var app = builder.Build();
 

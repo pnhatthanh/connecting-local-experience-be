@@ -1,7 +1,9 @@
 using BuildingBlocks.Application.CQRS.Command;
+using BuildingBlocks.Application.EventBus.Abstractions;
 using BuildingBlocks.Application.Interfaces;
 using BuildingBlocks.Domain.Exceptions;
 using BuildingBlocks.Domain.Interfaces;
+using User.Application.Events;
 using User.Application.Interfaces;
 using User.Domain.Entities;
 using User.Domain.Repositories;
@@ -16,19 +18,22 @@ namespace User.Application.Handlers.Commands.AddExperienceToWishlist
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
         private readonly IExperienceServiceClient _experienceServiceClient;
+        private readonly IEventBus _eventBus;
 
         public AddExperienceToWishlistCommandHandler(
             IUserWishlistRepository wishlistRepository,
             IWishlistExperienceRepository wishlistExperienceRepository,
             IUnitOfWork unitOfWork,
             ICurrentUserService currentUserService,
-            IExperienceServiceClient experienceServiceClient)
+            IExperienceServiceClient experienceServiceClient,
+            IEventBus eventBus)
         {
             _wishlistRepository = wishlistRepository;
             _wishlistExperienceRepository = wishlistExperienceRepository;
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
             _experienceServiceClient = experienceServiceClient;
+            _eventBus = eventBus;
         }
 
         public async Task<bool> Handle(AddExperienceToWishlistCommand request, CancellationToken cancellationToken)
@@ -61,6 +66,10 @@ namespace User.Application.Handlers.Commands.AddExperienceToWishlist
             _wishlistRepository.Update(wishlist);
             
             await _unitOfWork.SaveChangeAsync();
+            var @event = new ExperienceAddedToWishlistEvent(
+                userId: userId,
+                experienceId: request.ExperienceId);
+            await _eventBus.PublishAsync(@event);
             return true;
         }
     }

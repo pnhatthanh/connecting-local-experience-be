@@ -9,7 +9,8 @@ builder.Services.AddControllers();
 
 builder.Services.AddIAMApplication()
                 .AddIAMInfrastructure(builder.Configuration)
-                .AddAuthenticationExtension(builder.Configuration);
+                .AddAuthenticationExtension(builder.Configuration)
+                .AddPermissionAuthorization();
 
 var app = builder.Build();
 

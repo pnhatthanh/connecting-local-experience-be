@@ -14,15 +14,22 @@ namespace IAM.Application.Handlers.Commands.Login
     {
         private readonly IAccountRepository _accountRepository;
         private readonly IRefreshTokenRepository _refreshTokenRepository;
+        private readonly IRolePermissionRepository _rolePermissionRepository;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IUnitOfWork _unitOfWork;
 
-        public LoginCommandHandler(IAccountRepository accountRepository, IRefreshTokenRepository refreshTokenRepository,
-            IPasswordHasher passwordHasher, IJwtTokenService jwtTokenService, IUnitOfWork unitOfWork)
+        public LoginCommandHandler(
+            IAccountRepository accountRepository, 
+            IRefreshTokenRepository refreshTokenRepository,
+            IRolePermissionRepository rolePermissionRepository,
+            IPasswordHasher passwordHasher, 
+            IJwtTokenService jwtTokenService, 
+            IUnitOfWork unitOfWork)
         {
             _accountRepository = accountRepository;
             _refreshTokenRepository = refreshTokenRepository;
+            _rolePermissionRepository = rolePermissionRepository;
             _passwordHasher = passwordHasher;
             _jwtTokenService = jwtTokenService;
             _unitOfWork = unitOfWork;
@@ -36,14 +43,21 @@ namespace IAM.Application.Handlers.Commands.Login
             if (!_passwordHasher.VerifyPassword(request.Password, account.PasswordHash))
                 throw new BadRequestException("Invalid email or password");
 
-           if (!account.IsActive)
+            if (!account.IsActive)
                 throw new ForbiddenException("Account is deactivated");
 
             if (!account.IsEmailConfirmed)
                 throw new ForbiddenException("Email is not confirmed");
-               
-            var permissions = new List<string>();
-            var accessToken = _jwtTokenService.GenerateAccessToken(account, permissions);
+            
+            // Load permissions based on role using Specification Pattern
+            var rolePermissionSpec = new RolePermissionByRoleIdSpecification(account.RoleId);
+            var rolePermissions = await _rolePermissionRepository.GetAllAsync(
+                rolePermissionSpec, 
+                rp => rp.Permission  // Include Permission entity
+            );
+            var permissionCodes = rolePermissions.Select(rp => rp.Permission.PermissionCode).ToList();
+            
+            var accessToken = _jwtTokenService.GenerateAccessToken(account, permissionCodes);
             var refreshTokenValue = _jwtTokenService.GenerateRefreshToken();
             var refreshToken = new RefreshTokenEntity
             {
