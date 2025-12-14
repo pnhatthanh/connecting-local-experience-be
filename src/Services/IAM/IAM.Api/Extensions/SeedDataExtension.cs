@@ -151,6 +151,7 @@ public static class SeedDataExtension
                 PermissionCodesShared.EXPERIENCE_EXPERIENCE_UPDATE,
                 PermissionCodesShared.EXPERIENCE_EXPERIENCE_DELETE,
                 PermissionCodesShared.BOOKING_BOOKING_VIEW_BY_HOST,
+                PermissionCodesShared.BOOKING_BOOKING_TOGGLE_STATUS
             };
 
             rolePermissions.AddRange(permissions

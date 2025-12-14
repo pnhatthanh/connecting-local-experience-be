@@ -7,12 +7,13 @@ using Experience.Application.Handlers.Queries.GetExperience;
 using Experience.Application.Handlers.Queries.GetExperienceAvailability;
 using Experience.Application.Handlers.Queries.GetExperiences;
 using Experience.Application.Handlers.Queries.GetExperiencesByIds;
+using Experience.Application.Handlers.Queries.GetRecommendations;
 using Experience.Application.Handlers.Queries.ValidateBookingAvailability;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using BuildingBlocks.Presentation.Authorization;
 using BuildingBlocks.Presentation.Constants;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Experience.Api.Controllers
 {
@@ -131,6 +132,19 @@ namespace Experience.Api.Controllers
             {
                 Success = result,
                 Message = result ? "Experience deleted successfully." : "Failed to delete experience."
+            });
+        }
+        [HttpGet("recommendations")]
+        [Authorize]
+        public async Task<IActionResult> GetRecommendations( [FromQuery] int topK = 10)
+        {
+            var query = new GetRecommendationsQuery(topK);
+            var result = await _mediator.Send(query);
+            
+            return Ok(new
+            {
+                Recommendations = result,
+                Total = result.Count
             });
         }
     }

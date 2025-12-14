@@ -86,10 +86,7 @@ namespace Experience.Application.Handlers.Queries.GetExperiences
         }
         private bool HasSearchCriteria(GetExperiencesQuery request)
         {
-            return request.SearchTerm is not null || request.CategoryIds is not null 
-                || request.MinPrice is not null || request.MaxPrice is not null 
-                || request.MinDuration is not null || request.MaxDuration is not null
-                || request.Languages is not null || request.Status is not null;
+            return request.SearchTerm is not null || request.CategoryIds is not null;
         }
     }
 }

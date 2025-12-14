@@ -922,6 +922,58 @@
 									]
 								}
 							}
+						},
+						{
+							"name": "Get Recommendations",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/experiences/recommendations?topK=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"experiences",
+										"recommendations"
+									],
+									"query": [
+										{
+											"key": "topK",
+											"value": "10",
+											"description": "Number of recommendations to return"
+										}
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Categories",
+					"item": [
+						{
+							"name": "Get Categories",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/categories",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"categories"
+									]
+								}
+							}
 						}
 					]
 				},

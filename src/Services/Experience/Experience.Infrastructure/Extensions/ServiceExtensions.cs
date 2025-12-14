@@ -47,6 +47,7 @@ namespace Experience.Infrastructure.Extensions
             services.AddHttpClient();
             services.AddScoped<IUserServiceClient, UserServiceClient>();
             services.AddScoped<IBookingServiceClient, BookingServiceClient>();
+            services.AddScoped<IAIRecommendationService, AIRecommendationService>();
 
             // Add RabbitMQ
             var rabbitMQSetting = configuration.GetSection("RabbitMQ").Get<RabbitMQConfig>()
