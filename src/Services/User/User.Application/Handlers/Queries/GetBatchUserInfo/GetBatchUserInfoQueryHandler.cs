@@ -1,6 +1,7 @@
 using BuildingBlocks.Application.CQRS.Query;
 using User.Application.DTOs;
 using User.Domain.Repositories;
+using User.Domain.Specifications;
 
 namespace User.Application.Handlers.Queries.GetBatchUserInfo
 {
@@ -17,7 +18,10 @@ namespace User.Application.Handlers.Queries.GetBatchUserInfo
         {
             if (!request.UserIds.Any())
                 return new List<UserInfoDto>();
-            var users = await _userRepository.GetByIdsAsync(request.UserIds);
+
+            var usersByIdsSpec = new UsersByIdsSpecification(request.UserIds);
+            var users = await _userRepository.GetAllAsync(usersByIdsSpec);
+
             return [.. users.Select(u => new UserInfoDto(u.Id, u.FullName, u.AvatarUrl))];
         }
     }

@@ -1,9 +1,11 @@
 using System.Diagnostics;
 using BuildingBlocks.Application.CQRS.Command;
+using BuildingBlocks.Application.EventBus.Abstractions;
 using BuildingBlocks.Application.Interfaces;
 using BuildingBlocks.Domain.Exceptions;
 using BuildingBlocks.Domain.Interfaces;
 using Experience.Application.Dtos;
+using Experience.Application.Events;
 using Experience.Application.Interfaces;
 using Experience.Domain.Entities;
 using Experience.Domain.Enums;
@@ -21,6 +23,7 @@ namespace Experience.Application.Handlers.Commands.CreateExperience
         private readonly IPhotoService _photoService;
         private readonly ICurrentUserService _currentUserService;
         private readonly IMapper _mapper;
+        private readonly IEventBus _eventBus;
 
         public CreateExperienceCommandHandler(
             IExperienceRepository experienceRepository,
@@ -28,7 +31,8 @@ namespace Experience.Application.Handlers.Commands.CreateExperience
             IUnitOfWork unitOfWork, 
             IPhotoService photoService, 
             ICurrentUserService currentUserService,
-            IMapper mapper)
+            IMapper mapper,
+            IEventBus eventBus)
         {
             _experienceRepository = experienceRepository;
             _categoryRepository = categoryRepository;
@@ -36,14 +40,14 @@ namespace Experience.Application.Handlers.Commands.CreateExperience
             _photoService = photoService;
             _currentUserService = currentUserService;
             _mapper = mapper;
+            _eventBus = eventBus;
         }
 
         public async Task<ExperienceDto> Handle(CreateExperienceCommand request, CancellationToken cancellationToken)
         {
             var hostId = _currentUserService.UserId;
-
-            if (await _categoryRepository.GetByIdAsync(request.CategoryId) == null)
-                throw new BadRequestException("Invalid category ID");
+            var category = await _categoryRepository.GetByIdAsync(request.CategoryId)
+                ?? throw new BadRequestException("Invalid category ID");
             var experience = new ExperienceEntity
             {
                 Id = Guid.NewGuid(),
@@ -58,7 +62,6 @@ namespace Experience.Application.Handlers.Commands.CreateExperience
                 ChildPrice = request.ChildPrice,
                 Duration = request.Duration,
                 MaxParticipants = request.MaxParticipants,
-                
                 CategoryId = request.CategoryId,
                 ActivityLevel = Enum.Parse<ActivityLevel>(request.ActivityLevel),
                 SkillLevel = Enum.Parse<SkillLevel>(request.SkillLevel),
@@ -91,6 +94,21 @@ namespace Experience.Application.Handlers.Commands.CreateExperience
             
             await _experienceRepository.AddAsync(experience);
             await _unitOfWork.SaveChangeAsync();
+            
+            var experienceCreatedEvent = new ExperienceCreatedEvent(
+                experienceId: experience.Id.ToString(),
+                title: experience.Title,
+                description: experience.Description,
+                maxParticipants: experience.MaxParticipants,
+                address: $"{experience.City}, {experience.Country}",
+                category: category.Name,
+                adultPrice: experience.AdultPrice,
+                childPrice: experience.ChildPrice,
+                duration: experience.Duration,
+                language: experience.Language,
+                media: _mapper.Map<List<ExperienceMediaDto>>(experience.Media)
+            );
+            await _eventBus.PublishAsync(experienceCreatedEvent, cancellationToken);
             return _mapper.Map<ExperienceDto>(experience);
         }
         private async Task<List<ExperienceMediaEntity>> UploadMediaFilesAsync(Guid experienceId, List<IFormFile> mediaFiles)

@@ -6,6 +6,8 @@ using Experience.Application.Handlers.Queries.GetReviewsByHost;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using BuildingBlocks.Presentation.Authorization;
+using BuildingBlocks.Presentation.Constants;
 
 namespace Experience.Api.Controllers
 {
@@ -40,7 +42,7 @@ namespace Experience.Api.Controllers
         }
 
         [HttpGet("reviews")]
-        [Authorize(Roles = "Admin")]
+        [RequirePermission(PermissionCodes.EXPERIENCE_REVIEW_VIEW_ALL)]
         public async Task<IActionResult> GetAllReviews([FromQuery] GetAllReviewsQuery query)
         {
             var result = await _mediator.Send(query);
@@ -56,7 +58,7 @@ namespace Experience.Api.Controllers
         }
 
         [HttpPut("reviews/{reviewId}/status")]
-        [Authorize(Roles = "Admin")]
+        [RequirePermission(PermissionCodes.EXPERIENCE_REVIEW_UPDATE_STATUS)]
         public async Task<IActionResult> HideReview([FromRoute] Guid reviewId, [FromBody] HideReviewCommand command)
         {
             var result = await _mediator.Send(command with { ReviewId = reviewId });

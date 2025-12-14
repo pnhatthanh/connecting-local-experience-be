@@ -1,6 +1,8 @@
 using BuildingBlocks.Application.Dtos;
+using BuildingBlocks.Application.EventBus.Abstractions;
 using BuildingBlocks.Application.Interfaces;
 using Experience.Application.Dtos;
+using Experience.Application.Events;
 using Experience.Application.Interfaces;
 using Experience.Domain.Repositories;
 using Experience.Domain.Specifications;
@@ -15,17 +17,20 @@ namespace Experience.Application.Handlers.Queries.GetExperiences
         private readonly IMapper _mapper;
         private readonly IUserServiceClient _userServiceClient;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IEventBus _eventBus;
 
         public GetExperiencesQueryHandler(
             IExperienceRepository experienceRepository, 
             IMapper mapper,
             IUserServiceClient userServiceClient,
-            ICurrentUserService currentUserService)
+            ICurrentUserService currentUserService,
+            IEventBus eventBus)
         {
             _experienceRepository = experienceRepository;
             _mapper = mapper;
             _userServiceClient = userServiceClient;
             _currentUserService = currentUserService;
+            _eventBus = eventBus;
         }
     
         public async Task<PaginationResult<ExperienceSummaryDto>> Handle(GetExperiencesQuery request, CancellationToken cancellationToken)
@@ -51,22 +56,26 @@ namespace Experience.Application.Handlers.Queries.GetExperiences
                 includes: [e => e.Category, e => e.Media]
             );
             var totalCount = await _experienceRepository.CountAsync(spec);
-            
             var experienceDtos = _mapper.Map<List<ExperienceSummaryDto>>(experiences);
 
-            // Check favorites for authenticated users
             if (_currentUserService.IsAuthenticated && experienceDtos.Any())
             {
                 var userId = _currentUserService.UserId;
                 var experienceIds = experienceDtos.Select(e => e.Id).ToList();
                 var favoriteIds = await _userServiceClient.CheckExperiencesInWishlistAsync(userId, experienceIds);
-                
                 foreach (var dto in experienceDtos)
                 {
                     dto.IsFavorite = favoriteIds.Contains(dto.Id);
                 }
+                if(HasSearchCriteria(request))
+                {
+                    var userSearchedEvent = new UserSearchedEvent(
+                        userId: _currentUserService.UserId,
+                        experienceIds: experienceIds
+                    );
+                    await _eventBus.PublishAsync(userSearchedEvent);
+                }
             }
-                
             return new PaginationResult<ExperienceSummaryDto>
             {
                 Data = experienceDtos,
@@ -74,6 +83,10 @@ namespace Experience.Application.Handlers.Queries.GetExperiences
                 PageNumber = request.PageNumber,
                 PageSize = request.PageSize
             };
+        }
+        private bool HasSearchCriteria(GetExperiencesQuery request)
+        {
+            return request.SearchTerm is not null || request.CategoryIds is not null;
         }
     }
 }

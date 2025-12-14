@@ -922,6 +922,58 @@
 									]
 								}
 							}
+						},
+						{
+							"name": "Get Recommendations",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/experiences/recommendations?topK=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"experiences",
+										"recommendations"
+									],
+									"query": [
+										{
+											"key": "topK",
+											"value": "10",
+											"description": "Number of recommendations to return"
+										}
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Categories",
+					"item": [
+						{
+							"name": "Get Categories",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/categories",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"categories"
+									]
+								}
+							}
 						}
 					]
 				},
@@ -967,7 +1019,7 @@
 							}
 						},
 						{
-							"name": "Get Reviews",
+							"name": "Get Reviews by Experience",
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -1002,9 +1054,9 @@
 							}
 						},
 						{
-							"name": "Hide Review (Admin)",
+							"name": "Get All Reviews (Admin)",
 							"request": {
-								"method": "PUT",
+								"method": "GET",
 								"header": [
 									{
 										"key": "Authorization",
@@ -1012,23 +1064,92 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/api/experiences/:experienceId/reviews/:reviewId/hide",
+									"raw": "{{baseUrl}}/api/reviews?PageNumber=1&PageSize=10",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"api",
-										"experiences",
-										":experienceId",
-										"reviews",
-										":reviewId",
-										"hide"
+										"reviews"
+									],
+									"query": [
+										{
+											"key": "PageNumber",
+											"value": "1"
+										},
+										{
+											"key": "PageSize",
+											"value": "10"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Reviews by Host",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/hosts/:hostId/reviews?pageNumber=1&pageSize=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"hosts",
+										":hostId",
+										"reviews"
+									],
+									"query": [
+										{
+											"key": "pageNumber",
+											"value": "1"
+										},
+										{
+											"key": "pageSize",
+											"value": "10"
+										}
 									],
 									"variable": [
 										{
-											"key": "experienceId",
+											"key": "hostId",
 											"value": "00000000-0000-0000-0000-000000000000"
-										},
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Update Review Status (Admin)",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{accessToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"isHidden\": true\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/reviews/:reviewId/status",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"reviews",
+										":reviewId",
+										"status"
+									],
+									"variable": [
 										{
 											"key": "reviewId",
 											"value": "00000000-0000-0000-0000-000000000000"
@@ -1129,57 +1250,33 @@
 					"name": "Get Host Bookings",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
 						"url": {
-							"raw": "{{baseUrl}}/api/bookings/host/:hostId",
+							"raw": "{{baseUrl}}/api/bookings/host-bookings?date=2024-12-15&startTime=09:00:00",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"bookings",
-								"host",
-								":hostId"
-							],
-							"variable": [
-								{
-									"key": "hostId",
-									"value": "00000000-0000-0000-0000-000000000000"
-								}
-							]
-						}
-					}
-				},
-				{
-					"name": "Get Experience Bookings",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/bookings/experience/:experienceId?date=2024-01-15&startTime=09:00:00",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"bookings",
-								"experience",
-								":experienceId"
+								"host-bookings"
 							],
 							"query": [
 								{
 									"key": "date",
-									"value": "2024-01-15"
+									"value": "2024-12-15",
+									"description": "Date in format YYYY-MM-DD (default: today)"
 								},
 								{
 									"key": "startTime",
-									"value": "09:00:00"
-								}
-							],
-							"variable": [
-								{
-									"key": "experienceId",
-									"value": "00000000-0000-0000-0000-000000000000"
+									"value": "09:00:00",
+									"disabled": true,
+									"description": "Start time in format HH:mm:ss (optional)"
 								}
 							]
 						}
@@ -1193,6 +1290,10 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
 							}
 						],
 						"body": {
@@ -1217,6 +1318,46 @@
 								}
 							]
 						}
+					}
+				},
+				{
+					"name": "Toggle Booking Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"Confirmed\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/bookings/:id/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"bookings",
+								":id",
+								"status"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "00000000-0000-0000-0000-000000000000",
+									"description": "Booking ID"
+								}
+							]
+						},
+						"description": "Toggle booking status. Status values (string):\n- Pending\n- Confirmed\n- Completed\n- Cancelled"
 					}
 				},
 				{

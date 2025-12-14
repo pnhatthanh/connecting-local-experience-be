@@ -10,7 +10,10 @@ using IAM.Application.Handlers.Commands.RefreshToken;
 using IAM.Application.Handlers.Commands.ForgotPassword;
 using IAM.Application.Handlers.Commands.ResetPassword;
 using IAM.Application.Handlers.Commands.UpdateAccountStatus;
+using BuildingBlocks.Presentation.Authorization;
+using BuildingBlocks.Presentation.Constants;
 using Microsoft.AspNetCore.Authorization;
+
 namespace IAM.Api.Controllers
 {
     [ApiController]
@@ -83,7 +86,7 @@ namespace IAM.Api.Controllers
         }
 
         [HttpPatch("accounts/{accountId}/status")]
-        [Authorize(Roles = "Admin")]
+        [RequirePermission(PermissionCodes.IAM_ACCOUNT_UPDATE_STATUS)]
         public async Task<ActionResult<bool>> UpdateAccountStatus(
             [FromRoute] Guid accountId,
             [FromBody] UpdateAccountStatusCommand command)

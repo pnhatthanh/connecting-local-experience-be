@@ -3,5 +3,9 @@ using Booking.Application.Dtos;
 
 namespace Booking.Application.Handlers.Queries.GetHostBookings
 {
-    public record GetHostBookingsQuery(Guid HostId) : IQuery<IEnumerable<BookingDto>>;
+    public record GetHostBookingsQuery : IQuery<IEnumerable<BookingDto>>
+    {
+        public DateOnly Date { get; init; } = DateOnly.FromDateTime(DateTime.Now);
+        public TimeSpan? StartTime { get; init; }
+    }
 }

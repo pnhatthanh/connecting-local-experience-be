@@ -273,6 +273,7 @@ services:
       - ReverseProxy__Clusters__experience-cluster__Destinations__destination1__Address=http://experience-api:8080
       - ReverseProxy__Clusters__user-cluster__Destinations__destination1__Address=http://user-api:8080
       - ReverseProxy__Clusters__booking-cluster__Destinations__destination1__Address=http://booking-api:8080
+      - ReverseProxy__Clusters__ai-cluster__Destinations__destination1__Address=http://ai-api:8000
     ports:
       - "80:8080"
     depends_on:
@@ -281,8 +282,80 @@ services:
       - user-api
       - booking-api
       - notification-service
+      - ai-api
     networks:
       - connecting-network
+    restart: unless-stopped
+
+  ai-api:
+    build:
+      context: ./Be_AI
+      dockerfile: Dockerfile
+    image: pnthanh22/connecting-ai-api:latest
+    container_name: connecting-ai-api
+    environment:
+      - APP_NAME=Experience Recommendation System
+      - DEBUG=False
+      - HOST=0.0.0.0
+      - PORT=8000
+      - MONGODB_URL=mongodb://ai-mongodb:27017
+      - MONGODB_DB_NAME=recommend_experiences
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_EXCHANGE=connecting_events
+      - RABBITMQ_QUEUE=ai_service_queue
+    ports:
+      - "8000:8000"
+    depends_on:
+      ai-mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - connecting-network
+    restart: unless-stopped
+    volumes:
+      - ai_models:/app/models
+
+  ai-mongodb:
+    image: mongo:7-jammy
+    container_name: connecting-ai-mongodb
+    environment:
+      MONGO_INITDB_DATABASE: recommend_experiences
+    ports:
+      - "27017:27017"
+    volumes:
+      - ai_mongodb_data:/data/db
+    networks:
+      - connecting-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: connecting-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - connecting-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     restart: unless-stopped
 
 volumes:
@@ -295,6 +368,12 @@ volumes:
   booking_postgres_data:
     driver: local
   rabbitmq_data:
+    driver: local
+  ai_mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+  ai_models:
     driver: local
 
 networks:

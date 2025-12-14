@@ -7,10 +7,13 @@ using Experience.Application.Handlers.Queries.GetExperience;
 using Experience.Application.Handlers.Queries.GetExperienceAvailability;
 using Experience.Application.Handlers.Queries.GetExperiences;
 using Experience.Application.Handlers.Queries.GetExperiencesByIds;
+using Experience.Application.Handlers.Queries.GetRecommendations;
 using Experience.Application.Handlers.Queries.ValidateBookingAvailability;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using BuildingBlocks.Presentation.Authorization;
+using BuildingBlocks.Presentation.Constants;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Experience.Api.Controllers
 {
@@ -26,7 +29,7 @@ namespace Experience.Api.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Host")]
+        [RequirePermission(PermissionCodes.EXPERIENCE_EXPERIENCE_CREATE)]
         public async Task<IActionResult> CreateExperience([FromForm] CreateExperienceCommand command)
         {
             var result = await _mediator.Send(command);
@@ -34,7 +37,7 @@ namespace Experience.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Host")]
+        [RequirePermission(PermissionCodes.EXPERIENCE_EXPERIENCE_UPDATE)]
         public async Task<IActionResult> UpdateExperience(Guid id, [FromForm] UpdateExperienceCommand command)
         {
             var result = await _mediator.Send(command with { ExperienceId = id });
@@ -49,7 +52,7 @@ namespace Experience.Api.Controllers
         }
 
         [HttpGet("admin/all")]
-        [Authorize(Roles = "Admin")]
+        [RequirePermission(PermissionCodes.EXPERIENCE_EXPERIENCE_VIEW_ADMIN)]
         public async Task<IActionResult> GetAllExperiencesForAdmin(
             [FromQuery] GetAllExperiencesForAdminQuery query,
             CancellationToken cancellationToken
@@ -100,7 +103,7 @@ namespace Experience.Api.Controllers
         }
 
         [HttpPut("{id}/status")]
-        [Authorize(Roles = "Admin")]
+        [RequirePermission(PermissionCodes.EXPERIENCE_EXPERIENCE_UPDATE_STATUS)]
         public async Task<IActionResult> UpdateExperienceStatus([FromRoute] Guid id, [FromBody] UpdateExperienceStatusCommand command)
         {
             var result = await _mediator.Send(command with { ExperienceId = id });
@@ -121,7 +124,7 @@ namespace Experience.Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Host")]
+        [RequirePermission(PermissionCodes.EXPERIENCE_EXPERIENCE_DELETE)]
         public async Task<IActionResult> DeleteExperience([FromRoute] Guid id)
         {
             var result = await _mediator.Send(new DeleteExperienceCommand(id));
@@ -129,6 +132,19 @@ namespace Experience.Api.Controllers
             {
                 Success = result,
                 Message = result ? "Experience deleted successfully." : "Failed to delete experience."
+            });
+        }
+        [HttpGet("recommendations")]
+        [Authorize]
+        public async Task<IActionResult> GetRecommendations( [FromQuery] int topK = 10)
+        {
+            var query = new GetRecommendationsQuery(topK);
+            var result = await _mediator.Send(query);
+            
+            return Ok(new
+            {
+                Recommendations = result,
+                Total = result.Count
             });
         }
     }

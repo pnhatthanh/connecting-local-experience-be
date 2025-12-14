@@ -3,6 +3,8 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using User.Application.DTOs;
+using BuildingBlocks.Presentation.Authorization;
+using BuildingBlocks.Presentation.Constants;
 using User.Application.Handlers.Commands.BecomeHost;
 using User.Application.Handlers.Commands.UpdateUserProfile;
 using User.Application.Handlers.Queries.GetBatchUserInfo;
@@ -24,7 +26,7 @@ namespace User.Api.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [RequirePermission(PermissionCodes.USER_USER_VIEW_ALL)]
         public async Task<ActionResult<PaginationResult<UserDto>>> GetUsers( [FromQuery] GetUsersQuery query, CancellationToken cancellationToken = default)
         {
             var result = await _mediator.Send(query, cancellationToken);
@@ -58,7 +60,7 @@ namespace User.Api.Controllers
         }
         
         [HttpPost("become-host")]
-        [Authorize]
+        [RequirePermission(PermissionCodes.USER_USER_BECOME_HOST)]
         public async Task<ActionResult<HostProfileDto>> BecomeHost( [FromForm] BecomeHostCommand command, 
             CancellationToken cancellationToken)
         {

@@ -10,7 +10,8 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddUserApplication()
                 .AddUserInfrastructure(builder.Configuration)
-                .AddAuthenticationExtension(builder.Configuration);
+                .AddAuthenticationExtension(builder.Configuration)
+                .AddPermissionAuthorization();
 
 var app = builder.Build();
 

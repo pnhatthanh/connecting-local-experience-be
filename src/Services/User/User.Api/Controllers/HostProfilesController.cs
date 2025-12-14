@@ -1,8 +1,9 @@
 using BuildingBlocks.Application.Dtos;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using User.Application.DTOs;
+using BuildingBlocks.Presentation.Authorization;
+using BuildingBlocks.Presentation.Constants;
 using User.Application.Handlers.Commands.VerifyHost;
 using User.Application.Handlers.Queries.GetHostDetail;
 using User.Application.Handlers.Queries.GetHosts;
@@ -21,7 +22,7 @@ namespace User.Api.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [RequirePermission(PermissionCodes.USER_HOST_VIEW_ALL)]
         public async Task<ActionResult<PaginationResult<HostSummaryDto>>> GetHosts(
             [FromQuery] GetHostsQuery query,
             CancellationToken cancellationToken)
@@ -41,7 +42,7 @@ namespace User.Api.Controllers
         }
 
         [HttpPut("{accountId}/verify")]
-        [Authorize(Roles = "Admin")]
+        [RequirePermission(PermissionCodes.USER_HOST_VERIFY)]
         public async Task<ActionResult<HostProfileDto>> VerifyHostProfile( 
             [FromRoute] Guid accountId, 
             [FromBody] VerifyHostCommand command,

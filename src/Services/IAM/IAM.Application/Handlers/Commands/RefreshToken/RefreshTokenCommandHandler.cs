@@ -13,17 +13,20 @@ namespace IAM.Application.Handlers.Commands.RefreshToken
     {
         private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IAccountRepository _accountRepository;
+        private readonly IRolePermissionRepository _rolePermissionRepository;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IUnitOfWork _unitOfWork;
 
         public RefreshTokenCommandHandler(
             IRefreshTokenRepository refreshTokenRepository,
             IAccountRepository accountRepository,
+            IRolePermissionRepository rolePermissionRepository,
             IJwtTokenService jwtTokenService,
             IUnitOfWork unitOfWork)
         {
             _refreshTokenRepository = refreshTokenRepository;
             _accountRepository = accountRepository;
+            _rolePermissionRepository = rolePermissionRepository;
             _jwtTokenService = jwtTokenService;
             _unitOfWork = unitOfWork;
         }
@@ -44,8 +47,14 @@ namespace IAM.Application.Handlers.Commands.RefreshToken
             if (!account.IsEmailConfirmed)
                 throw new ForbiddenException("Email is not confirmed");
 
-            var permissions = new List<string>();
-            var newAccessToken = _jwtTokenService.GenerateAccessToken(account, permissions);
+            var rolePermissionSpec = new RolePermissionByRoleIdSpecification(account.RoleId);
+            var rolePermissions = await _rolePermissionRepository.GetAllAsync(
+                rolePermissionSpec,
+                rp => rp.Permission
+            );
+            var permissionCodes = rolePermissions.Select(rp => rp.Permission.PermissionCode).ToList();
+
+            var newAccessToken = _jwtTokenService.GenerateAccessToken(account, permissionCodes);
             var newRefreshTokenValue = _jwtTokenService.GenerateRefreshToken();
             
             _refreshTokenRepository.Delete(refreshToken);

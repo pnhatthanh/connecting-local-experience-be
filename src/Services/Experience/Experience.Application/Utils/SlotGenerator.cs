@@ -29,7 +29,7 @@ namespace Experience.Application.Utils
                     }
                 }
             }
-            if (schedule.RecurrenceType == RecurrenceType.Weekly)
+            if (schedule.RecurrenceType == RecurrenceType.Weekly || schedule.RecurrenceType == RecurrenceType.Daily)
             {
                 var currentDate = startDate > schedule.StartDate
                     ? startDate
