@@ -19,7 +19,7 @@ namespace User.Application.Mappings
                 .Map(dest => dest.Education, src => src.HostProfile != null ? src.HostProfile.Education : null)
                 .Map(dest => dest.FunFact, src => src.HostProfile != null ? src.HostProfile.FunFact : null)
                 .Map(dest => dest.TopicsOfInterest, src => src.HostProfile != null ? src.HostProfile.TopicsOfInterest : null)
-                .Map(dest => dest.RatingAvg, src => src.HostProfile != null ? src.HostProfile.RatingAvg : null)
+                .Map(dest => dest.RatingAvg, src => src.HostProfile != null ? src.HostProfile.RatingAvg : 0)
                 .Map(dest => dest.TotalBookings, src => src.HostProfile != null ? src.HostProfile.TotalBookings : 0)
                 .Map(dest => dest.TotalReviews, src => src.HostProfile != null ? src.HostProfile.TotalReviews : 0)
                 .Map(dest => dest.HostingSince, src => src.HostProfile != null ? src.HostProfile.HostingSince : null)

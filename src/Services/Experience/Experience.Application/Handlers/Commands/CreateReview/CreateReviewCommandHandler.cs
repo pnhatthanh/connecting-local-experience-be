@@ -68,6 +68,7 @@ namespace Experience.Application.Handlers.Commands.CreateReview
             // Publish event
             var userRatedEvent = new UserRatedExperienceEvent(
                 userId,
+                experience.HostId,
                 request.ExperienceId, 
                 request.Rating);
             await _eventBus.PublishAsync(userRatedEvent);

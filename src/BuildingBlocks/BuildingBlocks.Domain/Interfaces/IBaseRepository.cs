@@ -16,5 +16,6 @@ namespace BuildingBlocks.Domain.Interfaces
         Task<int> CountAsync(Specification<T>? specification = null);
         Task<List<T>> GetPagedListAsync(Specification<T>? specification = null, int pageNumber = 1, int pageSize = 10,
             string? sortBy = null, bool isAscending = true, params Expression<Func<T, object>>[] includes);
+        IQueryable<T> GetQueryable();
     }
 }

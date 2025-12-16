@@ -66,6 +66,10 @@ namespace BuildingBlocks.EntityFramework
                         .ApplyInclude(includes)
                         .ToListAsync();
         }
+        public IQueryable<T> GetQueryable()
+        {
+            return _dbSet.AsQueryable();
+        }
     }
     internal static class ExternalRepository
     {

@@ -15,6 +15,7 @@ from .redis_cache import (
     get_redis,
     clear_recommendations_cache
 )
+from .rabbitmq_consumer import rabbitmq_consumer
 
 __all__ = [
     "mongodb",
@@ -29,5 +30,6 @@ __all__ = [
     "connect_to_redis",
     "close_redis_connection",
     "get_redis",
-    "clear_recommendations_cache"
+    "clear_recommendations_cache",
+    "rabbitmq_consumer"
 ]

@@ -57,31 +57,26 @@ namespace Booking.Application.Handlers.Commands.CancelBooking
             if (booking == null)
                 throw new NotFoundException("Booking not found");
 
-            // Validate cancellation permission
             if (!request.IsCancelledByHost && booking.UserId != userId)
                 throw new ForbiddenException("You don't have permission to cancel this booking");
 
             if (request.IsCancelledByHost && booking.HostId != userId)
                 throw new ForbiddenException("You don't have permission to cancel this booking");
 
-            // Check if booking can be cancelled
             if (booking.Status == BookingStatus.Cancelled)
                 throw new BadRequestException("Booking is already cancelled");
 
             if (booking.Status == BookingStatus.Completed)
                 throw new BadRequestException("Cannot cancel a completed booking");
 
-            // Get experience for cancellation policy
             var experience = await _experienceService.GetExperienceAsync(booking.ExperienceId);
             if (experience == null)
                 throw new NotFoundException("Experience not found");
 
-            // Get payment using specification
             var paymentSpec = new PaymentByBookingIdSpecification(booking.Id);
             var payment = await _paymentRepository.GetBySpecAsync(paymentSpec);
             if (payment == null || payment.Status != PaymentStatus.Paid)
             {
-                // If not paid yet, just cancel without refund
                 booking.Status = BookingStatus.Cancelled;
                 booking.UpdatedAt = DateTime.UtcNow;
 
@@ -113,7 +108,6 @@ namespace Booking.Application.Handlers.Commands.CancelBooking
                 request.IsCancelledByHost
             );
 
-            // Create cancellation record
             var cancellationEntity = new BookingCancellationEntity
             {
                 Id = Guid.NewGuid(),
@@ -126,7 +120,6 @@ namespace Booking.Application.Handlers.Commands.CancelBooking
                 CreatedAt = DateTime.UtcNow
             };
 
-            // Process refund if applicable
             if (refundAmount > 0)
             {
                 var refund = new RefundEntity
@@ -142,7 +135,6 @@ namespace Booking.Application.Handlers.Commands.CancelBooking
                     CreatedAt = DateTime.UtcNow
                 };
 
-                // Refund will be processed manually or via VNPay
                 refund.Status = RefundStatus.Requested;
                 _logger.LogInformation("Refund requested for booking {BookingId}, Amount: {Amount}", 
                     booking.Id, refundAmount);
@@ -150,14 +142,12 @@ namespace Booking.Application.Handlers.Commands.CancelBooking
                 await _refundRepository.AddAsync(refund);
             }
 
-            // Update booking status
             booking.Status = BookingStatus.Cancelled;
             booking.UpdatedAt = DateTime.UtcNow;
 
             await _cancellationRepository.AddAsync(cancellationEntity);
             await _unitOfWork.SaveChangeAsync();
 
-            // Publish cancellation event to release slots
             await PublishCancellationEvent(booking, cancellationEntity);
 
             return true;

@@ -6,6 +6,7 @@ namespace Experience.Application.Events
     public class ExperienceCreatedEvent : IntegrationEvent
     {
         public string ExperienceId { get; set; } = string.Empty;
+        public Guid HostId { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public int MaxParticipants { get; set; }
@@ -23,6 +24,7 @@ namespace Experience.Application.Events
 
         public ExperienceCreatedEvent(
             string experienceId,
+            Guid hostId,
             string title,
             string description,
             int maxParticipants,
@@ -35,6 +37,7 @@ namespace Experience.Application.Events
             List<ExperienceMediaDto> media)
         {
             ExperienceId = experienceId;
+            HostId = hostId;
             Title = title;
             Description = description;
             MaxParticipants = maxParticipants;

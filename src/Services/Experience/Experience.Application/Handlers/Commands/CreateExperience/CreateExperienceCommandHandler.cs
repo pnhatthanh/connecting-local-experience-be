@@ -97,6 +97,7 @@ namespace Experience.Application.Handlers.Commands.CreateExperience
             
             var experienceCreatedEvent = new ExperienceCreatedEvent(
                 experienceId: experience.Id.ToString(),
+                hostId: experience.HostId,
                 title: experience.Title,
                 description: experience.Description,
                 maxParticipants: experience.MaxParticipants,

@@ -19,7 +19,7 @@ namespace User.Domain.Entities
         public int TotalExperiences { get; set; } = 0;
         public int TotalBookings { get; set; } = 0;
         public int TotalReviews { get; set; } = 0;
-        public decimal? RatingAvg { get; set; } 
+        public decimal RatingAvg { get; set; } = 0;
         public string? Work { get; set; }
         public string? Education { get; set; }
         public string? FunFact { get; set; }

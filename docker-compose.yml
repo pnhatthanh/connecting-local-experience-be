@@ -64,7 +64,7 @@ services:
       - RabbitMQ__Password=${RABBITMQ_PASSWORD}
       - RabbitMQ__VirtualHost=/
       - RabbitMQ__ExchangeName=connecting_events
-      - RabbitMQ__QueueName=user_service_queue
+      - RabbitMQ__QueueName=experience_service_queue
       - Jwt__SecretKey=${JWT_SECRET_KEY}
       - Jwt__Issuer=${JWT_ISSUER}
       - Jwt__Audience=${JWT_AUDIENCE}
@@ -275,7 +275,7 @@ services:
       - ReverseProxy__Clusters__booking-cluster__Destinations__destination1__Address=http://booking-api:8080
       - ReverseProxy__Clusters__ai-cluster__Destinations__destination1__Address=http://ai-api:8000
     ports:
-      - "80:8080"
+      - "5000:8080"
     depends_on:
       - iam-api
       - experience-api

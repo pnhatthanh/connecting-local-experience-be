@@ -30,7 +30,7 @@ namespace User.Application.Mappings
                 .Map(dest => dest.TotalExperiences, src => src.HostProfile != null ? src.HostProfile.TotalExperiences : 0)
                 .Map(dest => dest.TotalBookings, src => src.HostProfile != null ? src.HostProfile.TotalBookings : 0)
                 .Map(dest => dest.TotalReviews, src => src.HostProfile != null ? src.HostProfile.TotalReviews : 0)
-                .Map(dest => dest.RatingAvg, src => src.HostProfile != null ? src.HostProfile.RatingAvg : null)
+                .Map(dest => dest.RatingAvg, src => src.HostProfile != null ? src.HostProfile.RatingAvg : 0)
                 .Map(dest => dest.Work, src => src.HostProfile != null ? src.HostProfile.Work : null)
                 .Map(dest => dest.Education, src => src.HostProfile != null ? src.HostProfile.Education : null)
                 .Map(dest => dest.FunFact, src => src.HostProfile != null ? src.HostProfile.FunFact : null)

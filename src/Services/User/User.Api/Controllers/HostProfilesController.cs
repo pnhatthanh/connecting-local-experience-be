@@ -1,5 +1,6 @@
 using BuildingBlocks.Application.Dtos;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using User.Application.DTOs;
 using BuildingBlocks.Presentation.Authorization;
@@ -7,6 +8,7 @@ using BuildingBlocks.Presentation.Constants;
 using User.Application.Handlers.Commands.VerifyHost;
 using User.Application.Handlers.Queries.GetHostDetail;
 using User.Application.Handlers.Queries.GetHosts;
+using User.Application.Handlers.Queries.GetHostsBatch;
 
 namespace User.Api.Controllers
 {
@@ -27,6 +29,17 @@ namespace User.Api.Controllers
             [FromQuery] GetHostsQuery query,
             CancellationToken cancellationToken)
         {
+            var result = await _mediator.Send(query, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpGet("batch")]
+        [AllowAnonymous]
+        public async Task<ActionResult<List<HostProfileDto>>> GetHostsBatch(
+            [FromQuery] List<Guid> ids,
+            CancellationToken cancellationToken)
+        {
+            var query = new GetHostsBatchQuery { HostIds = ids };
             var result = await _mediator.Send(query, cancellationToken);
             return Ok(result);
         }
