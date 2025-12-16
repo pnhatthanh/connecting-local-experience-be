@@ -5,11 +5,15 @@ using Booking.Application.Handlers.Queries.CheckCompletedBooking;
 using Booking.Application.Handlers.Queries.GetBooking;
 using Booking.Application.Handlers.Queries.GetUserBookings;
 using Booking.Application.Handlers.Queries.GetHostBookings;
+using Booking.Application.Handlers.Queries.GetBookingStatistics;
+using Booking.Application.Handlers.Queries.GetTopHosts;
+using Booking.Application.Handlers.Queries.GetHostStatistics;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using BuildingBlocks.Presentation.Authorization;
 using BuildingBlocks.Presentation.Constants;
+using Booking.Application.Handlers.Queries.GetRecentBookings;
 
 namespace Booking.Api.Controllers
 {
@@ -39,13 +43,11 @@ namespace Booking.Api.Controllers
             var result = await _mediator.Send(new GetUserBookingsQuery());
             return Ok(new { success = true, data = result });
         }
-
-        [HttpGet("{id}")]
-        [Authorize]
-        public async Task<IActionResult> GetBooking(Guid id)
+        [HttpGet("all")]
+        [RequirePermission(PermissionCodes.BOOKING_BOOKING_VIEW_BY_ADMIN)]
+        public async Task<IActionResult> GetAllBookings([FromQuery] GetRecentBookingsQuery query)
         {
-            var result = await _mediator.Send(new GetBookingQuery(id));
-            
+            var result = await _mediator.Send(query);
             return Ok(result);
         }
 
@@ -57,12 +59,28 @@ namespace Booking.Api.Controllers
             return Ok(new { success = true, data = result });
         }
 
-        [HttpPost("{id}/cancel")]
-        [RequirePermission(PermissionCodes.BOOKING_BOOKING_CANCEL)]
-        public async Task<IActionResult> CancelBooking([FromRoute] Guid id, [FromBody] CancelBookingCommand command)
+        [HttpGet("host-statistics")]
+        [RequirePermission(PermissionCodes.BOOKING_BOOKING_VIEW_BY_HOST)]
+        public async Task<IActionResult> GetHostStatistics([FromQuery] int year = 2025)
         {
-            var result = await _mediator.Send(command with { BookingId = id });
-            return Ok(new { success = result, message = "Booking cancelled successfully" });
+            var result = await _mediator.Send(new GetHostStatisticsQuery(year));
+            return Ok(new { success = true, data = result });
+        }
+
+        [HttpGet("statistics")]
+        [RequirePermission(PermissionCodes.BOOKING_BOOKING_STATISTICS)]
+        public async Task<IActionResult> GetBookingStatistics([FromQuery] GetBookingStatisticsQuery query)
+        {
+            var result = await _mediator.Send(query);
+            return Ok(new { success = true, data = result });
+        }
+
+        [HttpGet("top-hosts")]
+        [RequirePermission(PermissionCodes.BOOKING_BOOKING_STATISTICS)]
+        public async Task<IActionResult> GetTopHosts([FromQuery] int year = 2025, [FromQuery] int limit = 10)
+        {
+            var result = await _mediator.Send(new GetTopHostsQuery(year, limit));
+            return Ok(result);
         }
 
         [HttpGet("check-completed")]
@@ -71,6 +89,23 @@ namespace Booking.Api.Controllers
         {
             var result = await _mediator.Send(new CheckCompletedBookingQuery(userId, experienceId));
             return Ok(result);
+        }
+
+        [HttpGet("{id}")]
+        [Authorize]
+        public async Task<IActionResult> GetBooking(Guid id)
+        {
+            var result = await _mediator.Send(new GetBookingQuery(id));
+            
+            return Ok(result);
+        }
+
+        [HttpPost("{id}/cancel")]
+        [RequirePermission(PermissionCodes.BOOKING_BOOKING_CANCEL)]
+        public async Task<IActionResult> CancelBooking([FromRoute] Guid id, [FromBody] CancelBookingCommand command)
+        {
+            var result = await _mediator.Send(command with { BookingId = id });
+            return Ok(new { success = result, message = "Booking cancelled successfully" });
         }
 
         [HttpPatch("{id}/status")]

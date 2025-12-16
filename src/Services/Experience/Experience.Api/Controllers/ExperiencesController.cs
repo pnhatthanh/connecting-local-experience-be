@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using BuildingBlocks.Presentation.Authorization;
 using BuildingBlocks.Presentation.Constants;
 using Microsoft.AspNetCore.Authorization;
+using Experience.Application.Handlers.Queries.GetPopularExperience;
 
 namespace Experience.Api.Controllers
 {
@@ -144,6 +145,18 @@ namespace Experience.Api.Controllers
             return Ok(new
             {
                 Recommendations = result,
+                Total = result.Count
+            });
+        }
+        [HttpGet("popular")]
+        public async Task<IActionResult> GetPopularExperiences([FromQuery] int topK = 10)
+        {
+            var query = new GetPopularExperienceQuery(topK);
+            var result = await _mediator.Send(query);
+            
+            return Ok(new
+            {
+                PopularExperiences = result,
                 Total = result.Count
             });
         }

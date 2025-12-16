@@ -26,13 +26,13 @@ namespace Booking.Api.Controllers
                 var command = new ProcessVnPayCallbackCommand(queryParams);
                 var result = await _mediator.Send(command);
                 if (result.Success)
-                    return Redirect($"http://localhost:3000/booking-success?bookingCode={result.BookingCode}");
-                return Redirect($"http://localhost:3000/booking-failed?message={Uri.EscapeDataString(result.Message)}");
+                    return Redirect($"https://connecting-local-experience-fe.vercel.app/booking-success?bookingCode={result.BookingCode}");
+                return Redirect($"https://connecting-local-experience-fe.vercel.app/booking-failed?message={Uri.EscapeDataString(result.Message)}");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing VNPay return");
-                return Redirect("http://localhost:3000/booking-failed");
+                return Redirect("https://connecting-local-experience-fe.vercel.app/booking-failed");
             }
         }
 

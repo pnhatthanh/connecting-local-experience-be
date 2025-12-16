@@ -2,6 +2,7 @@ using Booking.Application.Dtos;
 using Booking.Application.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using System.Net.Http.Json;
 
 namespace Booking.Infrastructure.Services
 {
@@ -49,6 +50,30 @@ namespace Booking.Infrastructure.Services
             {
                 _logger.LogError(ex, "Error getting user {UserId}", userId);
                 return null;
+            }
+        }
+
+        public async Task<List<HostProfileDto>> GetHostProfilesAsync(List<Guid> hostIds, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var idsQuery = string.Join("&", hostIds.Select(id => $"ids={id}"));
+                var response = await _httpClient.GetAsync($"/api/hosts/batch?{idsQuery}", cancellationToken);
+                
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("Failed to get host profiles. Status: {StatusCode}", response.StatusCode);
+                    return new List<HostProfileDto>();
+                }
+
+                var hostProfiles = await response.Content.ReadFromJsonAsync<List<HostProfileDto>>(cancellationToken);
+                _logger.LogInformation("Successfully retrieved {Count} host profiles", hostProfiles?.Count ?? 0);
+                return hostProfiles ?? new List<HostProfileDto>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting host profiles");
+                return new List<HostProfileDto>();
             }
         }
     }

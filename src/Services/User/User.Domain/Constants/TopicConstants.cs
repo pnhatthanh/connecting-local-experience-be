@@ -4,26 +4,16 @@ namespace User.Domain.Constants
     {
         public static readonly string[] ValidTopics = 
         [
-            "Art & Culture",
+            "Wellness & Relaxation",
             "Food & Drink",
-            "Sports & Fitness",
-            "Music & Entertainment",
+            "Culture & History",
+            "Shopping & Markets",
             "Nature & Wildlife",
-            "History & Heritage",
-            "Technology & Innovation",
-            "Photography",
-            "Adventure & Outdoor",
-            "Wellness & Meditation",
-            "Shopping & Fashion",
-            "Nightlife & Parties",
-            "Local Cuisine",
-            "Architecture",
-            "Traditional Crafts",
-            "Language Exchange",
-            "Business & Networking",
-            "Family Activities",
-            "Eco-Tourism",
-            "Spiritual & Religious"
+            "Art & Crafts",
+            "Sports & Adventure",
+            "Music & Entertainment",
+            "Nightlife & Social",
+            "Photography & Tours"
         ];
 
         public static bool IsValidTopic(string topic)

@@ -1,7 +1,6 @@
 using BuildingBlocks.Application.EventBus.Abstractions;
 using BuildingBlocks.Domain.Interfaces;
 using Experience.Application.Events;
-using Experience.Application.Handlers.Queries.GetExperiencesByIds;
 using Experience.Domain.Entities;
 using Experience.Domain.Enums;
 using Experience.Domain.Repositories;
@@ -56,7 +55,7 @@ namespace Experience.Application.EventHandlers
                         StartTime = @event.StartTime,
                         EndTime = @event.EndTime,
                         TotalSlots = experience.MaxParticipants,
-                        AvailableSlots = experience.MaxParticipants - @event.TotalParticipants,
+                        AvailableSlots = experience.MaxParticipants - (@event.Adults + @event.Children),
                         Status = SlotStatus.Open
                     };
                     await _scheduleSlotRepository.AddAsync(scheduleSlot);
@@ -66,15 +65,13 @@ namespace Experience.Application.EventHandlers
                 }
                 else
                 {
-                    scheduleSlot.AvailableSlots -= @event.TotalParticipants;
+                    scheduleSlot.AvailableSlots -= @event.Adults + @event.Children;
                     if (scheduleSlot.AvailableSlots <= 0)
                     {
                         scheduleSlot.Status = SlotStatus.FullyBooked;
                         scheduleSlot.AvailableSlots = 0;
                     }
                     _scheduleSlotRepository.Update(scheduleSlot);
-                    _logger.LogInformation("Updated schedule slot for Experience {ExperienceId} on {Date} {StartTime}-{EndTime}. Reduced by {Participants} participants. Available slots: {AvailableSlots}/{TotalSlots}",
-                        @event.ExperienceId, @event.Date, @event.StartTime, @event.EndTime, @event.TotalParticipants, scheduleSlot.AvailableSlots, scheduleSlot.TotalSlots);
                 }
                 await _unitOfWork.SaveChangeAsync();
                 _logger.LogInformation("Successfully processed BookingConfirmedEvent for Booking {BookingId}", @event.BookingId);

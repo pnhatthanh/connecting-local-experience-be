@@ -90,39 +90,8 @@ class InteractionResponse(BaseModel):
         from_attributes = True
 
 
-class ExperienceCreate(BaseModel):
-    """Schema để tạo experience mới từ server chính"""
-    experience_id: str = Field(..., description="Unique experience ID (Guid) từ server chính")
-    title: str = Field(..., description="Tiêu đề experience")
-    description: str = Field("", description="Mô tả chi tiết")
-    max_participants: int = Field(1, description="Số lượng người tham gia tối đa")
-    address: str = Field("", description="Địa chỉ đầy đủ")
-    category: str = Field(..., description="Tên danh mục")
-    adult_price: float = Field(0.0, description="Giá cho người lớn")
-    child_price: float = Field(0.0, description="Giá cho trẻ em")
-    duration: int = Field(0, description="Thời lượng (phút)")
-    language: str = Field("", description="Ngôn ngữ")
-    media: Optional[List[ExperienceMediaDto]] = Field(default_factory=list, description="Danh sách media")
-    
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "experience_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                "title": "Phong Nha Cave Tour",
-                "description": "Explore the amazing cave system",
-                "max_participants": 15,
-                "address": "Phong Nha-Ke Bang National Park, Quang Binh, Vietnam",
-                "category": "Adventure",
-                "adult_price": 500000,
-                "child_price": 300000,
-                "duration": 480,
-                "language": "English, Vietnamese",
-                "media": [
-                    {"url": "https://example.com/img1.jpg", "type": "image", "is_primary": True},
-                    {"url": "https://example.com/img2.jpg", "type": "image", "is_primary": False}
-                ]
-            }
-        }
+# ==================== DEPRECATED: ExperienceCreate không còn dùng ====================
+# AI service không lưu experience data nữa, chỉ lưu interactions
 
 
 # ==================== DEPRECATED: Xóa ExperienceRecommendation và RecommendationResponse cũ ====================

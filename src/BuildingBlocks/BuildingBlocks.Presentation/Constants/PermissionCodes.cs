@@ -27,5 +27,7 @@ namespace BuildingBlocks.Presentation.Constants
         public const string BOOKING_BOOKING_CANCEL = "Booking.Cancel";
         public const string BOOKING_BOOKING_CHECK_COMPLETED = "Booking.CheckCompleted";
         public const string BOOKING_BOOKING_TOGGLE_STATUS = "Booking.ToggleStatus";
+        public const string BOOKING_BOOKING_STATISTICS = "Booking.Statistics";
+        public const string BOOKING_BOOKING_VIEW_BY_ADMIN = "Booking.ViewByAdmin";
     }
 }

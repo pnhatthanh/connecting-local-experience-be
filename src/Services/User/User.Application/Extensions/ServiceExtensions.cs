@@ -9,6 +9,7 @@ using User.Application.Handlers.Commands.UpdateUserProfile;
 using BuildingBlocks.Application.EventBus.Abstractions;
 using User.Application.Events;
 using User.Application.EventHandlers;
+using Booking.Application.Events;
 
 namespace User.Application.Extensions
 {
@@ -27,6 +28,9 @@ namespace User.Application.Extensions
 
             services.AddScoped<IIntegrationEventHandler<AccountCreatedEvent>, AccountCreatedEventHandler>();
             services.AddScoped<IIntegrationEventHandler<AccountStatusChangedEvent>, AccountStatusChangedEventHandler>();
+            services.AddScoped<IIntegrationEventHandler<UserRatedExperienceEvent>, UserRatedExperienceEventHandler>();
+            services.AddScoped<IIntegrationEventHandler<ExperienceCreatedEvent>, ExperienceCreatedEventHandler>();
+            services.AddScoped<IIntegrationEventHandler<BookingConfirmedEvent>, BookingConfirmedEventHandler>();
             return services;
         }
         
@@ -35,6 +39,10 @@ namespace User.Application.Extensions
             var eventBus = serviceProvider.GetRequiredService<IEventBus>();
             await eventBus.SubscribeAsync<AccountCreatedEvent, IIntegrationEventHandler<AccountCreatedEvent>>();
             await eventBus.SubscribeAsync<AccountStatusChangedEvent, IIntegrationEventHandler<AccountStatusChangedEvent>>();
+            await eventBus.SubscribeAsync<UserRatedExperienceEvent, IIntegrationEventHandler<UserRatedExperienceEvent>>();
+            await eventBus.SubscribeAsync<ExperienceCreatedEvent, IIntegrationEventHandler<ExperienceCreatedEvent>>();
+            await eventBus.SubscribeAsync<BookingConfirmedEvent, IIntegrationEventHandler<BookingConfirmedEvent>>();
+            
             return serviceProvider;
         }
     }

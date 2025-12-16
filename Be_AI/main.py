@@ -84,7 +84,7 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(
     retrain_job, 
     'interval', 
-    hours=6,
+    hours=1,
     id='retrain_als_model',
     name='Retrain ALS Model',
     replace_existing=True

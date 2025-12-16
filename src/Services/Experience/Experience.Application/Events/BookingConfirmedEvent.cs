@@ -12,22 +12,5 @@ namespace Experience.Application.Events
         public TimeSpan EndTime { get; set; }
         public int Adults { get; set; }
         public int Children { get; set; }
-        public int TotalParticipants { get; set; }
-        
-        public BookingConfirmedEvent() { }
-        public BookingConfirmedEvent(Guid bookingId, Guid experienceId, Guid userId, DateOnly date, 
-            TimeSpan startTime, TimeSpan endTime, int adults, int children, int totalParticipants)
-        {
-            BookingId = bookingId;
-            ExperienceId = experienceId;
-            UserId = userId;
-            Date = date;
-            StartTime = startTime;
-            EndTime = endTime;
-            Adults = adults;
-            Children = children;
-            TotalParticipants = totalParticipants;
-        }
-
     }
 }

@@ -68,6 +68,7 @@ namespace Booking.Application.Handlers.Commands.ProcessVnPayCallback
 
             var bookingConfirmedEvent = new BookingConfirmedEvent(
                 booking.Id,
+                booking.HostId,
                 booking.ExperienceId,
                 booking.UserId,
                 booking.Date,
