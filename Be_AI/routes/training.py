@@ -40,7 +40,8 @@ async def retrain_model(background_tasks: BackgroundTasks):
             detail="Training is already in progress. Please wait for it to complete."
         )
     
-    background_tasks.add_task(training_service.run_full_pipeline)
+    # Sử dụng retrain script giống scheduler để đảm bảo consistency
+    background_tasks.add_task(training_service.run_retrain_script)
     return {
         "message": "Model retraining started in background",
         "status": "pending",
@@ -107,19 +108,28 @@ async def get_training_metrics():
         # Extract metrics
         metrics = metadata.get('metrics', {})
         
-        # Đánh giá chất lượng
+        # Đánh giá chất lượng (dựa vào NDCG@10 - metric chính xác nhất)
+        ndcg_10 = metrics.get('ndcg@10', 0)
         precision_10 = metrics.get('precision@10', 0)
+        recall_10 = metrics.get('recall@10', 0)
+        
+        # Use NDCG as primary metric (best for ranking quality)
+        primary_metric = ndcg_10
+        
         quality_assessment = {
-            "overall_quality": "XUẤT SẮC 🎉" if precision_10 >= 0.50 else
-                              "TỐT ✅" if precision_10 >= 0.35 else
-                              "ĐẠT YÊU CẦU ⚠️" if precision_10 >= 0.25 else
+            "overall_quality": "XUẤT SẮC 🎉" if primary_metric >= 0.30 else
+                              "TỐT ✅" if primary_metric >= 0.20 else
+                              "ĐẠT YÊU CẦU ⚠️" if primary_metric >= 0.10 else
                               "CẦN CẢI THIỆN ❌",
-            "ready_for_production": precision_10 >= 0.30,
-            "precision_benchmark": {
-                "value": precision_10,
-                "minimum": 0.25,
-                "good": 0.35,
-                "excellent": 0.50
+            "ready_for_production": primary_metric >= 0.20,
+            "primary_metric": "ndcg@10",
+            "ndcg@10": ndcg_10,
+            "precision@10": precision_10,
+            "recall@10": recall_10,
+            "benchmarks": {
+                "minimum": 0.10,
+                "good": 0.20,
+                "excellent": 0.30
             }
         }
         

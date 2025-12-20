@@ -4,6 +4,7 @@ Training Service - Orchestrate model training pipeline
 
 import subprocess
 import sys
+import asyncio
 from pathlib import Path
 from typing import Dict, Optional
 from datetime import datetime
@@ -12,8 +13,15 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Import retrain module directly
+try:
+    import retrain_from_mongodb
+except ImportError:
+    logger.warning("Could not import retrain_from_mongodb, retrain functionality will be limited")
+    retrain_from_mongodb = None
+
 MODELS_DIR = Path("models")
-METADATA_FILE = MODELS_DIR / "training_metadata.json"
+METADATA_FILE = MODELS_DIR / "als_metadata.json"
 
 
 class TrainingService:
@@ -44,7 +52,7 @@ class TrainingService:
         except Exception as e:
             logger.error(f"Failed to save metadata: {e}")
     
-    async def run_preprocessing(self) -> Dict:
+    def run_preprocessing(self) -> Dict:
         """
         Chạy preprocessing: MongoDB → CSV
         Step 2 trong flow
@@ -55,7 +63,8 @@ class TrainingService:
         self.training_status = "preprocessing"
         
         try:
-            logger.info("Starting preprocessing...")
+            logger.info("🔄 Starting preprocessing...")
+            print("🔄 Starting preprocessing...", flush=True)
             
             # Run preprocessing script
             result = subprocess.run(
@@ -95,7 +104,7 @@ class TrainingService:
                 "message": str(e)
             }
     
-    async def run_training(self) -> Dict:
+    def run_training(self) -> Dict:
         """
         Chạy model training
         Steps 3-5 trong flow: Label encoding → Train ALS → Save model
@@ -106,7 +115,8 @@ class TrainingService:
         self.training_status = "training"
         
         try:
-            logger.info("Starting model training...")
+            logger.info("🚀 Starting model training...")
+            print("🚀 Starting model training...", flush=True)
             
             # Run training script
             result = subprocess.run(
@@ -150,29 +160,50 @@ class TrainingService:
                 "message": str(e)
             }
     
-    async def run_full_pipeline(self) -> Dict:
+    def run_full_pipeline(self) -> Dict:
         """
         Chạy full pipeline: Preprocessing → Training
         """
-        logger.info("Starting full training pipeline...")
+        logger.info("="*60)
+        logger.info("🎯 Starting full training pipeline...")
+        print("\n" + "="*60)
+        print("🎯 Starting full training pipeline...")
+        print("="*60 + "\n", flush=True)
         
         # Step 1: Preprocessing
-        preprocess_result = await self.run_preprocessing()
+        logger.info("Step 1: Preprocessing interactions from MongoDB...")
+        print("📊 Step 1: Preprocessing interactions from MongoDB...", flush=True)
+        preprocess_result = self.run_preprocessing()
         if preprocess_result['status'] != 'success':
+            logger.error(f"❌ Preprocessing failed: {preprocess_result}")
+            print(f"❌ Preprocessing failed: {preprocess_result}", flush=True)
             return {
                 "status": "error",
                 "step": "preprocessing",
                 "details": preprocess_result
             }
+        logger.info("✅ Preprocessing completed successfully")
+        print("✅ Preprocessing completed successfully\n", flush=True)
         
         # Step 2: Training
-        training_result = await self.run_training()
+        logger.info("Step 2: Training ALS model...")
+        print("🧠 Step 2: Training ALS model...", flush=True)
+        training_result = self.run_training()
         if training_result['status'] != 'success':
+            logger.error(f"❌ Training failed: {training_result}")
+            print(f"❌ Training failed: {training_result}", flush=True)
             return {
                 "status": "error",
                 "step": "training",
                 "details": training_result
             }
+        logger.info("✅ Training completed successfully")
+        print("✅ Training completed successfully\n", flush=True)
+        
+        logger.info("🎉 Full pipeline completed successfully!")
+        print("="*60)
+        print("🎉 Full pipeline completed successfully!")
+        print("="*60 + "\n", flush=True)
         
         return {
             "status": "success",
@@ -180,6 +211,54 @@ class TrainingService:
             "preprocessing": preprocess_result,
             "training": training_result
         }
+    
+    def run_retrain_script(self) -> Dict:
+        """
+        Chạy retrain từ MongoDB (gọi trực tiếp async function)
+        """
+        if self.training_status == "training":
+            return {"status": "error", "message": "Training already running"}
+        
+        if retrain_from_mongodb is None:
+            return {
+                "status": "error",
+                "message": "retrain_from_mongodb module not available"
+            }
+        
+        self.training_status = "training"
+        
+        try:
+            logger.info("="*60)
+            logger.info("🔄 Starting retrain from MongoDB...")
+            print("\n" + "="*60)
+            print("🔄 Starting retrain from MongoDB...")
+            print("="*60 + "\n", flush=True)
+            
+            # Run async retrain function
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(retrain_from_mongodb.main())
+            loop.close()
+            
+            self.training_status = "completed"
+            
+            # Don't save metadata here - retrain_from_mongodb already saved it with full details
+            logger.info("✅ Retrain completed successfully")
+            print("✅ Retrain completed successfully\n", flush=True)
+            
+            return {
+                "status": "success",
+                "message": "Retrain completed, metadata saved by retrain script"
+            }
+                
+        except Exception as e:
+            self.training_status = "failed"
+            logger.error(f"❌ Retrain error: {e}", exc_info=True)
+            print(f"❌ Retrain error: {e}", flush=True)
+            return {
+                "status": "error",
+                "message": str(e)
+            }
     
     def get_status(self) -> Dict:
         """Get current training status"""

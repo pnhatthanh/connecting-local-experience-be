@@ -5,6 +5,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import subprocess
 import logging
 import uvicorn
+import sys
+import os
 from config import settings
 from database import connect_to_mongodb, close_mongodb_connection
 from database import connect_to_redis, close_redis_connection, clear_recommendations_cache
@@ -49,17 +51,16 @@ async def lifespan(app: FastAPI):
 def retrain_job():
     try:
         logger.info("🔄 Starting scheduled model retraining...")
+        logger.info(f"Working directory: {os.getcwd()}")
         
-        result = subprocess.run(
-            ["python", "retrain_from_mongodb.py"],
-            capture_output=True,
-            text=True,
-            timeout=1800  # 30 minutes timeout
-        )
+        # Import and run retrain function directly
+        import retrain_from_mongodb
         
-        if result.returncode != 0:
-            logger.error(f"Retraining failed: {result.stderr}")
-            return
+        # Run async retrain in new event loop
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(retrain_from_mongodb.main())
+        loop.close()
         
         logger.info("✓ Model retraining completed successfully")
         
@@ -69,15 +70,22 @@ def retrain_job():
         recommendation_service._loaded = False
         logger.info("✓ Cleared old model from memory, will reload on next request")
         
-        # Clear all cached recommendations
-        cleared_count = asyncio.run(clear_recommendations_cache())
-        if cleared_count > 0:
-            logger.info(f"✓ Cleared {cleared_count} cached recommendations")
+        # Clear all cached recommendations (fix event loop issue)
+        try:
+            # Don't use asyncio.run in a thread that might have existing event loop
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            cleared_count = loop.run_until_complete(clear_recommendations_cache())
+            loop.close()
+            if cleared_count > 0:
+                logger.info(f"✓ Cleared {cleared_count} cached recommendations")
+        except Exception as e:
+            logger.warning(f"Failed to clear cache: {e}")
         
     except subprocess.TimeoutExpired:
         logger.error("⚠️ Retraining timeout - process killed")
     except Exception as e:
-        logger.error(f"❌ Retraining job failed: {e}")
+        logger.error(f"❌ Retraining job failed: {e}", exc_info=True)
 
 
 scheduler = BackgroundScheduler()

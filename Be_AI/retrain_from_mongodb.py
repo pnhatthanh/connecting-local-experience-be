@@ -6,34 +6,64 @@ import pandas as pd
 import numpy as np
 import pickle
 import os
+import sys
 from pathlib import Path
 from datetime import datetime
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
 
+# Setup logging to stdout for Docker
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler(sys.stdout)],
+    force=True
+)
+logger = logging.getLogger(__name__)
+
 # Import ALS model từ script cũ
-import sys
 sys.path.append('scripts')
-from train_als_model import ImplicitALS
+try:
+    from train_als_model import ImplicitALS
+    logger.info("✓ Successfully imported ImplicitALS")
+except ImportError as e:
+    logger.error(f"❌ Failed to import ImplicitALS: {e}")
+    logger.error(f"Current sys.path: {sys.path}")
+    sys.exit(1)
 
 async def load_data_from_mongodb():
     """Load interactions từ MongoDB"""
-    print("="*60)
-    print("LOADING DATA FROM MONGODB")
-    print("="*60)
+    logger.info("="*60)
+    logger.info("LOADING DATA FROM MONGODB")
+    logger.info("="*60)
     
     # Get MongoDB URL from environment (for Docker compatibility)
     mongodb_url = os.getenv('MONGODB_URL', 'mongodb://localhost:27017')
     mongodb_db = os.getenv('MONGODB_DB_NAME', 'recommend_experiences')
     
-    print(f"\nConnecting to: {mongodb_url}")
-    client = AsyncIOMotorClient(mongodb_url)
+    logger.info(f"MongoDB URL: {mongodb_url}")
+    logger.info(f"Database: {mongodb_db}")
+    
+    try:
+        client = AsyncIOMotorClient(mongodb_url, serverSelectionTimeoutMS=10000)
+        # Test connection
+        await client.admin.command('ping')
+        logger.info("✓ MongoDB connection successful")
+    except Exception as e:
+        logger.error(f"❌ MongoDB connection failed: {e}")
+        raise
+    
     db = client[mongodb_db]
     
     # Load interactions (now with business_id field)
-    print("\nLoading interactions...")
-    interactions = await db.interactions.find().to_list(length=None)
-    print(f"  ✓ Loaded {len(interactions):,} interactions")
+    logger.info("Loading interactions from database...")
+    try:
+        interactions = await db.interactions.find().to_list(length=None)
+        logger.info(f"✓ Loaded {len(interactions):,} interactions")
+    except Exception as e:
+        logger.error(f"❌ Failed to load interactions: {e}")
+        raise
     
     # Convert to DataFrame
     data = []
@@ -133,54 +163,124 @@ async def main():
     
     print("\n✓ Training completed!")
     
-    # Simple evaluation - Hit Rate@10
+    # Comprehensive evaluation
     print("\n" + "="*60)
     print("EVALUATING MODEL")
     print("="*60)
     
-    # Calculate hit rate on sample
     from sklearn.model_selection import train_test_split
     train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)
     
-    # Evaluate on larger test set for better accuracy
-    hits = 0
-    total = 0
-    
-    # Test on 1000 samples instead of 100
-    test_sample = test_df.sample(min(1000, len(test_df)), random_state=42)
-    
-    for _, row in test_sample.iterrows():
+    # Build train user-item set for excluding during test
+    train_user_items = {}
+    for _, row in train_df.iterrows():
         user_idx = row['user_idx']
         item_idx = row['item_idx']
+        if user_idx not in train_user_items:
+            train_user_items[user_idx] = set()
+        train_user_items[user_idx].add(item_idx)
+    
+    # Group test by user for proper evaluation
+    test_by_user = {}
+    for _, row in test_df.iterrows():
+        user_idx = row['user_idx']
+        item_idx = row['item_idx']
+        if user_idx not in test_by_user:
+            test_by_user[user_idx] = set()
+        test_by_user[user_idx].add(item_idx)
+    
+    # Evaluate at different K
+    K_values = [5, 10, 20]
+    metrics_by_k = {}
+    
+    for K in K_values:
+        hits = 0
+        precision_sum = 0
+        recall_sum = 0
+        ndcg_sum = 0
+        total_users = 0
         
-        # Get predictions for this user
-        user_vec = model.user_factors[user_idx]
-        scores = model.item_factors.dot(user_vec)
+        for user_idx, true_items in test_by_user.items():
+            if user_idx >= len(model.user_factors):
+                continue
+                
+            # Get user vector
+            user_vec = model.user_factors[user_idx]
+            
+            # Get scores for all items
+            scores = model.item_factors.dot(user_vec)
+            
+            # Exclude items seen during training
+            if user_idx in train_user_items:
+                for train_item in train_user_items[user_idx]:
+                    if train_item < len(scores):
+                        scores[train_item] = -np.inf
+            
+            # Top-K recommendations
+            top_k_indices = np.argsort(scores)[-K:][::-1]  # Descending order
+            
+            # Calculate metrics
+            relevant_in_topk = set(top_k_indices) & true_items
+            
+            # Hit Rate: At least 1 relevant item in top-K
+            if len(relevant_in_topk) > 0:
+                hits += 1
+            
+            # Precision@K: Proportion of recommended items that are relevant
+            precision = len(relevant_in_topk) / K
+            precision_sum += precision
+            
+            # Recall@K: Proportion of relevant items that are recommended
+            recall = len(relevant_in_topk) / len(true_items) if len(true_items) > 0 else 0
+            recall_sum += recall
+            
+            # NDCG@K: Normalized Discounted Cumulative Gain
+            dcg = 0
+            for i, item_idx in enumerate(top_k_indices):
+                if item_idx in true_items:
+                    dcg += 1 / np.log2(i + 2)  # i+2 because i starts at 0
+            
+            # Ideal DCG (all relevant items at top)
+            idcg = sum(1 / np.log2(i + 2) for i in range(min(len(true_items), K)))
+            
+            ndcg = dcg / idcg if idcg > 0 else 0
+            ndcg_sum += ndcg
+            
+            total_users += 1
         
-        # Top 10 recommendations
-        top_10 = np.argsort(scores)[-10:]
-        
-        if item_idx in top_10:
-            hits += 1
-        total += 1
+        # Average metrics
+        if total_users > 0:
+            metrics_by_k[K] = {
+                'hit_rate': hits / total_users,
+                'precision': precision_sum / total_users,
+                'recall': recall_sum / total_users,
+                'ndcg': ndcg_sum / total_users
+            }
+        else:
+            metrics_by_k[K] = {
+                'hit_rate': 0,
+                'precision': 0,
+                'recall': 0,
+                'ndcg': 0
+            }
     
-    hit_rate = hits / total if total > 0 else 0
+    # Print results
+    print(f"\nMetrics on {len(test_by_user)} test users:")
+    print(f"{'Metric':<15} {'@5':<10} {'@10':<10} {'@20':<10}")
+    print("-" * 50)
+    print(f"{'Hit Rate':<15} {metrics_by_k[5]['hit_rate']:<10.3f} {metrics_by_k[10]['hit_rate']:<10.3f} {metrics_by_k[20]['hit_rate']:<10.3f}")
+    print(f"{'Precision':<15} {metrics_by_k[5]['precision']:<10.3f} {metrics_by_k[10]['precision']:<10.3f} {metrics_by_k[20]['precision']:<10.3f}")
+    print(f"{'Recall':<15} {metrics_by_k[5]['recall']:<10.3f} {metrics_by_k[10]['recall']:<10.3f} {metrics_by_k[20]['recall']:<10.3f}")
+    print(f"{'NDCG':<15} {metrics_by_k[5]['ndcg']:<10.3f} {metrics_by_k[10]['ndcg']:<10.3f} {metrics_by_k[20]['ndcg']:<10.3f}")
     
-    metrics = {
-        'hit_rate': hit_rate,
-        'coverage': 1.0
-    }
-    
-    print(f"\nMetrics (sample of {min(1000, len(test_df))} test interactions):")
-    print(f"  Hit Rate@10: {metrics['hit_rate']:.2%}")
-    
-    # Additional stats
-    print(f"\nModel Quality Assessment:")
-    if metrics['hit_rate'] >= 0.30:
+    # Model Quality Assessment based on NDCG@10
+    ndcg_10 = metrics_by_k[10]['ndcg']
+    print(f"\nModel Quality Assessment (based on NDCG@10 = {ndcg_10:.3f}):")
+    if ndcg_10 >= 0.30:
         print(f"  ✅ EXCELLENT - Model performs very well")
-    elif metrics['hit_rate'] >= 0.15:
+    elif ndcg_10 >= 0.20:
         print(f"  ✓ GOOD - Model performs acceptably")
-    elif metrics['hit_rate'] >= 0.05:
+    elif ndcg_10 >= 0.10:
         print(f"  ⚠️ FAIR - Model needs improvement")
     else:
         print(f"  ❌ POOR - Consider tuning hyperparameters or improving data quality")
@@ -219,20 +319,42 @@ async def main():
         pickle.dump(encoders, f)
     print(f"✓ Saved encoders to {model_dir / 'encoders_als.pkl'}")
     
-    # Save metadata
+    # Save metadata với đầy đủ thông tin
     metadata = {
         'trained_at': datetime.now().isoformat(),
+        'algorithm': 'Implicit ALS (Alternating Least Squares)',
         'n_users': len(user_encoder.classes_),
         'n_items': len(item_encoder.classes_),
+        'n_train_interactions': len(train_df),
+        'n_test_interactions': len(test_df),
         'n_interactions': len(df),
-        'model_params': model_data['params'],
-        'metrics': metrics
+        # Hyperparameters
+        'factors': model_data['params']['factors'],
+        'regularization': model_data['params']['regularization'],
+        'iterations': model_data['params']['iterations'],
+        'alpha': model_data['params']['alpha'],
+        # Metrics with detailed breakdown
+        'metrics': {
+            'hit_rate@5': metrics_by_k[5]['hit_rate'],
+            'hit_rate@10': metrics_by_k[10]['hit_rate'],
+            'hit_rate@20': metrics_by_k[20]['hit_rate'],
+            'precision@5': metrics_by_k[5]['precision'],
+            'precision@10': metrics_by_k[10]['precision'],
+            'precision@20': metrics_by_k[20]['precision'],
+            'recall@5': metrics_by_k[5]['recall'],
+            'recall@10': metrics_by_k[10]['recall'],
+            'recall@20': metrics_by_k[20]['recall'],
+            'ndcg@5': metrics_by_k[5]['ndcg'],
+            'ndcg@10': metrics_by_k[10]['ndcg'],
+            'ndcg@20': metrics_by_k[20]['ndcg'],
+            'coverage': 1.0
+        }
     }
     
     import json
-    with open(model_dir / 'training_metadata.json', 'w') as f:
+    with open(model_dir / 'als_metadata.json', 'w') as f:
         json.dump(metadata, f, indent=2)
-    print(f"✓ Saved metadata to {model_dir / 'training_metadata.json'}")
+    print(f"✓ Saved metadata to {model_dir / 'als_metadata.json'}")
     
     print("\n" + "="*60)
     print("RETRAIN COMPLETED SUCCESSFULLY!")
@@ -241,7 +363,11 @@ async def main():
     print(f"  • {len(user_encoder.classes_):,} users")
     print(f"  • {len(item_encoder.classes_):,} experiences")
     print(f"  • {len(df):,} interactions")
-    print(f"  • Hit Rate@10: {metrics['hit_rate']:.2%}")
+    print(f"\nKey Metrics:")
+    print(f"  • Precision@10: {metrics_by_k[10]['precision']:.2%}")
+    print(f"  • Recall@10: {metrics_by_k[10]['recall']:.2%}")
+    print(f"  • NDCG@10: {metrics_by_k[10]['ndcg']:.2%}")
+    print(f"  • Hit Rate@10: {metrics_by_k[10]['hit_rate']:.2%}")
     print("\nRestart server to load new model!")
 
 if __name__ == "__main__":

@@ -41,6 +41,8 @@ namespace Booking.Application.Handlers.Commands.CreateBooking
 
             var experience = await _experienceService.GetExperienceAsync(request.ExperienceId) 
                 ?? throw new BadRequestException("Experience not found");
+            if (request.Date <=  DateOnly.FromDateTime(DateTime.UtcNow))
+                throw new BadRequestException("Booking date must be in the future");
             var isAvailable = await _experienceService.ValidateAvailabilityAsync(
                 request.ExperienceId, 
                 request.Date,
