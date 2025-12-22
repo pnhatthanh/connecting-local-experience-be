@@ -1,7 +1,7 @@
 using BuildingBlocks.Application.CQRS.Command;
 using IAM.Application.DTOs;
 
-namespace IAM.Application.Handlers.Commands.RefreshTokenCommand
+namespace IAM.Application.Handlers.Commands.RefreshToken
 {
     public class RefreshTokenCommand : ICommand<TokenResponse>
     {

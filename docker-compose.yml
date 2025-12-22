@@ -1,0 +1,381 @@
+services:
+  iam-api:
+    build:
+      context: .
+      dockerfile: src/Services/IAM/IAM.Api/Dockerfile
+    image: pnthanh22/connecting-iam-api:latest
+    container_name: connecting-iam-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ConnectionStrings__DefaultConnection=Host=iam-db;Database=${IAM_POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=${RABBITMQ_USER}
+      - RabbitMQ__Password=${RABBITMQ_PASSWORD}
+      - RabbitMQ__VirtualHost=/
+      - RabbitMQ__ExchangeName=connecting_events
+      - RabbitMQ__QueueName=iam_service_queue
+      - Jwt__SecretKey=${JWT_SECRET_KEY}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
+      - Jwt__ExpirationMinutes=${JWT_EXPIRATION_MINUTES}
+    ports:
+      - "5001:8080"
+    depends_on:
+      iam-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - connecting-network
+    restart: unless-stopped
+
+  iam-db:
+    image: postgres:15-alpine
+    container_name: connecting-iam-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${IAM_POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - iam_postgres_data:/var/lib/postgresql/data
+    networks:
+      - connecting-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  experience-api:
+    build:
+      context: .
+      dockerfile: src/Services/Experience/Experience.Api/Dockerfile
+    image: pnthanh22/connecting-experience-api:latest
+    container_name: connecting-experience-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ConnectionStrings__DefaultConnection=Host=experience-db;Database=${EXPERIENCE_POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=${RABBITMQ_USER}
+      - RabbitMQ__Password=${RABBITMQ_PASSWORD}
+      - RabbitMQ__VirtualHost=/
+      - RabbitMQ__ExchangeName=connecting_events
+      - RabbitMQ__QueueName=experience_service_queue
+      - Jwt__SecretKey=${JWT_SECRET_KEY}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
+      - Jwt__ExpirationMinutes=${JWT_EXPIRATION_MINUTES}
+      - Cloudinary__CloudName=${CLOUDINARY_CLOUD_NAME}
+      - Cloudinary__ApiKey=${CLOUDINARY_API_KEY}
+      - Cloudinary__ApiSecret=${CLOUDINARY_API_SECRET}
+    ports:
+      - "5002:8080"
+    depends_on:
+      experience-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - connecting-network
+    restart: unless-stopped
+
+  experience-db:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: connecting-experience-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${EXPERIENCE_POSTGRES_DB}
+    ports:
+      - "5433:5432"
+    volumes:
+      - experience_postgres_data:/var/lib/postgresql/data
+    networks:
+      - connecting-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  user-api:
+    build:
+      context: .
+      dockerfile: src/Services/User/User.Api/Dockerfile
+    image: pnthanh22/connecting-user-api:latest
+    container_name: connecting-user-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ConnectionStrings__DefaultConnection=Host=user-db;Database=${USER_POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=${RABBITMQ_USER}
+      - RabbitMQ__Password=${RABBITMQ_PASSWORD}
+      - RabbitMQ__VirtualHost=/
+      - RabbitMQ__ExchangeName=connecting_events
+      - RabbitMQ__QueueName=user_service_queue
+      - Jwt__SecretKey=${JWT_SECRET_KEY}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
+      - Jwt__ExpirationMinutes=${JWT_EXPIRATION_MINUTES}
+      - Cloudinary__CloudName=${CLOUDINARY_CLOUD_NAME}
+      - Cloudinary__ApiKey=${CLOUDINARY_API_KEY}
+      - Cloudinary__ApiSecret=${CLOUDINARY_API_SECRET}
+      - ExperienceService__BaseUrl=http://experience-api:8080
+    ports:
+      - "5003:8080"
+    depends_on:
+      user-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - connecting-network
+    restart: unless-stopped
+
+  user-db:
+    image: postgres:15-alpine
+    container_name: connecting-user-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${USER_POSTGRES_DB}
+    ports:
+      - "5434:5432"
+    volumes:
+      - user_postgres_data:/var/lib/postgresql/data
+    networks:
+      - connecting-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  booking-api:
+    build:
+      context: .
+      dockerfile: src/Services/Booking/Booking.Api/Dockerfile
+    image: pnthanh22/connecting-booking-api:latest
+    container_name: connecting-booking-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ConnectionStrings__DefaultConnection=Host=booking-db;Database=${BOOKING_POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=${RABBITMQ_USER}
+      - RabbitMQ__Password=${RABBITMQ_PASSWORD}
+      - RabbitMQ__VirtualHost=/
+      - RabbitMQ__ExchangeName=connecting_events
+      - RabbitMQ__QueueName=booking_service_queue
+      - Jwt__SecretKey=${JWT_SECRET_KEY}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
+      - Jwt__ExpirationMinutes=${JWT_EXPIRATION_MINUTES}
+      - Services__ExperienceApi=http://experience-api:8080
+      - Services__UserApi=http://user-api:8080
+      - VnPaySettings__TmnCode=${VNPAY_TMN_CODE}
+      - VnPaySettings__HashSecret=${VNPAY_HASH_SECRET}
+      - VnPaySettings__BaseUrl=${VNPAY_BASE_URL}
+      - VnPaySettings__ReturnUrl=${VNPAY_RETURN_URL}
+      - VnPaySettings__IpnUrl=${IPN_URL}
+    ports:
+      - "5004:8080"
+    depends_on:
+      booking-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - connecting-network
+    restart: unless-stopped
+
+  booking-db:
+    image: postgres:15-alpine
+    container_name: connecting-booking-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${BOOKING_POSTGRES_DB}
+    ports:
+      - "5435:5432"
+    volumes:
+      - booking_postgres_data:/var/lib/postgresql/data
+    networks:
+      - connecting-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: src/Services/Notification/Dockerfile
+    image: pnthanh22/connecting-notification-service:latest
+    container_name: connecting-notification-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=${RABBITMQ_USER}
+      - RabbitMQ__Password=${RABBITMQ_PASSWORD}
+      - RabbitMQ__VirtualHost=/
+      - RabbitMQ__ExchangeName=connecting_events
+      - RabbitMQ__QueueName=notification_service_queue
+      - Smtp__Host=${SMTP_HOST}
+      - Smtp__Port=${SMTP_PORT}
+      - Smtp__Username=${SMTP_USERNAME}
+      - Smtp__Password=${SMTP_PASSWORD}
+      - Smtp__FromAddress=${SMTP_FROM_ADDRESS}
+      - Email__VerificationUrlTemplate=${FRONTEND_URL}/auth/verify-email?email={email}&token={token}
+      - Email__ResetUrlTemplate=${FRONTEND_URL}/auth/reset-password?token={token}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - connecting-network
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: connecting-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - connecting-network
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  gateway:
+    build:
+      context: .
+      dockerfile: src/APIGateway/Dockerfile
+    image: pnthanh22/connecting-gateway:latest
+    container_name: connecting-gateway
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ReverseProxy__Clusters__iam-cluster__Destinations__destination1__Address=http://iam-api:8080
+      - ReverseProxy__Clusters__experience-cluster__Destinations__destination1__Address=http://experience-api:8080
+      - ReverseProxy__Clusters__user-cluster__Destinations__destination1__Address=http://user-api:8080
+      - ReverseProxy__Clusters__booking-cluster__Destinations__destination1__Address=http://booking-api:8080
+      - ReverseProxy__Clusters__ai-cluster__Destinations__destination1__Address=http://ai-api:8000
+    ports:
+      - "5000:8080"
+    depends_on:
+      - iam-api
+      - experience-api
+      - user-api
+      - booking-api
+      - notification-service
+      - ai-api
+    networks:
+      - connecting-network
+    restart: unless-stopped
+
+  ai-api:
+    build:
+      context: ./Be_AI
+      dockerfile: Dockerfile
+    image: pnthanh22/connecting-ai-api:latest
+    container_name: connecting-ai-api
+    environment:
+      - APP_NAME=Experience Recommendation System
+      - DEBUG=False
+      - HOST=0.0.0.0
+      - PORT=8000
+      - MONGODB_URL=mongodb://ai-mongodb:27017
+      - MONGODB_DB_NAME=recommend_experiences
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_EXCHANGE=connecting_events
+      - RABBITMQ_QUEUE=ai_service_queue
+    ports:
+      - "8000:8000"
+    depends_on:
+      ai-mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - connecting-network
+    restart: unless-stopped
+    volumes:
+      - ai_models:/app/models
+
+  ai-mongodb:
+    image: mongo:7-jammy
+    container_name: connecting-ai-mongodb
+    environment:
+      MONGO_INITDB_DATABASE: recommend_experiences
+    ports:
+      - "27017:27017"
+    volumes:
+      - ai_mongodb_data:/data/db
+    networks:
+      - connecting-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: connecting-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - connecting-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  iam_postgres_data:
+    driver: local
+  experience_postgres_data:
+    driver: local
+  user_postgres_data:
+    driver: local
+  booking_postgres_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+  ai_mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+  ai_models:
+    driver: local
+
+networks:
+  connecting-network:
+    driver: bridge

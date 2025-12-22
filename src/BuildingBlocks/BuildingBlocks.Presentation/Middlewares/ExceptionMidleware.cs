@@ -4,16 +4,20 @@ using Microsoft.AspNetCore.Http;
 using BuildingBlocks.Domain.Exceptions;
 using BuildingBlocks.Presentation.Results;
 using FluentValidation;
+using BuildingBlocks.Application.Exceptions;
+using Microsoft.Extensions.Logging;
 
 namespace BuildingBlocks.Presentation.Middlewares
 {
     public class ExceptionMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ILogger<ExceptionMiddleware> _logger;
 
-        public ExceptionMiddleware(RequestDelegate next)
+        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
         {
             _next = next;
+            _logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -30,17 +34,20 @@ namespace BuildingBlocks.Presentation.Middlewares
 
         private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
+            _logger.LogError(exception, "An error occurred: {ErrorMessage}", exception.Message);
+            
             context.Response.ContentType = "application/json";
             var errorResponse = new ErrorResponse();
 
             switch (exception)
             {
-                case ValidationException validationException:
+                case FluentValidationException fluentValidationException:
                     context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                     errorResponse.StatusCode = (int)HttpStatusCode.BadRequest;
                     errorResponse.Message = "Validation failed";
-                    errorResponse.Errors = validationException.Errors.GroupBy(error => error.PropertyName)
-                                        .ToDictionary(error => error.Key, error => error.Select(e => e.ErrorMessage).ToList());
+                    errorResponse.Errors = fluentValidationException.Errors.ToDictionary(
+                        error => error.Key, 
+                        error => error.Value.ToList());
                     break;
                 case BaseException customException:
                     context.Response.StatusCode = (int)customException.StatusCode;

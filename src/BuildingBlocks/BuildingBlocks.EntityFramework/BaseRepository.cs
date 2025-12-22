@@ -33,7 +33,7 @@ namespace BuildingBlocks.EntityFramework
         {
             return await _dbSet.FindAsync(id);
         }
-        public Task<T?> GetAnyAsync(Specification<T>? specification = null, params Expression<Func<T, object>>[] includes)
+        public Task<T?> GetBySpecAsync(Specification<T>? specification = null, params Expression<Func<T, object>>[] includes)
         {
             return _dbSet.ApplySpecification(specification)
                           .ApplyInclude(includes)
@@ -66,6 +66,10 @@ namespace BuildingBlocks.EntityFramework
                         .ApplyInclude(includes)
                         .ToListAsync();
         }
+        public IQueryable<T> GetQueryable()
+        {
+            return _dbSet.AsQueryable();
+        }
     }
     internal static class ExternalRepository
     {
@@ -91,6 +95,11 @@ namespace BuildingBlocks.EntityFramework
         public static IQueryable<T> ApplySorting<T>(this IQueryable<T> query, string? sortBy, bool isAscending)
         {
             if (string.IsNullOrEmpty(sortBy))
+                return query;
+            var property = typeof(T)
+                .GetProperties()
+                .FirstOrDefault(p => p.Name.Equals(sortBy, StringComparison.OrdinalIgnoreCase));
+            if (property == null)
                 return query;
             return isAscending ? query.OrderBy(sortBy) : query.OrderBy(sortBy + " descending");
         }

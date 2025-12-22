@@ -1,6 +1,6 @@
 using BuildingBlocks.Application.CQRS.Command;
 
-namespace IAM.Application.Handlers.Commands.ForgotPasswordCommand
+namespace IAM.Application.Handlers.Commands.ForgotPassword
 {
     public class ForgotPasswordCommand : ICommand<bool>
     {

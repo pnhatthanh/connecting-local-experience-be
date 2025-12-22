@@ -1,0 +1,78 @@
+using BuildingBlocks.Application.Dtos;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using User.Application.DTOs;
+using BuildingBlocks.Presentation.Authorization;
+using BuildingBlocks.Presentation.Constants;
+using User.Application.Handlers.Commands.BecomeHost;
+using User.Application.Handlers.Commands.UpdateUserProfile;
+using User.Application.Handlers.Queries.GetBatchUserInfo;
+using User.Application.Handlers.Queries.GetMyProfile;
+using User.Application.Handlers.Queries.GetUserById;
+using User.Application.Handlers.Queries.GetUsers;
+
+namespace User.Api.Controllers
+{
+    [ApiController]
+    [Route("api/users")]
+    public class UsersController : ControllerBase
+    {
+        private readonly IMediator _mediator;
+
+        public UsersController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
+        [HttpGet]
+        [RequirePermission(PermissionCodes.USER_USER_VIEW_ALL)]
+        public async Task<ActionResult<PaginationResult<UserDto>>> GetUsers( [FromQuery] GetUsersQuery query, CancellationToken cancellationToken = default)
+        {
+            var result = await _mediator.Send(query, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpGet("{userId}")]
+        public async Task<ActionResult<UserDto>> GetUserById([FromRoute] Guid userId, CancellationToken cancellationToken)
+        {
+            var query = new GetUserByIdQuery { UserId = userId };
+            var result = await _mediator.Send(query, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<ActionResult<UserDto>> GetMyProfile(CancellationToken cancellationToken)
+        {
+            var query = new GetMyProfileQuery();
+            var result = await _mediator.Send(query, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpPut]
+        [Authorize]
+        public async Task<ActionResult<UserDto>> UpdateProfile([FromForm] UpdateUserProfileCommand command,
+            CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(command, cancellationToken);
+            return Ok(result);
+        }
+        
+        [HttpPost("become-host")]
+        [RequirePermission(PermissionCodes.USER_USER_BECOME_HOST)]
+        public async Task<ActionResult<HostProfileDto>> BecomeHost( [FromForm] BecomeHostCommand command, 
+            CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(command, cancellationToken);
+            return Ok(result);
+        }
+        [HttpGet("batch-info")]
+        public async Task<ActionResult<List<UserInfoDto>>> GetBatchUserInfo([FromQuery] List<Guid> userIds, CancellationToken cancellationToken)
+        {
+            var query = new GetBatchUserInfoQuery(userIds);
+            var result = await _mediator.Send(query, cancellationToken);
+            return Ok(result);
+        }
+    }
+}

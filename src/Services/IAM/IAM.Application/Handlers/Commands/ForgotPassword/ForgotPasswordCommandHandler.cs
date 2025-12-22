@@ -6,7 +6,7 @@ using IAM.Application.Events;
 using IAM.Domain.Repositories;
 using IAM.Domain.Specifications;
 
-namespace IAM.Application.Handlers.Commands.ForgotPasswordCommand
+namespace IAM.Application.Handlers.Commands.ForgotPassword
 {
     public class ForgotPasswordCommandHandler : ICommandHandler<ForgotPasswordCommand, bool>
     {
@@ -27,9 +27,11 @@ namespace IAM.Application.Handlers.Commands.ForgotPasswordCommand
         public async Task<bool> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
         {
             var emailSpec = new AccountEmailSpecification(request.Email.ToLowerInvariant());
-            var account = await _accountRepository.GetAnyAsync(emailSpec)
+            var account = await _accountRepository.GetBySpecAsync(emailSpec)
                 ?? throw new BadRequestException("Email not found");
-            var resetToken = Guid.NewGuid().ToString("N");
+            
+            var random = new Random();
+            var resetToken = random.Next(100000, 999999).ToString(); 
             account.PasswordResetToken = resetToken;
             account.PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1); 
             _accountRepository.Update(account);

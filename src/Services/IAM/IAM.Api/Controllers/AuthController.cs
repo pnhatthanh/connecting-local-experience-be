@@ -1,17 +1,23 @@
-using IAM.Application.Handlers.Commands.RegisterCommand;
-using IAM.Application.Handlers.Commands.LoginCommand;
 using IAM.Application.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using IAM.Application.Handlers.Commands.RefreshTokenCommand;
-using IAM.Application.Handlers.Commands.ConfirmEmailCommand;
-using IAM.Application.Handlers.Commands.ForgotPasswordCommand;
-using IAM.Application.Handlers.Commands.ResetPasswordCommand;
+using IAM.Application.Handlers.Commands.ChangePassword;
+using IAM.Application.Handlers.Commands.ConfirmEmail;
+using IAM.Application.Handlers.Commands.Register;
+using IAM.Application.Handlers.Commands.Login;
+using IAM.Application.Handlers.Commands.Logout;
+using IAM.Application.Handlers.Commands.RefreshToken;
+using IAM.Application.Handlers.Commands.ForgotPassword;
+using IAM.Application.Handlers.Commands.ResetPassword;
+using IAM.Application.Handlers.Commands.UpdateAccountStatus;
+using BuildingBlocks.Presentation.Authorization;
+using BuildingBlocks.Presentation.Constants;
+using Microsoft.AspNetCore.Authorization;
 
 namespace IAM.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     public class AuthController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -42,29 +48,54 @@ namespace IAM.Api.Controllers
             return Ok(result);
         }
 
-        [HttpPost("refresh-token")]
-        public async Task<ActionResult<TokenResponse>> RefreshToken()
+        [HttpPost("refresh")]
+        public async Task<ActionResult<TokenResponse>> RefreshToken([FromBody] RefreshTokenCommand command)
         {
-            var refreshToken = Request.Cookies["refreshToken"] ?? "";
-            if (string.IsNullOrEmpty(refreshToken))
-                return Unauthorized(new { message = "Refresh token is required" });
-            var command = new RefreshTokenCommand { RefreshToken = refreshToken };
             var result = await _mediator.Send(command);
             return Ok(result);
         }
 
-        [HttpPost("forgot-password")]
+        [HttpPost("password/forgot")]
         public async Task<ActionResult<bool>> ForgotPassword([FromBody] ForgotPasswordCommand command)
         {
             var result = await _mediator.Send(command);
             return Ok(new { success = result, message = "Password reset email has been sent" });
         }
 
-        [HttpPost("reset-password")]
+        [HttpPost("password/reset")]
         public async Task<ActionResult<bool>> ResetPassword([FromBody] ResetPasswordCommand command)
         {
             var result = await _mediator.Send(command);
             return Ok(new { success = result, message = "Password has been reset successfully" });
+        }
+
+        [HttpPut("password/change")]
+        [Authorize]
+        public async Task<ActionResult<bool>> ChangePassword([FromBody] ChangePasswordCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(new { success = result, message = "Password changed successfully" });
+        }
+
+        [HttpPost("logout")]
+        [Authorize]
+        public async Task<ActionResult> Logout([FromBody] LogoutCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(new { success = result, message = "Logged out successfully" });
+        }
+
+        [HttpPatch("accounts/{accountId}/status")]
+        [RequirePermission(PermissionCodes.IAM_ACCOUNT_UPDATE_STATUS)]
+        public async Task<ActionResult<bool>> UpdateAccountStatus(
+            [FromRoute] Guid accountId,
+            [FromBody] UpdateAccountStatusCommand command)
+        {
+            var result = await _mediator.Send(command with { AccountId = accountId });
+            var message = command.IsActive 
+                ? "Account has been activated successfully" 
+                : "Account has been deactivated successfully";
+            return Ok(new { success = result, message });
         }
     }
 }

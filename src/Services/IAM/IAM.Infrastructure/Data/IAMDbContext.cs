@@ -66,7 +66,7 @@ namespace IAM.Infrastructure.Data
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasColumnName("id_permission");
                 entity.Property(e => e.Name).HasColumnName("name").IsRequired();
-                entity.Property(e => e.Description).HasColumnName("description");
+                entity.Property(e => e.PermissionCode).HasColumnName("permission_code").IsRequired();
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at");
                 entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
             });
@@ -101,7 +101,7 @@ namespace IAM.Infrastructure.Data
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasColumnName("id");
                 entity.Property(e => e.AccountId).HasColumnName("id_account");
-                entity.Property(e => e.Token).HasColumnName("token").HasMaxLength(32).IsRequired();
+                entity.Property(e => e.Token).HasColumnName("token").HasMaxLength(100).IsRequired();
                 entity.Property(e => e.ExpiryDate).HasColumnName("expiry_date");
                 entity.Property(e => e.IsRevoked).HasColumnName("is_revoked").HasDefaultValue(false);
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at");

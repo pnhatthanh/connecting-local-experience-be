@@ -7,6 +7,7 @@ using System.Text;
 using IAM.Infrastructure.Configurations;
 using Microsoft.Extensions.Options;
 using IAM.Domain.Entities;
+using System.Reflection.PortableExecutable;
 
 namespace IAM.Infrastructure.Services
 {
@@ -53,9 +54,16 @@ namespace IAM.Infrastructure.Services
         }
         public string GenerateRefreshToken()
         {
-            var randomNumber = new byte[32];
-            RandomNumberGenerator.Fill(randomNumber);
-            return Convert.ToBase64String(randomNumber);
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var randomBytes = new byte[32];
+            RandomNumberGenerator.Fill(randomBytes);
+            
+            var result = new char[32];
+            for (int i = 0; i < 32; i++)
+            {
+                result[i] = chars[randomBytes[i] % chars.Length];
+            }
+            return new string(result);
         }
     }
 }

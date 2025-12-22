@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace IAM.Application.Handlers.Commands.ResetPasswordCommand
+namespace IAM.Application.Handlers.Commands.ResetPassword
 {
     public class ResetPasswordCommandValidator : AbstractValidator<ResetPasswordCommand>
     {
@@ -13,13 +13,16 @@ namespace IAM.Application.Handlers.Commands.ResetPasswordCommand
             RuleFor(x => x.Token)
                 .NotEmpty().WithMessage("Token is required");
 
-            RuleFor(x => x.NewPassword)
-                .NotEmpty().WithMessage("New password is required")
-                .MinimumLength(6).WithMessage("Password must be at least 6 characters");
+            RuleFor(x => x.Password)
+                .NotEmpty().WithMessage("Password is required")
+                .MinimumLength(8).WithMessage("Password must be at least 8 characters")
+                .MaximumLength(100).WithMessage("Password cannot exceed 100 characters")
+                .Matches(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]")
+                .WithMessage("Password must contain at least one uppercase letter, one lowercase letter, one digit and one special character");
 
             RuleFor(x => x.ConfirmPassword)
                 .NotEmpty().WithMessage("Confirm password is required")
-                .Equal(x => x.NewPassword).WithMessage("Passwords do not match");
+                .Equal(x => x.Password).WithMessage("Passwords do not match");
         }
     }
 }

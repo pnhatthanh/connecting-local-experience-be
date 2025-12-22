@@ -5,7 +5,7 @@ using IAM.Application.Interfaces;
 using IAM.Domain.Repositories;
 using IAM.Domain.Specifications;
 
-namespace IAM.Application.Handlers.Commands.ResetPasswordCommand
+namespace IAM.Application.Handlers.Commands.ResetPassword
 {
     public class ResetPasswordCommandHandler : ICommandHandler<ResetPasswordCommand, bool>
     {
@@ -26,13 +26,13 @@ namespace IAM.Application.Handlers.Commands.ResetPasswordCommand
         public async Task<bool> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
         {
             var emailSpec = new AccountEmailSpecification(request.Email.ToLowerInvariant());
-            var account = await _accountRepository.GetAnyAsync(emailSpec)
+            var account = await _accountRepository.GetBySpecAsync(emailSpec)
                 ?? throw new BadRequestException("Invalid email or token");
             if (string.IsNullOrEmpty(account.PasswordResetToken) || account.PasswordResetToken != request.Token)
                 throw new BadRequestException("Invalid email or token");
             if (account.PasswordResetTokenExpiry == null || account.PasswordResetTokenExpiry < DateTime.UtcNow)
                 throw new BadRequestException("Token has expired");
-            account.PasswordHash = _passwordHasher.HashPassword(request.NewPassword);
+            account.PasswordHash = _passwordHasher.HashPassword(request.Password);
             account.PasswordResetToken = null;
             account.PasswordResetTokenExpiry = null;
 

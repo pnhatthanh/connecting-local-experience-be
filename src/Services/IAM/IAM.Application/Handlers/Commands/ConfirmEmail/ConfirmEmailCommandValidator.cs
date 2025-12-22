@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace IAM.Application.Handlers.Commands.ConfirmEmailCommand
+namespace IAM.Application.Handlers.Commands.ConfirmEmail
 {
     public class ConfirmEmailCommandValidator : AbstractValidator<ConfirmEmailCommand>
     {

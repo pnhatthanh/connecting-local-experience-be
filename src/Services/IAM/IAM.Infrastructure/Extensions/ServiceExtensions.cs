@@ -1,3 +1,4 @@
+using BuildingBlocks.Application.Interfaces;
 using BuildingBlocks.EntityFramework;
 using BuildingBlocks.RabbitMQ;
 using BuildingBlocks.RabbitMQ.Configurations;
@@ -20,16 +21,21 @@ namespace IAM.Infrastructure.Extensions
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? throw new ArgumentNullException("Connection string 'DefaultConnection' not found.");
-            services.AddDbContextSqlServer<IAMDbContext>(connectionString);
+            services.AddDbContextPostgreSql<IAMDbContext>(connectionString);
             services.AddUnitOfWork<IAMDbContext>();
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+            services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IPermissionRepository, PermissionRepository>();
+            services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
             services.Configure<JwtSetting>(configuration.GetSection(JwtSetting.JwtSettingKey));
             var rabbitMQSetting = configuration.GetSection("RabbitMQ").Get<RabbitMQConfig>()
                 ?? throw new ArgumentNullException("RabbitMQ configuration is null");
             services.AddRabbitMQ(rabbitMQSetting);
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
+            services.AddHttpContextAccessor();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
             return services;
         }
     }

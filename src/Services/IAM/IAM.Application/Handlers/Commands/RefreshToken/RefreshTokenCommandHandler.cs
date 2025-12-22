@@ -7,23 +7,26 @@ using IAM.Domain.Entities;
 using IAM.Domain.Repositories;
 using IAM.Domain.Specifications;
 
-namespace IAM.Application.Handlers.Commands.RefreshTokenCommand
+namespace IAM.Application.Handlers.Commands.RefreshToken
 {
     public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand, TokenResponse>
     {
         private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IAccountRepository _accountRepository;
+        private readonly IRolePermissionRepository _rolePermissionRepository;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IUnitOfWork _unitOfWork;
 
         public RefreshTokenCommandHandler(
             IRefreshTokenRepository refreshTokenRepository,
             IAccountRepository accountRepository,
+            IRolePermissionRepository rolePermissionRepository,
             IJwtTokenService jwtTokenService,
             IUnitOfWork unitOfWork)
         {
             _refreshTokenRepository = refreshTokenRepository;
             _accountRepository = accountRepository;
+            _rolePermissionRepository = rolePermissionRepository;
             _jwtTokenService = jwtTokenService;
             _unitOfWork = unitOfWork;
         }
@@ -31,25 +34,30 @@ namespace IAM.Application.Handlers.Commands.RefreshTokenCommand
         public async Task<TokenResponse> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
         {
             var refreshTokenSpec = new RefreshTokenSpecification(request.RefreshToken);
-            var refreshToken = await _refreshTokenRepository.GetAnyAsync(refreshTokenSpec)
+            var refreshToken = await _refreshTokenRepository.GetBySpecAsync(refreshTokenSpec)
                 ?? throw new UnAuthorizedException("Invalid refresh token");
             if (!refreshToken.IsActive)
-            {
                 throw new UnAuthorizedException("Refresh token is expired or revoked");
-            }
-            var account = await _accountRepository.GetByIdAsync(refreshToken.AccountId)
+            
+            var accountSpec = new AccountByIdSpecification(refreshToken.AccountId);
+            var account = await _accountRepository.GetBySpecAsync(accountSpec, account => account.Role)
                 ?? throw new NotFoundException("Account not found");
             if (!account.IsActive)
                 throw new ForbiddenException("Account is deactivated");
             if (!account.IsEmailConfirmed)
                 throw new ForbiddenException("Email is not confirmed");
 
-            var permissions = new List<string>();
-            var newAccessToken = _jwtTokenService.GenerateAccessToken(account, permissions);
+            var rolePermissionSpec = new RolePermissionByRoleIdSpecification(account.RoleId);
+            var rolePermissions = await _rolePermissionRepository.GetAllAsync(
+                rolePermissionSpec,
+                rp => rp.Permission
+            );
+            var permissionCodes = rolePermissions.Select(rp => rp.Permission.PermissionCode).ToList();
+
+            var newAccessToken = _jwtTokenService.GenerateAccessToken(account, permissionCodes);
             var newRefreshTokenValue = _jwtTokenService.GenerateRefreshToken();
-            refreshToken.IsRevoked = true;
-            refreshToken.RevokedAt = DateTime.UtcNow;
-            _refreshTokenRepository.Update(refreshToken);
+            
+            _refreshTokenRepository.Delete(refreshToken);
             var newRefreshToken = new RefreshTokenEntity
             {
                 AccountId = account.Id,

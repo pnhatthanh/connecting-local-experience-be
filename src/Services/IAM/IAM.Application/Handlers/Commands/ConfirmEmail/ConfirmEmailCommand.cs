@@ -1,6 +1,6 @@
 using BuildingBlocks.Application.CQRS.Command;
 
-namespace IAM.Application.Handlers.Commands.ConfirmEmailCommand
+namespace IAM.Application.Handlers.Commands.ConfirmEmail
 {
     public class ConfirmEmailCommand : ICommand<bool>
     {

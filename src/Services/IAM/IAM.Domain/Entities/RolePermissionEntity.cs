@@ -1,8 +1,9 @@
+using BuildingBlocks.Domain.Models;
+
 namespace IAM.Domain.Entities
 {
-    public class RolePermissionEntity
+    public class RolePermissionEntity : BaseEntity
     {
-        public int Id { get; set; }
         public Guid RoleId { get; set; }
         public Guid PermissionId { get; set; }
         public bool Licensed { get; set; } = true;
