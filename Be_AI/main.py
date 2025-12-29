@@ -9,7 +9,7 @@ import sys
 import os
 from config import settings
 from database import connect_to_mongodb, close_mongodb_connection
-from database import connect_to_redis, close_redis_connection, clear_recommendations_cache
+from database import connect_to_redis, close_redis_connection, clear_recommendations_cache_sync
 from database import rabbitmq_consumer
 from routes.recommendations import router as recommendations_router
 from routes.training import router as training_router
@@ -70,15 +70,13 @@ def retrain_job():
         recommendation_service._loaded = False
         logger.info("✓ Cleared old model from memory, will reload on next request")
         
-        # Clear all cached recommendations (fix event loop issue)
+        # Clear all cached recommendations using sync version (no event loop issues)
         try:
-            # Don't use asyncio.run in a thread that might have existing event loop
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            cleared_count = loop.run_until_complete(clear_recommendations_cache())
-            loop.close()
+            cleared_count = clear_recommendations_cache_sync()
             if cleared_count > 0:
                 logger.info(f"✓ Cleared {cleared_count} cached recommendations")
+            else:
+                logger.info("No cached recommendations to clear")
         except Exception as e:
             logger.warning(f"Failed to clear cache: {e}")
         

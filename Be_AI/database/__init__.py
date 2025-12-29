@@ -13,7 +13,8 @@ from .redis_cache import (
     connect_to_redis,
     close_redis_connection,
     get_redis,
-    clear_recommendations_cache
+    clear_recommendations_cache,
+    clear_recommendations_cache_sync
 )
 from .rabbitmq_consumer import rabbitmq_consumer
 
@@ -31,5 +32,6 @@ __all__ = [
     "close_redis_connection",
     "get_redis",
     "clear_recommendations_cache",
+    "clear_recommendations_cache_sync",
     "rabbitmq_consumer"
 ]
