@@ -19,11 +19,9 @@ var app = builder.Build();
 
 await app.Services.ApplyMigrationAsync();
 await app.Services.SubscribeToEventsAsync();
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseException();
 app.UseHttpsRedirection();

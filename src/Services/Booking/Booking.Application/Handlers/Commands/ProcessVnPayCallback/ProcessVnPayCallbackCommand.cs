@@ -10,6 +10,7 @@ namespace Booking.Application.Handlers.Commands.ProcessVnPayCallback
     public record ProcessVnPayCallbackResponse(
         bool Success,
         string Message,
+        string ClientType,
         string? BookingCode = null
     );
 }

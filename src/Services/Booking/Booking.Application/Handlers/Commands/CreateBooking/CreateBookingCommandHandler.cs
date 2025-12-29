@@ -78,6 +78,7 @@ namespace Booking.Application.Handlers.Commands.CreateBooking
                 ContactEmail = request.ContactEmail,
                 ContactPhone = request.ContactPhone,
                 Notes = request.Notes,
+                ClientType = request.ClientType == "App" ? ClientType.App : ClientType.Web,
                 CreatedAt = DateTime.UtcNow
             };
 

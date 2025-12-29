@@ -43,6 +43,11 @@ namespace Booking.Application.Handlers.Commands.CreateBooking
             RuleFor(x => x.ContactPhone)
                 .NotEmpty().WithMessage("Contact phone is required")
                 .MaximumLength(50).WithMessage("Contact phone cannot exceed 50 characters");
+
+            RuleFor(x => x.ClientType)
+                .NotEmpty().WithMessage("Client type is required")
+                .Must(ct => ct == "Web" || ct == "App")
+                .WithMessage("Client type must be either 'Web' or 'App'");
         }
     }
 }

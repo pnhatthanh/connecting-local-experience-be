@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using BuildingBlocks.Domain.Specifications;
 using Booking.Domain.Entities;
+using Booking.Domain.Enums;
 
 namespace Booking.Domain.Specifications
 {
@@ -8,7 +9,8 @@ namespace Booking.Domain.Specifications
     {
         public override Expression<Func<BookingEntity, bool>> ToExpression()
         {
-            return booking => booking.UserId == UserId;
+            return booking => booking.UserId == UserId 
+                && booking.Status != BookingStatus.Pending;
         }
     }
 }

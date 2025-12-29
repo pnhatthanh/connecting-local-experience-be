@@ -6,7 +6,8 @@ using BuildingBlocks.Presentation.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddUserApplication()
                 .AddUserInfrastructure(builder.Configuration)
@@ -15,10 +16,9 @@ builder.Services.AddUserApplication()
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
+
 await app.Services.ApplyMigrationAsync();
 await app.Services.SubscribeToEventsAsync();
 

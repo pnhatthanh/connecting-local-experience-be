@@ -242,13 +242,34 @@ class TrainingService:
             
             self.training_status = "completed"
             
+            # Clear old model from memory - force reload on next request
+            from services.recommendation_service import recommendation_service
+            recommendation_service.model_data = None  
+            recommendation_service.encoders = None
+            recommendation_service._loaded = False
+            logger.info("✓ Cleared old model from memory, will reload on next request")
+            
+            # Clear all cached recommendations using sync version
+            try:
+                from database import clear_recommendations_cache_sync
+                cleared_count = clear_recommendations_cache_sync()
+                if cleared_count > 0:
+                    logger.info(f"✓ Cleared {cleared_count} cached recommendations")
+                    print(f"✓ Cleared {cleared_count} cached recommendations\n", flush=True)
+                else:
+                    logger.info("No cached recommendations to clear")
+                    print("No cached recommendations to clear\n", flush=True)
+            except Exception as e:
+                logger.warning(f"Failed to clear cache: {e}")
+                print(f"⚠️ Failed to clear cache: {e}\n", flush=True)
+            
             # Don't save metadata here - retrain_from_mongodb already saved it with full details
             logger.info("✅ Retrain completed successfully")
             print("✅ Retrain completed successfully\n", flush=True)
             
             return {
                 "status": "success",
-                "message": "Retrain completed, metadata saved by retrain script"
+                "message": "Retrain completed, cache cleared, metadata saved by retrain script"
             }
                 
         except Exception as e:

@@ -38,7 +38,7 @@ namespace Booking.Application.Handlers.Commands.ProcessVnPayCallback
             if (!isValid)
             {
                 _logger.LogWarning("VNPay callback validation failed: {Message}", message);
-                return new ProcessVnPayCallbackResponse(false, message);
+                return new ProcessVnPayCallbackResponse(false, message, "");
             }
             var vnpTxnRef = request.QueryParams?["vnp_TxnRef"].ToString() ?? "";
             _logger.LogInformation("Processing VNPay callback for Transaction: {TxnRef}", vnpTxnRef);
@@ -47,13 +47,13 @@ namespace Booking.Application.Handlers.Commands.ProcessVnPayCallback
             if (payment == null)
             {
                 _logger.LogWarning("Payment not found for VNPay callback: {TxnRef}", vnpTxnRef);
-                return new ProcessVnPayCallbackResponse(false, "Payment not found");
+                return new ProcessVnPayCallbackResponse(false, "Payment not found", "");
             }
             var booking = await _bookingRepository.GetByIdAsync(payment.BookingId);
             if (booking == null)
             {
                 _logger.LogWarning("Booking not found for VNPay callback: {BookingId}", payment.BookingId);
-                return new ProcessVnPayCallbackResponse(false, "Booking not found");
+                return new ProcessVnPayCallbackResponse(false, "Booking not found", "");
             }
             payment.Status = PaymentStatus.Paid;
             payment.PaidAt = DateTime.UtcNow;
@@ -81,7 +81,7 @@ namespace Booking.Application.Handlers.Commands.ProcessVnPayCallback
             
             _logger.LogInformation("VNPay payment processed successfully for booking {BookingId}, Transaction: {TransId}. Event published to update slot availability.",
                 payment.BookingId, transactionId);
-            return new ProcessVnPayCallbackResponse(true, "Payment successful", booking.BookingCode);
+            return new ProcessVnPayCallbackResponse(true, "Payment successful", booking.ClientType.ToString(), booking.BookingCode);
         }
     }
 }
