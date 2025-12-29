@@ -24,6 +24,7 @@ namespace Booking.Domain.Entities
         public string ContactEmail { get; set; } = string.Empty;
         public string ContactPhone { get; set; } = string.Empty;
         public string? Notes { get; set; }
+        public ClientType ClientType { get; set; } = ClientType.Web;
         public virtual PaymentEntity? Payment { get; set; }
         public virtual BookingCancellationEntity? Cancellation { get; set; }
         public virtual RefundEntity? Refunds { get; set; }

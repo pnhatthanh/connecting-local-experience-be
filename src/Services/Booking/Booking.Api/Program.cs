@@ -28,11 +28,8 @@ var app = builder.Build();
 
 await app.Services.ApplyMigrationAsync();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseException();
 app.UseCors("AllowAll");

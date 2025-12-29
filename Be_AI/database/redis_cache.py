@@ -34,7 +34,58 @@ def get_redis():
 
 
 async def clear_recommendations_cache():
-    """Clear all recommendation cache after model retraining"""
+    """Clear all recommendation cache after model retraining (async version)"""
+    try:
+        if redis_cache.client:
+            pattern = "recommendations:*"
+            keys = await redis_cache.client.keys(pattern)
+            if keys:
+                await redis_cache.client.delete(*keys)
+                print(f"✓ Cleared {len(keys)} cached recommendations")
+                return len(keys)
+            else:
+                print("No cached recommendations to clear")
+                return 0
+        else:
+            print("⚠️ Redis not connected, cannot clear cache")
+            return 0
+    except Exception as e:
+        print(f"✗ Failed to clear cache: {e}")
+        return 0
+
+
+def clear_recommendations_cache_sync():
+    """Clear all recommendation cache (sync version for use in threads/background tasks)"""
+    import redis as sync_redis
+    try:
+        # Create a synchronous Redis client
+        client = sync_redis.Redis(
+            host=settings.REDIS_HOST,
+            port=settings.REDIS_PORT,
+            db=settings.REDIS_DB,
+            password=settings.REDIS_PASSWORD if settings.REDIS_PASSWORD else None,
+            decode_responses=True
+        )
+        
+        pattern = "recommendations:*"
+        keys = client.keys(pattern)
+        if keys:
+            client.delete(*keys)
+            count = len(keys)
+            print(f"✓ Cleared {count} cached recommendations")
+            client.close()
+            return count
+        else:
+            print("No cached recommendations to clear")
+            client.close()
+            return 0
+    except Exception as e:
+        print(f"✗ Failed to clear cache: {e}")
+        return 0
+
+
+async def _clear_cache_helper():
+    """Helper function to clear cache in a fresh event loop"""
     try:
         if redis_cache.client:
             pattern = "recommendations:*"

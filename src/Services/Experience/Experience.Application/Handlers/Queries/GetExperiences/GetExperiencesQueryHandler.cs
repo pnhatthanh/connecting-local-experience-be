@@ -90,3 +90,29 @@ namespace Experience.Application.Handlers.Queries.GetExperiences
         }
     }
 }
+public interface IDatabase
+{
+    void Save(string data);
+}
+public class MySQLDatabase : IDatabase
+{
+    public void Save(string data)
+    {
+        Console.WriteLine("Save data to MySQL");
+    }
+}
+public class PetStore
+{
+    private readonly IDatabase _database;
+    public PetStore(IDatabase database)
+    {
+        _database = database;
+    }
+    public void AddPet(string pet)
+    {
+        _database.Save(pet);
+    }
+}
+
+
+

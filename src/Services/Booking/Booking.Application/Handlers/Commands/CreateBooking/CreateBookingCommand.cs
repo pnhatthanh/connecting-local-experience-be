@@ -14,6 +14,7 @@ namespace Booking.Application.Handlers.Commands.CreateBooking
         string ContactEmail,
         string ContactPhone,
         string? Notes,
+        string ClientType = "Web",
         string? IpAddress = null
     ) : ICommand<CreateBookingResponse>;
 
